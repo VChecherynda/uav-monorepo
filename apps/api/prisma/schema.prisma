@@ -39,3 +39,11 @@ model Telemetry {
 
   @@index([droneId, recordedAt])
 }
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
