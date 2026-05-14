@@ -15,15 +15,17 @@
     "@fastify/cors": "^11.2.0",
     "@fastify/websocket": "^11.2.0",
     "@prisma/client": "^6.19.3",
+    "bcrypt": "^6.0.0",
     "fastify": "^5.8.5",
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
     "@types/node": "^25.6.2",
+    "@uav/shared": "*",
     "pino-pretty": "^13.1.3",
     "prisma": "^6.19.3",
     "tsx": "^4.21.0",
-    "typescript": "^6.0.3",
-    "@uav/shared": "*"
+    "typescript": "^6.0.3"
   }
 }
