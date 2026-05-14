@@ -38,7 +38,7 @@ export async function authRoutes(fastify: FastifyInstance) {
 
     const passwordHash = await bcrypt.hash(password, 10);
 
-    const user = prisma.user.create({
+    const user = await prisma.user.create({
       data: { email, passwordHash },
       select: { id: true, email: true, createdAt: true },
     });
@@ -65,7 +65,7 @@ export async function authRoutes(fastify: FastifyInstance) {
     // Avoiding timing attack
     const passwordHash =
       user?.passwordHash ?? "$2b$10$invalidhashfortimingprotection";
-    const isValid = bcrypt.compare(password, passwordHash);
+    const isValid = await bcrypt.compare(password, passwordHash);
 
     if (!user || !isValid) {
       return reply.status(401).send({
