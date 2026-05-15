@@ -4,13 +4,14 @@ import {
   ConnectionBadge,
   DroneMap,
   DronePanel,
+  LogoutButton,
 } from "@/app/components";
 import { useDronesLive } from "@/hooks/useDronesLive";
 import { useState } from "react";
 
 export default function Home() {
   const { drones, status } = useDronesLive();
-  const [droneId, setDroneId] = useState<string | undefined>();
+  const [droneId, setDroneId] = useState<string | null>(null);
 
   const onCardClick = (id: string) => {
     setDroneId(id);
@@ -21,6 +22,7 @@ export default function Home() {
       <header className="col-span-12 flex items-center justify-between px-4">
         <h1>UAV Fleet</h1>
         <ConnectionBadge status={status} />
+        <LogoutButton />
       </header>
       <main className="col-span-8 row-span-1">
         <DroneMap drones={drones} />

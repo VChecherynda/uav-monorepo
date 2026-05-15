@@ -23,8 +23,8 @@ const app = Fastify({
 });
 
 await app.register(cors, { origin: "http://localhost:3000" });
-await app.register(websocket);
 
+await app.register(websocket, {});
 await app.register(wsRoutes);
 await app.register(authRoutes);
 await app.register(droneRoutes);

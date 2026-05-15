@@ -6,18 +6,10 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import { useQuery } from "@tanstack/react-query";
+import { useTelemetry } from "@/hooks/useTelemetry";
 
-export const BatteryChart = ({ droneId }: { droneId?: string }) => {
-  const { data = [] } = useQuery({
-    queryKey: ["telemetry", droneId],
-    queryFn: () =>
-      fetch(`http://localhost:4000/drones/${droneId}/telemetry`).then((r) =>
-        r.json(),
-      ),
-    refetchInterval: 5000,
-    enabled: !!droneId,
-  });
+export const BatteryChart = ({ droneId }: { droneId: string | null }) => {
+  const { data = [] } = useTelemetry(droneId);
 
   const sorted = [...data].reverse();
 

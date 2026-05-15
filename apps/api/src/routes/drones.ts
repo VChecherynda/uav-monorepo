@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { prisma } from "../lib/prisma.js";
+import { authenticate } from "../lib/auth.js";
 import type { FastifyInstance } from "fastify";
 
 const CommandSchema = z.object({
@@ -30,15 +31,19 @@ export async function droneRoutes(app: FastifyInstance) {
     return telemetry;
   });
 
-  app.post("/drones/:id/command", async (req, reply) => {
-    const parsed = CommandSchema.safeParse(req.body);
-    if (!parsed.success) {
-      return reply.code(400).send(z.flattenError(parsed.error));
-    }
-    return {
-      ok: true,
-      droneId: (req.params as any).id,
-      action: parsed.data.action,
-    };
-  });
+  app.post(
+    "/drones/:id/command",
+    { preHandler: authenticate },
+    async (req, reply) => {
+      const parsed = CommandSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return reply.code(400).send(z.flattenError(parsed.error));
+      }
+      return {
+        ok: true,
+        droneId: (req.params as any).id,
+        action: parsed.data.action,
+      };
+    },
+  );
 }

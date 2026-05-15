@@ -17,10 +17,12 @@
     "@prisma/client": "^6.19.3",
     "bcrypt": "^6.0.0",
     "fastify": "^5.8.5",
+    "jsonwebtoken": "^9.0.3",
     "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^25.6.2",
     "@uav/shared": "*",
     "pino-pretty": "^13.1.3",

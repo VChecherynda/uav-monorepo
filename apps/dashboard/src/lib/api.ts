@@ -1,26 +1,66 @@
-import type { Drone, WSConnectionStatus } from "@uav/shared";
+import type { Drone, Telemetry, WSConnectionStatus } from "@uav/shared";
 export type { Drone, WSConnectionStatus };
+import { useAuthStore, type User } from "@/stores/useAuthStore";
 
-const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+
+export async function apiFetch<T>(
+  path: string,
+  options?: RequestInit,
+): Promise<T> {
+  const token = useAuthStore.getState().token;
+
+  const response = await fetch(`${API_URL}${path}`, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options?.headers,
+      ...(token && { Authorization: `Bearer ${token}` }),
+    },
+  });
+
+  if (!response.ok) {
+    if (response.status === 401) {
+      useAuthStore.getState().logout();
+    }
+
+    const error = await response
+      .json()
+      .catch(() => ({ error: "Request failed" }));
+    throw new Error(error.error ?? `HTTP status: ${response.status}`);
+  }
+
+  return response.json();
+}
+
+export async function login({
+  email,
+  password,
+}: {
+  email: string;
+  password: string;
+}): Promise<{ token: string; user: User }> {
+  return apiFetch<{ token: string; user: User }>("/auth/login", {
+    method: "POST",
+    body: JSON.stringify({ email, password }),
+  });
+}
+
+export async function fetchTelemetry(droneId: string): Promise<Telemetry[]> {
+  return apiFetch<Telemetry[]>(`/drones/${droneId}/telemetry`);
+}
 
 export async function fetchDrones(): Promise<Drone[]> {
-  const res = await fetch(`${API}/drones`);
-  if (!res.ok) throw new Error("Failed to fetch drones");
-  return res.json();
+  return apiFetch<Drone[]>("/drones");
 }
 
 export async function fetchDrone(id: string): Promise<Drone[]> {
-  const res = await fetch(`${API}/drone/${id}`);
-  if (!res.ok) throw new Error("Failed to fetch drone");
-  return res.json();
+  return apiFetch<Drone[]>(`/drones/${id}`);
 }
 
 export async function sendCommand(id: string, action: string) {
-  const res = await fetch(`${API}/drones/${id}/command`, {
+  return apiFetch<{ ok: boolean }>(`/drones/${id}/command`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ action }),
   });
-  if (!res.ok) throw new Error(`Command failed: ${res.status}`);
-  return res.json();
 }

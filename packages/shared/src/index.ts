@@ -10,6 +10,15 @@ export type Drone = {
   lat: number;
 };
 
+export type Telemetry = {
+  id: string;
+  droneId: string;
+  battery: number;
+  altitude: number;
+  lng: number;
+  lat: number;
+};
+
 export type WSConnectionStatus = "connecting" | "open" | "closed";
 
 export type WSMessage =

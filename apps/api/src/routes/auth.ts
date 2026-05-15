@@ -2,6 +2,7 @@ import type { FastifyInstance } from "fastify";
 import bcrypt from "bcrypt";
 import { prisma } from "../lib/prisma.js";
 import { z } from "zod";
+import jwt from "jsonwebtoken";
 
 const RegisterSchema = z.object({
   email: z.email(),
@@ -73,9 +74,12 @@ export async function authRoutes(fastify: FastifyInstance) {
       });
     }
 
+    const secret = process.env.JWT_SECRET ?? "dev-secret-change-in-production";
+    const token = jwt.sign({ userId: user.id }, secret, { expiresIn: "1h" });
+
     return reply.status(200).send({
       user: { id: user.id, email: user.email },
-      token: "JWT token will be added soon",
+      token,
     });
   });
 }
