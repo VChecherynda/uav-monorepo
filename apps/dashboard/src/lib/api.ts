@@ -1,6 +1,6 @@
-import type { Drone, Telemetry, WSConnectionStatus } from "@uav/shared";
+import type { User, Drone, Telemetry, WSConnectionStatus } from "@uav/shared";
 export type { Drone, WSConnectionStatus };
-import { useAuthStore, type User } from "@/stores/useAuthStore";
+import { useAuthStore } from "@/stores/useAuthStore";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 

@@ -1,10 +1,6 @@
+import { User } from "@uav/shared";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-
-type User = {
-  id: string;
-  email: string;
-};
 
 type AuthState = {
   token: string | null;

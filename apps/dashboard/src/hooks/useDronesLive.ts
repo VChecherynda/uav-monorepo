@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useAuthStore } from "@/stores/useAuthStore";
 import type { Drone, WSConnectionStatus } from "@/lib/api";
 
 const WS_URL =
@@ -7,6 +8,9 @@ const WS_URL =
 export function useDronesLive() {
   const [drones, setDrones] = useState<Drone[]>([]);
   const [status, setStatus] = useState<WSConnectionStatus>("connecting");
+
+  const token = useAuthStore((s) => s.token);
+
   const wsRef = useRef<WebSocket | null>(null);
   const retryRef = useRef<number>(0);
 
@@ -14,7 +18,13 @@ export function useDronesLive() {
     let cancelled = false;
 
     function connect() {
-      const ws = new WebSocket(WS_URL);
+      if (!token) {
+        return;
+      }
+
+      const wsURL = `${WS_URL}?token=${encodeURIComponent(token)}`;
+      const ws = new WebSocket(wsURL);
+
       wsRef.current = ws;
       setStatus("connecting");
 
@@ -35,9 +45,14 @@ export function useDronesLive() {
         }
       };
 
-      ws.onclose = () => {
+      ws.onclose = (event) => {
         if (cancelled) return;
         setStatus("closed");
+
+        if (event.code === 4001) {
+          useAuthStore.getState().logout();
+          return;
+        }
 
         const delay = Math.min(1000 * 2 ** retryRef.current, 16000);
         retryRef.current++;
@@ -53,7 +68,7 @@ export function useDronesLive() {
       cancelled = true;
       wsRef.current?.close();
     };
-  }, []);
+  }, [token]);
 
   return {
     drones,

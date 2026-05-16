@@ -1,11 +1,31 @@
-import type { FastifyInstance } from "fastify";
 import { prisma } from "../lib/prisma.js";
+import jwt from "jsonwebtoken";
+
+import type { FastifyInstance } from "fastify";
 import type { WSMessage, Drone } from "@uav/shared";
 
 const clients = new Set<WebSocket>();
 
 export async function wsRoutes(app: FastifyInstance) {
-  app.get("/ws/drones", { websocket: true }, (socket, _req) => {
+  app.get("/ws/drones", { websocket: true }, (socket, req) => {
+    const url = new URL(req.url, `http://${req.headers.host}`);
+    const token = url.searchParams.get("token");
+
+    if (!token) {
+      socket.close(4001, "Unauthorized: no token");
+      return;
+    }
+
+    try {
+      jwt.verify(
+        token,
+        process.env.JWT_SECRET ?? "dev-secret-change-in-production",
+      );
+    } catch {
+      socket.close(4001, "Unauthorized: invalid token");
+      return;
+    }
+
     clients.add(socket);
 
     socket.on("close", () => {

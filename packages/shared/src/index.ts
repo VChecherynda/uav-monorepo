@@ -1,5 +1,10 @@
 export type DroneStatus = "active" | "idle" | "offline";
 
+export type User = {
+  id: string;
+  email: string;
+};
+
 export type Drone = {
   id: string;
   name: string;
