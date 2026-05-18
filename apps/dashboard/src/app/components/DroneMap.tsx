@@ -6,7 +6,7 @@ import { Drone } from "@/lib/api";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 
-const MAP_STYLE_URL = "https://tiles.stadiamaps.com/styles/alidade_smooth.json";
+const MAP_STYLE_URL = `https://api.maptiler.com/maps/dataviz/style.json?key=${process.env.NEXT_PUBLIC_MAPTILER_KEY}`;
 const MAP_ZOOM = 11;
 const INITIAL_MAP_POSITION: [number, number] = [30.5234, 50.4501];
 
