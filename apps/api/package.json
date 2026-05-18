@@ -7,7 +7,7 @@
     "dev": "tsx --env-file=.env src/server.ts",
     "build": "tsc -p tsconfig.json",
     "start": "node dist/server.js",
-    "release": "prisma migrate deploy",
+    "release": "prisma migrate deploy && npx prisma db seed",
     "postinstall": "prisma generate"
   },
   "keywords": [],
