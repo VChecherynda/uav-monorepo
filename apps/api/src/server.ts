@@ -10,23 +10,35 @@ import { wsRoutes, broadcastDrones } from "./routes/ws.js";
 startSimulation(broadcastDrones);
 
 const app = Fastify({
-  logger: {
-    transport: {
-      target: "pino-pretty",
-      options: {
-        colorize: true,
-        translateTime: "HH:MM:ss",
-        ignore: "pid,hostname",
-      },
-    },
-  },
+  logger:
+    process.env.NODE_ENV === "production"
+      ? true
+      : {
+          transport: {
+            target: "pino-pretty",
+            options: {
+              colorize: true,
+              translateTime: "HH:MM:ss",
+              ignore: "pid,hostname",
+            },
+          },
+        },
 });
 
-await app.register(cors, { origin: "http://localhost:3000" });
+const allowedOrigins = (process.env.CORS_ORIGINS ?? "http://localhost:3000")
+  .split(",")
+  .map((o) => o.trim());
+
+await app.register(cors, { origin: allowedOrigins });
 
 await app.register(websocket, {});
 await app.register(wsRoutes);
 await app.register(authRoutes);
 await app.register(droneRoutes);
 
-app.listen({ port: 4000 }).then(() => console.log("API on :4000"));
+app.get("/health", async () => ({ status: "ok" }));
+
+const port = Number(process.env.PORT ?? 4000);
+const host = "0.0.0.0";
+
+app.listen({ port, host }).then((address) => console.log(`API on ${address}`));

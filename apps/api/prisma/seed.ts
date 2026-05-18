@@ -1,4 +1,4 @@
-import { PrismaClient } from "../generated/prisma/client.js";
+import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -34,15 +34,20 @@ async function main() {
   await prisma.drone.deleteMany();
   await prisma.drone.createMany({ data: drones });
 
-  const createdDrones = await prisma.drone.findMany({ orderBy: { name: "asc" } });
+  const createdDrones = await prisma.drone.findMany({
+    orderBy: { name: "asc" },
+  });
 
   for (const drone of createdDrones) {
     const now = Date.now();
     const telemetryHistory = Array.from({ length: 40 }, (_, i) => {
-      const decay = Math.floor(i * (drone.battery * 0.15) / 40);
+      const decay = Math.floor((i * (drone.battery * 0.15)) / 40);
       return {
         droneId: drone.id,
-        battery: Math.max(0, drone.battery - decay + Math.floor(Math.random() * 3 - 1)),
+        battery: Math.max(
+          0,
+          drone.battery - decay + Math.floor(Math.random() * 3 - 1),
+        ),
         altitude: drone.altitude,
         lat: drone.lat + (Math.random() - 0.5) * 0.01,
         lng: drone.lng + (Math.random() - 0.5) * 0.01,

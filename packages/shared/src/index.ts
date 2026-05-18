@@ -24,7 +24,11 @@ export type Telemetry = {
   lat: number;
 };
 
-export type WSConnectionStatus = "connecting" | "open" | "closed";
+export type WSConnectionStatus =
+  | "connecting"
+  | "open"
+  | "reconnecting"
+  | "lost";
 
 export type WSMessage =
   | { type: "drones:update"; data: Drone[] }

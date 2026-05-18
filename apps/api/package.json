@@ -5,7 +5,10 @@
   "main": "index.js",
   "scripts": {
     "dev": "tsx --env-file=.env src/server.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/server.js",
+    "release": "prisma migrate deploy",
+    "postinstall": "prisma generate"
   },
   "keywords": [],
   "author": "",

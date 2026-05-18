@@ -1,5 +1,5 @@
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { fetchDrones, fetchDrone } from "@/lib/api";
+import { useQuery } from "@tanstack/react-query";
+import { fetchDrone } from "@/lib/api";
 
 export function useDrone(id: string | null) {
   return useQuery({
@@ -7,14 +7,5 @@ export function useDrone(id: string | null) {
     queryFn: () => fetchDrone(id!),
     enabled: !!id,
     staleTime: 1000,
-  });
-}
-
-export function useDrones() {
-  return useQuery({
-    queryKey: ["drones"],
-    queryFn: fetchDrones,
-    refetchInterval: 2000,
-    placeholderData: keepPreviousData,
   });
 }

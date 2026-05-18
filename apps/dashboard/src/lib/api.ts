@@ -50,10 +50,6 @@ export async function fetchTelemetry(droneId: string): Promise<Telemetry[]> {
   return apiFetch<Telemetry[]>(`/drones/${droneId}/telemetry`);
 }
 
-export async function fetchDrones(): Promise<Drone[]> {
-  return apiFetch<Drone[]>("/drones");
-}
-
 export async function fetchDrone(id: string): Promise<Drone[]> {
   return apiFetch<Drone[]>(`/drones/${id}`);
 }
