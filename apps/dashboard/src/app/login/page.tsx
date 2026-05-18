@@ -35,7 +35,7 @@ export default function LoginPage() {
         onSubmit={handleSubmit}
         className="w-full max-w-sm space-y-4 rounded-lg border border-slate-800 bg-slate-900 p-6"
       >
-        <h1 className="text-2xl font-bold text white">UAV Fleet Login</h1>
+        <h1 className="text-2xl font-bold text-white">UAV Fleet Login</h1>
 
         <div className="space-y-1">
           <label htmlFor="email" className="block text-sm text-slate-400">
@@ -53,7 +53,7 @@ export default function LoginPage() {
 
         <div className="space-y-1">
           <label htmlFor="password" className="block text-sm text-slate-400">
-            Email
+            Password
           </label>
           <input
             id="password"
