@@ -35,6 +35,7 @@ export function useDronesLive() {
       ws.onopen = () => {
         if (cancelled) return;
         retryRef.current = 0;
+        console.log("[WS] open");
         setStatus("open");
       };
 
@@ -51,6 +52,7 @@ export function useDronesLive() {
 
       ws.onclose = (event) => {
         if (cancelled) return;
+        console.log("[WS] close", event.code, event.reason);
 
         if (event.code === 4001) {
           useAuthStore.getState().logout();
