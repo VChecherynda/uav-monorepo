@@ -63,5 +63,8 @@ const shutdown = async (signal: string) => {
   process.exit(0);
 };
 
-process.on("SIGTERM", () => shutdown("SIGTERM"));
+process.on("SIGTERM", () => {
+  console.log(">>> SIGTERM RECEIVED <<<");
+  shutdown("SIGTERM");
+});
 process.on("SIGINT", () => shutdown("SIGINT"));
