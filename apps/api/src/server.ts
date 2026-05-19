@@ -2,12 +2,11 @@ import Fastify from "fastify";
 import cors from "@fastify/cors";
 import websocket from "@fastify/websocket";
 import { startSimulation } from "./lib/simulation.js";
+import { startHousekeeping } from "./lib/housekeeping.js";
 import { droneRoutes } from "./routes/drones.js";
 import { authRoutes } from "./routes/auth.js";
 import { wsRoutes, broadcastDrones } from "./routes/ws.js";
-
-// TEMP: Generate fake data
-startSimulation(broadcastDrones);
+import { prisma } from "./lib/prisma.js";
 
 const app = Fastify({
   logger:
@@ -41,4 +40,28 @@ app.get("/health", async () => ({ status: "ok" }));
 const port = Number(process.env.PORT ?? 4000);
 const host = "0.0.0.0";
 
-app.listen({ port, host }).then((address) => console.log(`API on ${address}`));
+const address = await app.listen({ port, host });
+app.log.info(`API on ${address}`);
+
+const simulationTimer = startSimulation(broadcastDrones);
+const housekeepingTimer = startHousekeeping();
+app.log.info("Background processes started: simulation, housekeeping");
+
+const shutdown = async (signal: string) => {
+  app.log.info(`Received ${signal}, starting graceful shutdown...`);
+
+  clearInterval(simulationTimer);
+  clearInterval(housekeepingTimer);
+  app.log.info("Background timers stopped");
+
+  await app.close();
+  app.log.info("HTTP server closed");
+
+  await prisma.$disconnect();
+  app.log.info("Database disconnected");
+
+  process.exit(0);
+};
+
+process.on("SIGTERM", () => shutdown("SIGTERM"));
+process.on("SIGINT", () => shutdown("SIGINT"));

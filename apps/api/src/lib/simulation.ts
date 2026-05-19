@@ -1,5 +1,7 @@
 import { prisma } from "./prisma.js";
 
+const SIMULATION_TIMEOUT = 2 * 1000; // 2 sec
+
 const tick = async (broadcastDrones: () => Promise<void>) => {
   const drones = await prisma.drone.findMany();
   await Promise.all(
@@ -36,4 +38,8 @@ const tick = async (broadcastDrones: () => Promise<void>) => {
 };
 
 export const startSimulation = (broadcastDrones: () => Promise<void>) =>
-  setInterval(() => tick(broadcastDrones), 2000);
+  setInterval(() => {
+    tick(broadcastDrones).catch((err) =>
+      console.error("[simulation] Tick failed:", err),
+    );
+  }, SIMULATION_TIMEOUT);
