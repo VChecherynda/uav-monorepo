@@ -6,6 +6,10 @@ import type { WSMessage, Drone } from "@uav/shared";
 
 const clients = new Set<WebSocket>();
 
+export const hasClients = () => {
+  return clients.size > 0;
+};
+
 export async function wsRoutes(app: FastifyInstance) {
   app.get("/ws/drones", { websocket: true }, (socket, req) => {
     const url = new URL(req.url, `http://${req.headers.host}`);
@@ -41,6 +45,8 @@ export async function wsRoutes(app: FastifyInstance) {
 }
 
 export async function broadcastDrones() {
+  if (clients.size === 0) return;
+
   const drones = await prisma.drone.findMany();
   const payload: WSMessage = {
     type: "drones:update",

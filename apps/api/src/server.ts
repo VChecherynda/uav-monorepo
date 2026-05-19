@@ -5,7 +5,7 @@ import { startSimulation } from "./lib/simulation.js";
 import { startHousekeeping } from "./lib/housekeeping.js";
 import { droneRoutes } from "./routes/drones.js";
 import { authRoutes } from "./routes/auth.js";
-import { wsRoutes, broadcastDrones } from "./routes/ws.js";
+import { wsRoutes, hasClients, broadcastDrones } from "./routes/ws.js";
 import { prisma } from "./lib/prisma.js";
 
 const app = Fastify({
@@ -43,7 +43,7 @@ const host = "0.0.0.0";
 const address = await app.listen({ port, host });
 app.log.info(`API on ${address}`);
 
-const simulationTimer = startSimulation(broadcastDrones);
+const simulationTimer = startSimulation(broadcastDrones, hasClients);
 const housekeepingTimer = startHousekeeping();
 app.log.info("Background processes started: simulation, housekeeping");
 
