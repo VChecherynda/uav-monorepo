@@ -1,4 +1,4 @@
-import { fetchTelemetry } from "@/lib/api";
+import { fetchTelemetry } from "@/contexts/telemetry/api/fetchTelemetry";
 import { useQuery } from "@tanstack/react-query";
 
 export const useTelemetry = (droneId: string | null) => {

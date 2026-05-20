@@ -1,12 +1,13 @@
 "use client";
 import {
-  BatteryChart,
   ConnectionBadge,
   DroneMap,
   DronePanel,
-  LogoutButton,
-} from "@/app/components";
-import { useDronesLive } from "@/hooks/useDronesLive";
+  useDronesLive,
+} from "@/contexts/drones";
+import { BatteryChart } from "@/contexts/telemetry";
+import { LogoutButton } from "@/contexts/auth";
+
 import { useState } from "react";
 
 export default function Home() {

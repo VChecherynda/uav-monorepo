@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useAuthStore } from "@/stores/useAuthStore";
+import { useAuthStore } from "@/contexts/auth";
 
 export default function ProtectedLayout({
   children,

@@ -6,7 +6,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import { useTelemetry } from "@/hooks/useTelemetry";
+import { useTelemetry } from "@/contexts/telemetry/hooks/useTelemetry";
 
 export const BatteryChart = ({ droneId }: { droneId: string | null }) => {
   const { data = [] } = useTelemetry(droneId);

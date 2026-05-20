@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { useAuthStore } from "@/stores/useAuthStore";
-import type { Drone, WSConnectionStatus } from "@/lib/api";
+import { useAuthStore } from "@/contexts/auth";
+import type { Drone, WSConnectionStatus } from "@uav/shared";
 
 const WS_URL =
   process.env.NEXT_PUBLIC_WS_URL ?? "ws://localhost:4000/ws/drones";

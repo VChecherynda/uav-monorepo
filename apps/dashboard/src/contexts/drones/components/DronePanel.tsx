@@ -1,6 +1,6 @@
 import React from "react";
-import { Drone } from "@/lib/api";
-import { useSendCommand } from "@/hooks/useSendCommand";
+import type { Drone } from "@uav/shared";
+import { useSendCommand } from "@/contexts/fleet-commands";
 
 type DronePanelProps = {
   drones: Drone[];

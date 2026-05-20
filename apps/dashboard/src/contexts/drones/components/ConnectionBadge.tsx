@@ -1,6 +1,6 @@
 import React from "react";
 
-import { WSConnectionStatus } from "@/lib/api";
+import { WSConnectionStatus } from "@uav/shared";
 
 const COLORS: Record<WSConnectionStatus, string> = {
   connecting: "⏳ Connecting...",

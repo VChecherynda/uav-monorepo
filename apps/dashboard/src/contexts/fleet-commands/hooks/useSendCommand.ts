@@ -1,7 +1,10 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { sendCommand } from "@/lib/api";
+import {
+  sendCommand,
+  type DroneAction,
+} from "@/contexts/fleet-commands/api/sendCommand";
 
-type Vars = { id: string; action: "return-home" | "land" | "takeoff" };
+type Vars = { id: string; action: DroneAction };
 
 export const useSendCommand = () => {
   const qc = useQueryClient();
