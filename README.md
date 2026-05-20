@@ -186,3 +186,4 @@ Honest list. Decisions, not omissions.
 ---
 
 Built by [Vadym Checherynda](https://linkedin.com/in/vadym-checherynda-8b15ba119/) · [vchecherynda.dev](https://github.com/VChecherynda)
+
