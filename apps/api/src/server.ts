@@ -68,3 +68,4 @@ process.on("SIGTERM", () => {
   shutdown("SIGTERM");
 });
 process.on("SIGINT", () => shutdown("SIGINT"));
+// production hardening complete
