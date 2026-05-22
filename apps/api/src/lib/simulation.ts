@@ -4,7 +4,7 @@ const SIMULATION_TIMEOUT = 2 * 1000; // 2 sec
 const SKIP_LOG_THROTTLE_MS = 5 * 60 * 1000; // 5 min
 
 const tick = async (broadcastDrones: () => Promise<void>) => {
-  const drones = await prisma.drone.findMany();
+  const drones = await prisma.drone.findMany({ orderBy: { name: "asc" } });
   await Promise.all(
     drones.map(async (d) => {
       const newLng = d.lng + (Math.random() - 0.5) * 0.003;

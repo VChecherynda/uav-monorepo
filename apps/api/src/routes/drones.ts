@@ -10,7 +10,7 @@ const CommandSchema = z.object({
 export async function droneRoutes(app: FastifyInstance) {
   app.get("/drones", async () =>
     prisma.drone.findMany({
-      orderBy: { id: "asc" },
+      orderBy: { name: "asc" },
     }),
   );
 
@@ -36,13 +36,32 @@ export async function droneRoutes(app: FastifyInstance) {
     { preHandler: authenticate },
     async (req, reply) => {
       const parsed = CommandSchema.safeParse(req.body);
+
       if (!parsed.success) {
         return reply.code(400).send(z.flattenError(parsed.error));
       }
+
+      const { id } = req.params as { id: string };
+      const drone = await prisma.drone.findUnique({ where: { id } });
+
+      if (!drone) {
+        return reply.code(404).send({ error: "Drone not found" });
+      }
+
+      if (drone.battery < 20) {
+        return reply
+          .code(409)
+          .send({ error: `Insufficient battery: ${drone.battery}%` });
+      }
+
+      const updated = await prisma.drone.update({
+        where: { id },
+        data: { status: "returning" },
+      });
+
       return {
         ok: true,
-        droneId: (req.params as any).id,
-        action: parsed.data.action,
+        drone: updated,
       };
     },
   );

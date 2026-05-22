@@ -47,7 +47,9 @@ export async function wsRoutes(app: FastifyInstance) {
 export async function broadcastDrones() {
   if (clients.size === 0) return;
 
-  const drones = await prisma.drone.findMany();
+  const drones = await prisma.drone.findMany({
+    orderBy: { name: "asc" },
+  });
   const payload: WSMessage = {
     type: "drones:update",
     data: drones as Drone[],
