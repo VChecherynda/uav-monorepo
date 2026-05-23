@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useAuthStore } from "@/contexts/auth";
 import { useDronesStore } from "@/contexts/drones";
-import type { WSConnectionStatus } from "@uav/shared";
+import type { WSConnectionStatus, WSMessage } from "@uav/shared";
+import { useNotificationsStore } from "@/contexts/notifications/stores/useNotificationsStore";
 
 const WS_URL =
   process.env.NEXT_PUBLIC_WS_URL ?? "ws://localhost:4000/ws/drones";
@@ -54,9 +55,16 @@ export function useDronesLive() {
 
       ws.onmessage = (event) => {
         try {
-          const message = JSON.parse(event.data);
-          if (message.type === "drones:update") {
-            setServerDrones(message.data);
+          const message = JSON.parse(event.data) as WSMessage;
+
+          switch (message.type) {
+            case "drones:snapshot":
+              setServerDrones(message.data);
+              break;
+            case "DroneCommandRejected":
+            case "BatteryCritical":
+              useNotificationsStore.getState().addNotification(message);
+              break;
           }
         } catch (e) {
           console.error("Bad WS payload", e);

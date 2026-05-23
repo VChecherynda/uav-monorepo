@@ -21,8 +21,8 @@ const drones = [
   },
   {
     name: "Owl-3",
-    status: "offline",
-    battery: 12,
+    status: "idle",
+    battery: 21,
     altitude: 0,
     lat: 50.505,
     lng: 30.505,

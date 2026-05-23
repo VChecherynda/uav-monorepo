@@ -1,3 +1,5 @@
+export type DroneAction = "return-home" | "land" | "takeoff";
+
 export type DroneStatus = "active" | "idle" | "offline" | "returning";
 
 export type User = {
@@ -30,9 +32,10 @@ export type WSConnectionStatus =
   | "reconnecting"
   | "lost";
 
-export type WSMessage =
-  | { type: "drones:update"; data: Drone[] }
-  | { type: "drone:command:result"; droneId: string; ok: boolean };
+export type SnapshotMessage = {
+  type: "drones:snapshot";
+  data: Drone[];
+};
 
 export type CommandRejectionReason =
   | { code: "DRONE_NOT_FOUND"; message: string }
@@ -40,6 +43,23 @@ export type CommandRejectionReason =
   | { code: "INSUFFICIENT_BATTERY"; message: string; currentBattery: number }
   | { code: "ALREADY_RUNNING"; message: string };
 
+export type DomainEvent =
+  | {
+      type: "DroneCommandRejected";
+      droneId: string;
+      action: DroneAction;
+      reason: CommandRejectionReason;
+      at: string;
+    }
+  | {
+      type: "BatteryCritical";
+      droneId: string;
+      battery: number;
+      at: string;
+    };
+
 export type CommandResult =
   | { status: "success"; drone: Drone }
   | { status: "rejected"; reason: CommandRejectionReason };
+
+export type WSMessage = SnapshotMessage | DomainEvent;

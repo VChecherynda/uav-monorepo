@@ -7,6 +7,7 @@ import {
 } from "@/contexts/drones";
 import { BatteryChart } from "@/contexts/telemetry";
 import { LogoutButton } from "@/contexts/auth";
+import { NotificationsFeed } from "@/contexts/notifications";
 
 import { useState } from "react";
 
@@ -45,6 +46,7 @@ export default function Home() {
           </main>
           <aside className="col-span-4 row-span-1 gap-4 overflow-auto">
             <DronePanel drones={drones} onCardClick={onCardClick} />
+            <NotificationsFeed />
           </aside>
         </>
       )}

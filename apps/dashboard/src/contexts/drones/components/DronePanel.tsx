@@ -1,5 +1,6 @@
 import type { Drone } from "@uav/shared";
 import { useSendCommand } from "@/contexts/fleet-commands";
+import { predictDroneChange } from "@/contexts/fleet-commands";
 
 type DronePanelProps = {
   drones: Drone[];
@@ -23,7 +24,9 @@ function DroneCard({
   drone: Drone;
   onCardClick: (id: string) => void;
 }) {
-  const sendCmd = useSendCommand(); // ← свій інстанс для КОЖНОЇ карточки
+  const sendCmd = useSendCommand();
+  const canReturnHome =
+    predictDroneChange("return-home", drone.status) !== undefined;
 
   return (
     <div
@@ -59,9 +62,9 @@ function DroneCard({
 
       <div className="flex flex-col items-end gap-1">
         <button
-          disabled={sendCmd.isPending}
+          disabled={sendCmd.isPending || !canReturnHome}
           onClick={(e) => {
-            e.stopPropagation(); // щоб клік на кнопці не тригерив onCardClick
+            e.stopPropagation();
             sendCmd.mutate({ id: drone.id, action: "return-home" });
           }}
           className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
@@ -71,7 +74,12 @@ function DroneCard({
         {sendCmd.isError && (
           <p className="text-red-500 text-xs">{sendCmd.error.message}</p>
         )}
-        {sendCmd.isSuccess && (
+        {sendCmd.data?.status === "rejected" && (
+          <p className="text-orange-500 text-xs">
+            {sendCmd.data.reason.message}
+          </p>
+        )}
+        {sendCmd.data?.status === "success" && (
           <p className="text-green-500 text-xs">Drone sent</p>
         )}
       </div>

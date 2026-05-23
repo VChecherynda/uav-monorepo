@@ -1,9 +1,11 @@
 import { apiFetch } from "@/lib/apiFetch";
+import { CommandResult, DroneAction } from "@uav/shared";
 
-export type DroneAction = "return-home" | "land" | "takeoff";
-
-export async function sendCommand(id: string, action: DroneAction) {
-  return apiFetch<{ ok: boolean }>(`/drones/${id}/command`, {
+export async function sendCommand(
+  id: string,
+  action: DroneAction,
+): Promise<CommandResult> {
+  return apiFetch<CommandResult>(`/drones/${id}/command`, {
     method: "POST",
     body: JSON.stringify({ action }),
   });

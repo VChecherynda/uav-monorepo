@@ -1,8 +1,7 @@
-import { prisma } from "../lib/prisma.js";
 import jwt from "jsonwebtoken";
 
 import type { FastifyInstance } from "fastify";
-import type { WSMessage, Drone } from "@uav/shared";
+import type { WSMessage, Drone, DomainEvent } from "@uav/shared";
 
 const clients = new Set<WebSocket>();
 
@@ -44,20 +43,31 @@ export async function wsRoutes(app: FastifyInstance) {
   });
 }
 
-export async function broadcastDrones() {
+export function broadcastDrones(drones: Drone[]) {
   if (clients.size === 0) return;
 
-  const drones = await prisma.drone.findMany({
-    orderBy: { name: "asc" },
-  });
   const payload: WSMessage = {
-    type: "drones:update",
-    data: drones as Drone[],
+    type: "drones:snapshot",
+    data: drones,
   };
+  const serialized = JSON.stringify(payload);
 
   for (const client of clients) {
     if (client.readyState === 1) {
-      client.send(JSON.stringify(payload));
+      client.send(serialized);
+    }
+  }
+}
+
+export function broadcastEvent(event: DomainEvent) {
+  if (clients.size === 0) return;
+
+  const payload: WSMessage = event;
+  const serialized = JSON.stringify(payload);
+
+  for (const client of clients) {
+    if (client.readyState === 1) {
+      client.send(serialized);
     }
   }
 }

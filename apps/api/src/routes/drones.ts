@@ -2,6 +2,15 @@ import { z } from "zod";
 import { prisma } from "../lib/prisma.js";
 import { authenticate } from "../lib/auth.js";
 import type { FastifyInstance } from "fastify";
+import type {
+  CommandRejectionReason,
+  CommandResult,
+  DomainEvent,
+  Drone,
+} from "@uav/shared";
+import { broadcastEvent } from "./ws.js";
+
+const BATTERY_CRITICAL_THRESHOLD = 15;
 
 const CommandSchema = z.object({
   action: z.enum(["return-home", "land", "takeoff"]),
@@ -35,23 +44,50 @@ export async function droneRoutes(app: FastifyInstance) {
     "/drones/:id/command",
     { preHandler: authenticate },
     async (req, reply) => {
+      // === TRANSPORT LAYER ===
       const parsed = CommandSchema.safeParse(req.body);
-
       if (!parsed.success) {
         return reply.code(400).send(z.flattenError(parsed.error));
       }
 
+      const { action } = parsed.data;
       const { id } = req.params as { id: string };
+
+      // === DOMAIN LAYER (always 200 + CommandResult) ===
       const drone = await prisma.drone.findUnique({ where: { id } });
 
+      const reject = (reason: CommandRejectionReason): CommandResult => {
+        const event: DomainEvent = {
+          type: "DroneCommandRejected",
+          droneId: id,
+          action,
+          reason,
+          at: new Date().toISOString(),
+        };
+        broadcastEvent(event);
+        return { status: "rejected", reason };
+      };
+
       if (!drone) {
-        return reply.code(404).send({ error: "Drone not found" });
+        return reject({
+          code: "DRONE_NOT_FOUND",
+          message: "Drone not found",
+        });
+      }
+
+      if (drone.status === "offline") {
+        return reject({
+          code: "DRONE_OFFLINE",
+          message: `Drone ${drone.name} is offline`,
+        });
       }
 
       if (drone.battery < 20) {
-        return reply
-          .code(409)
-          .send({ error: `Insufficient battery: ${drone.battery}%` });
+        return reject({
+          code: "INSUFFICIENT_BATTERY",
+          message: `Insufficient battery: ${drone.battery}%`,
+          currentBattery: drone.battery,
+        });
       }
 
       const updated = await prisma.drone.update({
@@ -60,9 +96,9 @@ export async function droneRoutes(app: FastifyInstance) {
       });
 
       return {
-        ok: true,
-        drone: updated,
-      };
+        status: "success",
+        drone: updated as Drone,
+      } satisfies CommandResult;
     },
   );
 }

@@ -1,2 +1,3 @@
 export { useSendCommand } from "./hooks/useSendCommand";
-export type { DroneAction } from "./api/sendCommand";
+export { sendCommand } from "./api/sendCommand";
+export { predictDroneChange } from "./lib/predictDroneChange";
