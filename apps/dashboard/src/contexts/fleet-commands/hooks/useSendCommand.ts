@@ -3,6 +3,7 @@ import { sendCommand } from "@/contexts/fleet-commands";
 import { useDronesStore } from "@/contexts/drones";
 import { CommandResult, DroneAction, Drone } from "@uav/shared";
 import { predictDroneChange } from "../lib/predictDroneChange";
+import { useEffect, useRef } from "react";
 
 type Vars = { id: string; action: DroneAction };
 
@@ -10,7 +11,19 @@ type Context = {
   snapshot: Partial<Drone> | undefined;
 };
 
+const CONFIRMATION_TIMEOUT_MS = 10_000;
+
 export const useSendCommand = () => {
+  const timeoutsRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(
+    new Map(),
+  );
+
+  useEffect(() => {
+    return () => {
+      timeoutsRef.current.forEach(clearTimeout);
+    };
+  }, []);
+
   return useMutation<CommandResult, Error, Vars, Context>({
     mutationFn: ({ id, action }: Vars) => sendCommand(id, action),
 
@@ -44,7 +57,27 @@ export const useSendCommand = () => {
       if (result.status === "rejected") {
         const store = useDronesStore.getState();
         store.clearOptimistic(vars.id);
+        return;
       }
+
+      const existing = timeoutsRef.current.get(vars.id);
+      if (existing) clearTimeout(existing);
+
+      const timeoutId = setTimeout(() => {
+        const store = useDronesStore.getState();
+        const optimistic = store.optimisticOverrides.get(vars.id);
+
+        if (optimistic) {
+          console.warn(
+            "[saga] Confirmation timeout (force clearing optimistic)",
+          );
+          store.clearOptimistic(vars.id);
+        }
+
+        timeoutsRef.current.delete(vars.id);
+      }, CONFIRMATION_TIMEOUT_MS);
+
+      timeoutsRef.current.set(vars.id, timeoutId);
     },
   });
 };
