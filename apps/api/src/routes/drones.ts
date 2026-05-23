@@ -9,6 +9,7 @@ import type {
   Drone,
 } from "@uav/shared";
 import { broadcastEvent } from "./ws.js";
+import { mapDrone, mapDrones } from "../lib/mappers.js";
 
 const BATTERY_CRITICAL_THRESHOLD = 15;
 
@@ -17,17 +18,19 @@ const CommandSchema = z.object({
 });
 
 export async function droneRoutes(app: FastifyInstance) {
-  app.get("/drones", async () =>
-    prisma.drone.findMany({
+  app.get("/drones", async () => {
+    const drones = await prisma.drone.findMany({
       orderBy: { name: "asc" },
-    }),
-  );
+    });
+
+    return mapDrones(drones);
+  });
 
   app.get("/drones/:id", async (req, reply) => {
     const { id } = req.params as { id: string };
     const drone = await prisma.drone.findUnique({ where: { id } });
     if (!drone) return reply.code(404).send({ error: "Not found" });
-    return drone;
+    return mapDrone(drone);
   });
 
   app.get("/drones/:id/telemetry", async (req, reply) => {
@@ -97,7 +100,7 @@ export async function droneRoutes(app: FastifyInstance) {
 
       return {
         status: "success",
-        drone: updated as Drone,
+        drone: mapDrone(updated),
       } satisfies CommandResult;
     },
   );

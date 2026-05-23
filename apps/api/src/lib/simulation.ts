@@ -1,6 +1,7 @@
 import type { Drone } from "@uav/shared";
 import { prisma } from "./prisma.js";
 import { broadcastEvent } from "../routes/ws.js";
+import { mapDrones } from "./mappers.js";
 
 const SIMULATION_TIMEOUT = 2 * 1000; // 2 sec
 const SKIP_LOG_THROTTLE_MS = 5 * 60 * 1000; // 5 min
@@ -12,7 +13,10 @@ const tick = async (broadcastDrones: (drones: Drone[]) => void) => {
     drones.map(async (d) => {
       const newLng = d.lng + (Math.random() - 0.5) * 0.003;
       const newLat = d.lat + (Math.random() - 0.5) * 0.003;
-      const newBattery = Math.max(0, d.battery - (Math.random() < 0.5 ? 1 : 0));
+      const newBattery = Math.max(
+        0,
+        d.battery - (Math.random() < 0.01 ? 1 : 0),
+      );
 
       const updated = await prisma.drone.update({
         where: { id: d.id },
@@ -50,7 +54,7 @@ const tick = async (broadcastDrones: (drones: Drone[]) => void) => {
     }),
   );
 
-  broadcastDrones(updatedDrones as Drone[]);
+  broadcastDrones(mapDrones(updatedDrones));
 };
 
 export const startSimulation = (
