@@ -56,6 +56,11 @@ export type DomainEvent =
       droneId: string;
       battery: number;
       at: string;
+    }
+  | {
+      type: "DroneRecovered";
+      droneId: string;
+      at: string;
     };
 
 export type CommandResult =

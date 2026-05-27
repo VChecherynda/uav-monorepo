@@ -6,51 +6,86 @@ import { mapDrones } from "./mappers.js";
 const SIMULATION_TIMEOUT = 2 * 1000; // 2 sec
 const SKIP_LOG_THROTTLE_MS = 5 * 60 * 1000; // 5 min
 const BATTERY_CRITICAL_THRESHOLD = 15; // battery 15%
+const BATTERY_RECOVERY_THRESHOLD = 5;
+const INITIAL_BATTERY = 100;
 
 const tick = async (broadcastDrones: (drones: Drone[]) => void) => {
   const drones = await prisma.drone.findMany({ orderBy: { name: "asc" } });
   const updatedDrones = await Promise.all(
     drones.map(async (d) => {
-      const newLng = d.lng + (Math.random() - 0.5) * 0.003;
-      const newLat = d.lat + (Math.random() - 0.5) * 0.003;
-      const newBattery = Math.max(
-        0,
-        d.battery - (Math.random() < 0.01 ? 1 : 0),
-      );
+      const shouldRecover = d.battery < BATTERY_RECOVERY_THRESHOLD;
 
-      const updated = await prisma.drone.update({
-        where: { id: d.id },
-        data: {
-          lng: newLng,
-          lat: newLat,
-          battery: newBattery,
-        },
-      });
+      if (shouldRecover) {
+        const updated = await prisma.drone.update({
+          where: { id: d.id },
+          data: {
+            status: "idle",
+            battery: INITIAL_BATTERY,
+            altitude: 0,
+            lng: d.homeLng,
+            lat: d.homeLat,
+          },
+        });
 
-      const crossedCriticalThreshold =
-        d.battery >= BATTERY_CRITICAL_THRESHOLD &&
-        newBattery < BATTERY_CRITICAL_THRESHOLD;
-
-      if (crossedCriticalThreshold) {
         broadcastEvent({
-          type: "BatteryCritical",
+          type: "DroneRecovered",
           droneId: d.id,
-          battery: newBattery,
           at: new Date().toISOString(),
         });
+
+        await prisma.telemetry.create({
+          data: {
+            droneId: d.id,
+            battery: INITIAL_BATTERY,
+            altitude: 0,
+            lng: d.homeLng,
+            lat: d.homeLat,
+          },
+        });
+
+        return updated;
+      } else {
+        const newLng = d.lng + (Math.random() - 0.5) * 0.003;
+        const newLat = d.lat + (Math.random() - 0.5) * 0.003;
+        const newBattery = Math.max(
+          0,
+          d.battery - (Math.random() < 0.01 ? 1 : 0),
+        );
+
+        const updated = await prisma.drone.update({
+          where: { id: d.id },
+          data: {
+            lng: newLng,
+            lat: newLat,
+            battery: newBattery,
+          },
+        });
+
+        const crossedCriticalThreshold =
+          d.battery >= BATTERY_CRITICAL_THRESHOLD &&
+          newBattery < BATTERY_CRITICAL_THRESHOLD;
+
+        if (crossedCriticalThreshold) {
+          broadcastEvent({
+            type: "BatteryCritical",
+            droneId: d.id,
+            battery: newBattery,
+            at: new Date().toISOString(),
+          });
+        }
+
+        await prisma.telemetry.create({
+          data: {
+            droneId: d.id,
+            battery: newBattery,
+            altitude: d.altitude,
+            lng: newLng,
+            lat: newLat,
+          },
+        });
+
+        return updated;
       }
-
-      await prisma.telemetry.create({
-        data: {
-          droneId: d.id,
-          battery: newBattery,
-          altitude: d.altitude,
-          lng: newLng,
-          lat: newLat,
-        },
-      });
-
-      return updated;
     }),
   );
 

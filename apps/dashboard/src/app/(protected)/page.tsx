@@ -8,6 +8,7 @@ import {
 import { BatteryChart } from "@/contexts/telemetry";
 import { LogoutButton } from "@/contexts/auth";
 import { NotificationsFeed } from "@/contexts/notifications";
+import { ResetFleetButton } from "@/contexts/fleet";
 
 import { useState } from "react";
 
@@ -24,7 +25,10 @@ export default function Home() {
       <header className="col-span-12 flex items-center justify-between px-4">
         <h1>UAV Fleet</h1>
         <ConnectionBadge status={status} />
-        <LogoutButton />
+        <div className="flex gap-2">
+          <ResetFleetButton />
+          <LogoutButton />
+        </div>
       </header>
       {status === "lost" ? (
         <main className="col-span-12 row-span-1">

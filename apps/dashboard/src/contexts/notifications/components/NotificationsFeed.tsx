@@ -1,15 +1,20 @@
 "use client";
 
 import { useNotificationsStore } from "../stores/useNotificationsStore";
+import { useDronesStore } from "@/contexts/drones";
 import type { Notification } from "../stores/useNotificationsStore";
 
 function NotificationItem({ notification }: { notification: Notification }) {
   const { event } = notification;
+  const drone = useDronesStore((s) =>
+    s.serverDrones.find((d) => d.id === event.droneId),
+  );
+  const droneName = drone?.name ?? "Unknown drone";
 
   if (event.type === "BatteryCritical") {
     return (
       <div className="rounded border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
-        🔋 <strong>Battery critical</strong> - {event.battery}%
+        🔋 <strong>Battery critical</strong> - {droneName} has {event.battery}%
       </div>
     );
   }
@@ -17,7 +22,16 @@ function NotificationItem({ notification }: { notification: Notification }) {
   if (event.type === "DroneCommandRejected") {
     return (
       <div className="rounded border border-orange-200 bg-orange-50 px-3 py-2 text-xs text-orange-700">
-        ⚠️ <strong>{event.action}</strong> rejected — {event.reason.message}
+        ⚠️ {droneName}: <strong>{event.action}</strong> rejected —{" "}
+        {event.reason.message}
+      </div>
+    );
+  }
+
+  if (event.type === "DroneRecovered") {
+    return (
+      <div className="rounded border border-green-200 bg-green-50 px-3 py-2 text-xs text-green-700">
+        🔄 <strong>Auto-recovery</strong> — {droneName} returned to home base
       </div>
     );
   }

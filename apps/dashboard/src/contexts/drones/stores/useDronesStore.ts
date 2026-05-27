@@ -8,6 +8,7 @@ type DronesState = {
   setServerDrones: (drones: Drone[]) => void;
   applyOptimistic: (droneId: string, changes: Partial<Drone>) => void;
   clearOptimistic: (droneId: string) => void;
+  clearAllOptimistic: () => void;
 };
 
 export const useDronesStore = create<DronesState>((set) => ({
@@ -51,5 +52,9 @@ export const useDronesStore = create<DronesState>((set) => ({
       next.delete(droneId);
       return { optimisticOverrides: next };
     });
+  },
+
+  clearAllOptimistic: () => {
+    set({ optimisticOverrides: new Map() });
   },
 }));

@@ -5,6 +5,7 @@ import { startSimulation } from "./lib/simulation.js";
 import { startHousekeeping } from "./lib/housekeeping.js";
 import { droneRoutes } from "./routes/drones.js";
 import { authRoutes } from "./routes/auth.js";
+import { fleetRoutes } from "./routes/fleet.js";
 import { wsRoutes, hasClients, broadcastDrones } from "./routes/ws.js";
 import { prisma } from "./lib/prisma.js";
 
@@ -34,6 +35,7 @@ await app.register(websocket, {});
 await app.register(wsRoutes);
 await app.register(authRoutes);
 await app.register(droneRoutes);
+await app.register(fleetRoutes);
 
 app.get("/health", async () => ({ status: "ok" }));
 

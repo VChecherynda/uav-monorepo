@@ -63,6 +63,7 @@ export function useDronesLive() {
               break;
             case "DroneCommandRejected":
             case "BatteryCritical":
+            case "DroneRecovered":
               useNotificationsStore.getState().addNotification(message);
               break;
           }

@@ -6,12 +6,9 @@ import type {
   CommandRejectionReason,
   CommandResult,
   DomainEvent,
-  Drone,
 } from "@uav/shared";
 import { broadcastEvent } from "./ws.js";
 import { mapDrone, mapDrones } from "../lib/mappers.js";
-
-const BATTERY_CRITICAL_THRESHOLD = 15;
 
 const CommandSchema = z.object({
   action: z.enum(["return-home", "land", "takeoff"]),
