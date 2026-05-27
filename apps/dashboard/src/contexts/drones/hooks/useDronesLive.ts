@@ -9,6 +9,7 @@ const WS_URL =
 
 const MAX_RETRIES = 3;
 const MAX_RETRY_DELAY = 16000;
+const HEARTBEAT_TIMEOUT_MS = 6000;
 
 export function useDronesLive() {
   const serverDrones = useDronesStore((s) => s.serverDrones);
@@ -21,6 +22,7 @@ export function useDronesLive() {
   const token = useAuthStore((s) => s.token);
 
   const wsRef = useRef<WebSocket | null>(null);
+  const heartbeatTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const retryRef = useRef<number>(0);
 
@@ -35,6 +37,17 @@ export function useDronesLive() {
 
   useEffect(() => {
     let cancelled = false;
+
+    function resetHeartbeat(ws: WebSocket) {
+      if (heartbeatTimerRef.current) {
+        clearTimeout(heartbeatTimerRef.current);
+      }
+
+      heartbeatTimerRef.current = setTimeout(() => {
+        console.warn("[WS] heartbeat timeout - connection appears dead");
+        ws.close();
+      }, HEARTBEAT_TIMEOUT_MS);
+    }
 
     function connect() {
       if (!token) {
@@ -51,9 +64,12 @@ export function useDronesLive() {
         retryRef.current = 0;
         console.log("[WS] open");
         setStatus("open");
+        resetHeartbeat(ws);
       };
 
       ws.onmessage = (event) => {
+        resetHeartbeat(ws);
+
         try {
           const message = JSON.parse(event.data) as WSMessage;
 
@@ -76,17 +92,22 @@ export function useDronesLive() {
         if (cancelled) return;
         console.log("[WS] close", event.code, event.reason);
 
+        if (heartbeatTimerRef.current) {
+          clearTimeout(heartbeatTimerRef.current);
+          heartbeatTimerRef.current = null;
+        }
+
         if (event.code === 4001) {
           useAuthStore.getState().logout();
           return;
         }
 
+        setStatus("reconnecting");
+
         if (retryRef.current >= MAX_RETRIES) {
           setStatus("lost");
           return;
         }
-
-        setStatus("reconnecting");
 
         const delay = Math.min(1000 * 2 ** retryRef.current, MAX_RETRY_DELAY);
         retryRef.current++;
@@ -101,6 +122,11 @@ export function useDronesLive() {
 
     return () => {
       cancelled = true;
+
+      if (heartbeatTimerRef.current) {
+        clearTimeout(heartbeatTimerRef.current);
+        heartbeatTimerRef.current = null;
+      }
 
       if (retryTimerRef.current) {
         clearTimeout(retryTimerRef.current);
