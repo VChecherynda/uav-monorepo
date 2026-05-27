@@ -23,7 +23,6 @@ export default function LoginPage() {
       router.push("/");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");
-    } finally {
       setIsLoading(false);
     }
   };
