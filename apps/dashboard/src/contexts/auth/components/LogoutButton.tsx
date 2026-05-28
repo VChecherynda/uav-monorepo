@@ -13,14 +13,35 @@ export function LogoutButton() {
     router.replace("/login");
   };
 
+  const initials = user?.email?.slice(0, 2).toLocaleUpperCase() ?? "??";
+
   return (
     <div className="flex items-center gap-3">
-      <span className="text-sm text-slate-400">{user?.email}</span>
+      {/* User identity block */}
+      <div
+        className="w-7 h-7 rounded flex items-center justify-center text-xs font-semibold"
+        style={{
+          background: "var(--bg-elevated)",
+          border: "1px solid var(--border-strong)",
+          color: "var(--text-secondary)",
+          fontFamily: "var(--font-mono)",
+        }}
+      >
+        {initials}
+      </div>
+      <span
+        className="text-xs"
+        style={{ color: "var(--text-muted)", fontFamily: "var(--font-mono)" }}
+      >
+        {user?.email}
+      </span>
+
+      {/* Logout button */}
       <button
         onClick={handleLogout}
-        className="rounded border border-slate-700 px-3 py-1 text-sm text-slate-300 hover:bg-slate-800"
+        className="px-3 py-1 text-xs rounded border btn-logout"
       >
-        Logout
+        LOGOUT
       </button>
     </div>
   );

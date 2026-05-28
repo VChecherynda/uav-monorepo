@@ -1,26 +1,136 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Base surfaces from the low to high */
+  --bg-deep: #0a0e14;
+  --bg-surface: #131820;
+  --bg-elevated: #1c2330;
+
+  --border-subtle: #1e2733;
+  --border-strong: #2d3748;
+
+  /* Text 3 level of readability */
+  --text-primary: #e6edf3;
+  --text-secondary: #a8b3bd;
+  --text-muted: #7d8590;
+
+  /* Accent */
+  --accent-ok: #2ea043;
+  --accent-warn: #d29922;
+  --accent-critical: #e5534b;
+  --accent-info: #58a6ff;
+
+  /* Glow for status dots and critical states */
+  --glow-ok: rgba(46, 160, 67, 0.15);
+  --glow-warn: rgba(210, 153, 34, 0.15);
+  --glow-critical: rgba(229, 83, 75, 0.2);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* Surfaces */
+  --color-deep: var(--bg-deep);
+  --color-surface: var(--bg-surface);
+  --color-elevated: var(--bg-elevated);
+
+  /* Borders */
+  --color-subtle: var(--border-subtle);
+  --color-strong: var(--border-strong);
+
+  /* Text */
+  --color-primary: var(--text-primary);
+  --color-secondary: var(--text-secondary);
+  --color-muted: var(--text-muted);
+
+  /* Accents */
+  --color-ok: var(--accent-ok);
+  --color-warn: var(--accent-warn);
+  --color-critical: var(--accent-critical);
+  --color-info: var(--accent-info);
+
+  /* Fonts */
+  --font-sans: var(--font-inter);
+  --font-mono: var(--font-jetbrains);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  background: var(--bg-deep);
+  color: var(--text-primary);
+  color-scheme: dark;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Thin tactical scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-deep);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* Amber focus ring instead default */
+:focus-visible {
+  outline: 2px solid var(--accent-warn);
+  outline-offset: 2px;
+}
+
+.label {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.btn-logout {
+  border-color: var(--border-strong);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  transition:
+    border-color 150ms,
+    color 150ms;
+}
+
+.btn-logout:hover {
+  border-color: var(--accent-critical);
+  color: var(--accent-critical);
+}
+
+.bg-grid {
+  background-color: var(--bg-deep);
+  background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0h40v40H0z' fill='none'/%3E%3Cpath d='M0 0h1v40H0zM0 0h40v1H0z' fill='%231e2733' opacity='0.6'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 40px 40px;
+}
+
+.input-tactical {
+  width: 100%;
+  border-radius: 4px;
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-elevated);
+  padding: 8px 12px;
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color 150ms;
+}
+
+.input-tactical:focus {
+  border-color: var(--accent-warn);
+}
+
+.input-tactical::placeholder {
+  color: var(--text-muted);
 }

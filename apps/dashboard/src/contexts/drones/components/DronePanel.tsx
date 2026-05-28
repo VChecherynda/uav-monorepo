@@ -1,3 +1,5 @@
+"use client";
+
 import type { Drone } from "@uav/shared";
 import { useSendCommand } from "@/contexts/fleet-commands";
 import { predictDroneChange } from "@/contexts/fleet-commands";
