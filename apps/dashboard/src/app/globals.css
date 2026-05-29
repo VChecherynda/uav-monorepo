@@ -134,3 +134,117 @@ body {
 .input-tactical::placeholder {
   color: var(--text-muted);
 }
+
+.drone-card {
+  background: var(--bg-surface);
+  border-color: var(--border-subtle);
+  transition:
+    background 150ms,
+    border-color 150ms;
+}
+
+.drone-card:hover {
+  background: var(--bg-elevated);
+}
+
+.drone-card.selected {
+  background: var(--bg-elevated);
+  border-color: var(--accent-info);
+}
+
+/* Buttons */
+.btn-rth {
+  border-color: var(--border-strong);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  transition:
+    border-color 150ms,
+    color 150ms;
+}
+
+.btn-rth:hover:not(:disabled) {
+  border-color: var(--accent-warn);
+  color: var(--accent-warn);
+}
+
+.btn-rth:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  width: 100%;
+  border-radius: 4px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font-mono);
+  letter-spacing: 0.1em;
+  background: var(--accent-warn);
+  color: var(--bg-deep);
+  transition: opacity 150ms;
+}
+
+.btn-primary:hover {
+  opacity: 0.9;
+}
+
+.btn-primary:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Typography utilities */
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+.text-data {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.text-value {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+/* Component utilities */
+.tactical-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px;
+  border-radius: 4px;
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+}
+
+.avatar-initials {
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--font-mono);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-strong);
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+.error-message {
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-family: var(--font-mono);
+  border: 1px solid var(--accent-critical);
+  color: var(--accent-critical);
+  background: var(--glow-critical);
+}

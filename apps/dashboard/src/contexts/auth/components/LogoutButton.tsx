@@ -18,28 +18,13 @@ export function LogoutButton() {
   return (
     <div className="flex items-center gap-3">
       {/* User identity block */}
-      <div
-        className="w-7 h-7 rounded flex items-center justify-center text-xs font-semibold"
-        style={{
-          background: "var(--bg-elevated)",
-          border: "1px solid var(--border-strong)",
-          color: "var(--text-secondary)",
-          fontFamily: "var(--font-mono)",
-        }}
-      >
-        {initials}
-      </div>
-      <span
-        className="text-xs"
-        style={{ color: "var(--text-muted)", fontFamily: "var(--font-mono)" }}
-      >
-        {user?.email}
-      </span>
+      <div className="avatar-initials">{initials}</div>
+      <span className="font-mono text-xs text-muted">{user?.email}</span>
 
       {/* Logout button */}
       <button
         onClick={handleLogout}
-        className="px-3 py-1 text-xs rounded border btn-logout"
+        className="btn-logout px-3 py-1 text-xs rounded border"
       >
         LOGOUT
       </button>

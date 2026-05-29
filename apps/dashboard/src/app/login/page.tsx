@@ -3,66 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { login, useAuthStore } from "@/contexts/auth";
-
-function CrosshairIcon() {
-  return (
-    <svg
-      width="32"
-      height="32"
-      viewBox="0 0 28 28"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <circle
-        cx="14"
-        cy="14"
-        r="12"
-        stroke="var(--accent-info)"
-        strokeWidth="1"
-        strokeDasharray="3 3"
-      />
-      <circle
-        cx="14"
-        cy="14"
-        r="4"
-        stroke="var(--accent-info)"
-        strokeWidth="1.5"
-      />
-      <line
-        x1="14"
-        y1="2"
-        x2="14"
-        y2="8"
-        stroke="var(--accent-info)"
-        strokeWidth="1.5"
-      />
-      <line
-        x1="14"
-        y1="20"
-        x2="14"
-        y2="26"
-        stroke="var(--accent-info)"
-        strokeWidth="1.5"
-      />
-      <line
-        x1="2"
-        y1="14"
-        x2="8"
-        y2="14"
-        stroke="var(--accent-info)"
-        strokeWidth="1.5"
-      />
-      <line
-        x1="20"
-        y1="14"
-        x2="26"
-        y2="14"
-        stroke="var(--accent-info)"
-        strokeWidth="1.5"
-      />
-    </svg>
-  );
-}
+import { CrosshairIcon } from "@/components/icons/CrosshairIcon";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -93,15 +34,9 @@ export default function LoginPage() {
         {/* Brand mark */}
 
         <div className="flex flex-col items-center gap-2 text-center">
-          <CrosshairIcon />
+          <CrosshairIcon size={32} />
           <div className="flex flex-col gap-1">
-            <span
-              className="text-sm font-semibold tracking-[0.25em]"
-              style={{
-                fontFamily: "var(--font-mono)",
-                color: "var(--text-primary)",
-              }}
-            >
+            <span className="font-mono text-sm font-semibold tracking-[0.25em] text-primary">
               UAV FLEET
             </span>
             <span className="label tracking-[0.15em]">
@@ -149,41 +84,16 @@ export default function LoginPage() {
             />
           </div>
 
-          {error && (
-            <p
-              className="rounded px-3 py-2 text-xs border"
-              style={{
-                background: "var(--glow-critical)",
-                borderColor: "var(--accent-critical)",
-                color: "var(--accent-critical)",
-                fontFamily: "var(--font-mono)",
-              }}
-            >
-              {error}
-            </p>
-          )}
+          {error && <p className="error-message">{error}</p>}
 
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full rounded px-4 py-2 text-sm font-semibold tracking-widest transition-colors disabled:opacity-40"
-            style={{
-              background: "var(--accent-warn)",
-              color: "var(--bg-deep)",
-              fontFamily: "var(--font-mono)",
-            }}
-          >
+          <button type="submit" disabled={isLoading} className="btn-primary">
             {isLoading ? "AUTHENTICATING..." : "AUTHENTICATE"}
           </button>
         </form>
 
         {/* Demo credentials */}
-        <p
-          className="text-center text-xs"
-          style={{ color: "var(--text-muted)", fontFamily: "var(--font-mono)" }}
-        >
-          demo access -{" "}
-          <span style={{ color: "var(--text-secondary)" }}> demo@uav.test</span>
+        <p className="font-mono text-muted text-center text-xs">
+          demo access - <span className="text-secondary"> demo@uav.test</span>
         </p>
       </div>
     </div>

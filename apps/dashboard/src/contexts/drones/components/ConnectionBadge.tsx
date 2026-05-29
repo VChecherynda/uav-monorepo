@@ -2,13 +2,6 @@
 
 import { WSConnectionStatus } from "@uav/shared";
 
-// const COLORS: Record<WSConnectionStatus, string> = {
-//   connecting: "⏳ Connecting...",
-//   open: "🟢 Live",
-//   reconnecting: "🟡 Reconnecting...",
-//   lost: "🔴 Disconnected",
-// };
-
 const STATUS_CONFIG: Record<
   WSConnectionStatus,
   { label: string; color: string; pulse: boolean }
@@ -39,10 +32,7 @@ export const ConnectionBadge = ({ status }: { status: WSConnectionStatus }) => {
   const { label, color, pulse } = STATUS_CONFIG[status];
 
   return (
-    <div
-      className="flex items-center gap-2 px-3 py-1 rounded border border-subtlebg-surface"
-      style={{ fontFamily: "var(--font-mono)" }}
-    >
+    <div className="tactical-badge font-mono">
       <svg width="8" height="8" viewBox="0 0 8 8">
         <circle cx="4" cy="4" r="4" fill={color}>
           {pulse && (

@@ -7,13 +7,72 @@ import { predictDroneChange } from "@/contexts/fleet-commands";
 type DronePanelProps = {
   drones: Drone[];
   onCardClick: (id: string) => void;
+  selectedId: string | null;
 };
 
-export const DronePanel = ({ drones, onCardClick }: DronePanelProps) => {
+const STATUS_DOT: Record<Drone["status"], { color: string; glow: string }> = {
+  active: { color: "var(--accent-ok)", glow: "var(--glow-ok)" },
+  idle: { color: "var(--text-muted)", glow: "none" },
+  offline: { color: "var(--accent-critical)", glow: "var(--glow-critical)" },
+  returning: { color: "var(--accent-warn)", glow: "var(--glow-warn)" },
+};
+
+function StatusDot({ status }: { status: Drone["status"] }) {
+  const { color, glow } = STATUS_DOT[status];
+  return (
+    <span
+      style={{
+        display: "inline-block",
+        width: 8,
+        height: 8,
+        borderRadius: "50%",
+        background: color,
+        boxShadow: glow !== "none" ? `0 0 6px ${glow}` : undefined,
+        flexShrink: 0,
+      }}
+    />
+  );
+}
+
+function getBatteryLevel(value: number) {
+  if (value < 20) return "var(--accent-critical)";
+  if (value < 40) return "var(--accent-warn)";
+  return "var(--accent-info)";
+}
+
+function BatteryBar({ value }: { value: number }) {
+  const color = getBatteryLevel(value);
+
+  return (
+    <div className="flex items-center gap-2">
+      <div
+        className="relative h-1.5 rounded-full overflow-hidden"
+        style={{ width: 64, background: "var(--bg-elevated)" }}
+      >
+        <div
+          className="absolute inset-y-0 left-0 rounded-full transition-all duration-500"
+          style={{ width: `${value}%`, background: color }}
+        />
+      </div>
+      <span className="font-mono text-xs tabular-nums">{value}%</span>
+    </div>
+  );
+}
+
+export const DronePanel = ({
+  drones,
+  selectedId,
+  onCardClick,
+}: DronePanelProps) => {
   return (
     <div className="flex flex-col gap-4">
       {drones.map((drone) => (
-        <DroneCard key={drone.id} drone={drone} onCardClick={onCardClick} />
+        <DroneCard
+          key={drone.id}
+          drone={drone}
+          isSelected={drone.id === selectedId}
+          onCardClick={onCardClick}
+        />
       ))}
     </div>
   );
@@ -22,9 +81,11 @@ export const DronePanel = ({ drones, onCardClick }: DronePanelProps) => {
 function DroneCard({
   drone,
   onCardClick,
+  isSelected,
 }: {
   drone: Drone;
   onCardClick: (id: string) => void;
+  isSelected: boolean;
 }) {
   const sendCmd = useSendCommand();
   const canReturnHome =
@@ -33,56 +94,67 @@ function DroneCard({
   return (
     <div
       onClick={() => onCardClick(drone.id)}
-      className="flex items-center rounded-xl border border-gray-200 bg-white px-5 py-4 shadow-sm"
+      className={`drone-card flex flex-col gap-3 rounded border px-4 py-3 cursor-pointer ${
+        isSelected ? "selected" : ""
+      }`}
+      style={{
+        borderLeft: isSelected
+          ? "3px solid var(--accent-info)"
+          : "3px solid transparent",
+      }}
     >
-      <div className="flex-1 text-sm text-gray-700">
-        <div>
-          <span className="block text-xs font-medium text-gray-400 uppercase tracking-wide">
-            Position
+      {/* Top row — identity + battery */}
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 min-w-0">
+          <StatusDot status={drone.status} />
+          <span className="text-sm font-semibold truncate text-primary">
+            {drone.name}
           </span>
-          {drone.lat.toFixed(4)}, {drone.lng.toFixed(4)}
         </div>
-        <div>
-          <span className="block text-xs font-medium text-gray-400 uppercase tracking-wide">
-            Altitude
+        <BatteryBar value={drone.battery} />
+      </div>
+
+      {/* Bottom row — telemetry data */}
+      <div className="flex gap-4">
+        <div className="flex flex-col gap-0.5">
+          <span className="label">Position</span>
+          <span className="text-data">
+            {drone.lat.toFixed(3)}, {drone.lng.toFixed(3)}
           </span>
-          {drone.altitude} m
         </div>
-        <div>
-          <span className="block text-xs font-medium text-gray-400 uppercase tracking-wide">
-            Battery
-          </span>
-          {drone.battery}%
+
+        <div className="flex flex-col gap-0.5">
+          <span className="label">Alt</span>
+          <span className="text-data">{drone.altitude}m</span>
         </div>
-        <div>
-          <span className="block text-xs font-medium text-gray-400 uppercase tracking-wide">
-            Status
-          </span>
-          {drone.status}
+
+        <div className="flex flex-col gap-0.5">
+          <span className="label">Status</span>
+          <span className="text-data">{drone.status.toUpperCase()}</span>
         </div>
       </div>
 
-      <div className="flex flex-col items-end gap-1">
+      {/* Command row */}
+      <div className="flex items-center justify-between">
         <button
           disabled={sendCmd.isPending || !canReturnHome}
           onClick={(e) => {
             e.stopPropagation();
             sendCmd.mutate({ id: drone.id, action: "return-home" });
           }}
-          className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="btn-rth px-3 py-1 text-xs rounded border"
         >
-          {sendCmd.isPending ? "Sending…" : "Return home"}
+          {sendCmd.isPending ? "SENDING..." : "RTH"}
         </button>
-        {sendCmd.isError && (
-          <p className="text-red-500 text-xs">{sendCmd.error.message}</p>
-        )}
+
         {sendCmd.data?.status === "rejected" && (
-          <p className="text-orange-500 text-xs">
+          <span className="font-mono text-xs text-critical">
             {sendCmd.data.reason.message}
-          </p>
+          </span>
         )}
+
         {sendCmd.data?.status === "success" && (
-          <p className="text-green-500 text-xs">Drone sent</p>
+          <span className="font-mono text-xs text-ok">ACKNOWLEDGED</span>
         )}
       </div>
     </div>

@@ -6,14 +6,58 @@ import type { Drone } from "@uav/shared";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 
-const MAP_STYLE_URL = `https://api.maptiler.com/maps/dataviz/style.json?key=${process.env.NEXT_PUBLIC_MAPTILER_KEY}`;
+const MAP_STYLE_URL = `https://api.maptiler.com/maps/darkmatter/style.json?key=${process.env.NEXT_PUBLIC_MAPTILER_KEY}`;
 const MAP_ZOOM = 11;
 const INITIAL_MAP_POSITION: [number, number] = [30.5234, 50.4501];
+
+const DRONE_STATUS_COLOR: Record<string, string> = {
+  active: "#2ea043",
+  idle: "#7d8590",
+  offline: "#e5534b",
+  returning: "#d29922",
+};
+
+function createDroneMarkerElement(status: string): HTMLDivElement {
+  const color = DRONE_STATUS_COLOR[status] ?? "#7d8590";
+  const wrapper = document.createElement("div");
+  wrapper.style.width = "24px";
+  wrapper.style.height = "24px";
+  wrapper.style.cursor = "pointer";
+
+  wrapper.innerHTML = `
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+      xmlns="http://www.w3.org/2000/svg">
+      <!-- Propeller arms -->
+      <line x1="4" y1="4" x2="20" y2="20" stroke="${color}" stroke-width="1.5"/>
+      <line x1="20" y1="4" x2="4" y2="20" stroke="${color}" stroke-width="1.5"/>
+
+      <!-- Propellers -->
+      <circle cx="4"  cy="4"  r="3" fill="${color}" fill-opacity="0.3" stroke="${color}" stroke-width="1"/>
+      <circle cx="20" cy="4"  r="3" fill="${color}" fill-opacity="0.3" stroke="${color}" stroke-width="1"/>
+      <circle cx="4"  cy="20" r="3" fill="${color}" fill-opacity="0.3" stroke="${color}" stroke-width="1"/>
+      <circle cx="20" cy="20" r="3" fill="${color}" fill-opacity="0.3" stroke="${color}" stroke-width="1"/>
+
+      <!-- Center body -->
+      <circle cx="12" cy="12" r="3" fill="${color}"/>
+    </svg>
+  `;
+
+  return wrapper;
+}
 
 export const DroneMap = ({ drones }: { drones: Drone[] }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
-  const markersRef = useRef<Map<string, maplibregl.Marker>>(new Map());
+  const markersRef = useRef<
+    Map<
+      string,
+      {
+        marker: maplibregl.Marker;
+        element: HTMLDivElement;
+        status: string;
+      }
+    >
+  >(new Map());
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -31,8 +75,8 @@ export const DroneMap = ({ drones }: { drones: Drone[] }) => {
       map.remove();
       mapRef.current = null;
 
-      markersRef.current.forEach((marker, id) => {
-        marker.remove();
+      markersRef.current.forEach((value, id) => {
+        value.marker.remove();
         markersRef.current.delete(id);
       });
     };
@@ -54,19 +98,47 @@ export const DroneMap = ({ drones }: { drones: Drone[] }) => {
 
       const existing = markersRef.current.get(drone.id);
       if (existing) {
-        existing.setLngLat([drone.lng, drone.lat]);
+        existing.marker.setLngLat([drone.lng, drone.lat]);
+
+        if (existing.status !== drone.status) {
+          const color = DRONE_STATUS_COLOR[drone.status] ?? "#7d8590";
+          const lines = existing.element.querySelectorAll("line");
+          const circles = existing.element.querySelectorAll("circle");
+
+          lines.forEach((l) => l.setAttribute("stroke", color));
+          circles.forEach((c) => {
+            c.setAttribute("stroke", color);
+            c.setAttribute("fill", color);
+          });
+
+          // Повертаємо opacity propeller колам
+          const propellers = existing.element.querySelectorAll(
+            "circle:not(:last-child)",
+          );
+          propellers.forEach((c) => c.setAttribute("fill-opacity", "0.3"));
+
+          markersRef.current.set(drone.id, {
+            ...existing,
+            status: drone.status,
+          });
+        }
       } else {
-        const marker = new maplibregl.Marker({ color: "#10b981" })
+        const element = createDroneMarkerElement(drone.status);
+        const marker = new maplibregl.Marker({ element })
           .setLngLat([drone.lng, drone.lat])
           .addTo(map);
 
-        markersRef.current.set(drone.id, marker);
+        markersRef.current.set(drone.id, {
+          marker,
+          element,
+          status: drone.status,
+        });
       }
     });
 
-    markersRef.current.forEach((marker, id) => {
+    markersRef.current.forEach((value, id) => {
       if (!seen.has(id)) {
-        marker.remove();
+        value.marker.remove();
         markersRef.current.delete(id);
       }
     });
