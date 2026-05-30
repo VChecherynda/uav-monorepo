@@ -45,7 +45,7 @@ jobs:
         working-directory: apps/api
 
       - name: Start API
-        run: npm run dev:api &
+        run: npm run dev:ci --workspace=apps/api &
         env:
           JWT_SECRET: ci-test-secret
           CORS_ORIGINS: http://localhost:3000
