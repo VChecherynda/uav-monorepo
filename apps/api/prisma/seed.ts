@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcrypt";
 
 const prisma = new PrismaClient();
 
@@ -39,6 +40,13 @@ async function main() {
   await prisma.telemetry.deleteMany();
   await prisma.drone.deleteMany();
   await prisma.drone.createMany({ data: drones });
+  await prisma.user.deleteMany();
+  await prisma.user.create({
+    data: {
+      email: "demo@uav.test",
+      passwordHash: await bcrypt.hash("password123", 10),
+    },
+  });
 
   const createdDrones = await prisma.drone.findMany({
     orderBy: { name: "asc" },
