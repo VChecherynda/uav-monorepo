@@ -52,7 +52,7 @@ jobs:
           PORT: "4000"
 
       - name: Wait for API
-        run: npx wait-on http://localhost:4000/health
+        run: npx wait-on http://localhost:4000/health -t 30000
 
       - name: Run tests
         run: |
