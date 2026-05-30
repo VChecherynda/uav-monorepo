@@ -7,6 +7,8 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: postgresql://uav:uav@localhost:5432/uav_dev
     services:
       postgres:
         image: postgres:16-alpine
@@ -41,13 +43,10 @@ jobs:
           npx prisma migrate deploy
           npx prisma db seed
         working-directory: apps/api
-        env:
-          DATABASE_URL: postgresql://uav:uav@localhost:5432/uav_dev
 
       - name: Start API
         run: npm run dev:api &
         env:
-          DATABASE_URL: postgresql://uav:uav@localhost:5432/uav_dev
           JWT_SECRET: ci-test-secret
           CORS_ORIGINS: http://localhost:3000
           PORT: "4000"
