@@ -1,3 +1,5 @@
+![CI](https://github.com/VChecherynda/uav-monorepo/actions/workflows/ci.yml/badge.svg)
+
 # UAV Fleet Management Dashboard
 
 Ground Control Station prototype demonstrating real-time UAV fleet awareness for operators managing drone assets in the field.
@@ -34,14 +36,14 @@ Vercel is optimized for Next.js — edge caching, automatic preview deploys. But
 
 Domain logic is organized as bounded contexts following DDD principles — each context owns its domain, exposes a public interface via `index.ts`, and knows nothing about other contexts' internals:
 
-| Context | Responsibility |
-|---|---|
-| `contexts/drones` | Real-time drone state, map visualization, WS lifecycle management |
-| `contexts/fleet-commands` | Per-drone commands, optimistic updates, saga |
-| `contexts/fleet` | Fleet-level operations (reset all) |
-| `contexts/notifications` | Domain events, toast system |
-| `contexts/auth` | JWT session, hydration guard |
-| `contexts/telemetry` | Battery history, chart |
+| Context                   | Responsibility                                                    |
+| ------------------------- | ----------------------------------------------------------------- |
+| `contexts/drones`         | Real-time drone state, map visualization, WS lifecycle management |
+| `contexts/fleet-commands` | Per-drone commands, optimistic updates, saga                      |
+| `contexts/fleet`          | Fleet-level operations (reset all)                                |
+| `contexts/notifications`  | Domain events, toast system                                       |
+| `contexts/auth`           | JWT session, hydration guard                                      |
+| `contexts/telemetry`      | Battery history, chart                                            |
 
 DDD on the frontend is justified here by domain complexity — optimistic updates with rollback, saga with timeout, WebSocket reconnect logic, and domain events that affect multiple UI areas. A flat `components/` folder would become an unmaintainable dependency graph within weeks.
 
@@ -96,6 +98,7 @@ HTTP status codes describe transport results — whether the request was receive
 This project models a subset of real GCS (Ground Control Station) domain concepts. Understanding these is necessary to understand the architecture.
 
 ### Fleet Awareness
+
 Real-time knowledge of every drone's position, battery, altitude, and status. In production GCS systems this is the primary operator concern — "where are my assets and are they healthy." Implemented via WebSocket broadcast from simulation, rendered on MapLibre GL with custom markers.
 
 ### Drone Status Lifecycle
@@ -114,18 +117,20 @@ idle → active → returning → idle
 Status drives UI — marker color, battery bar color, RTH button availability. `predictDroneChange()` implements this as a lookup-table state machine, preventing invalid transitions (e.g. `offline → returning`).
 
 ### Return To Home (RTH)
+
 Standard UAV failsafe command. Drone navigates autonomously to its `homeLat/homeLng` coordinates. In this implementation RTH is the primary operator command — used both manually and triggered automatically when battery drops below recovery threshold (5%).
 
 ### Battery Thresholds
 
-| Level | Threshold | Action |
-|---|---|---|
-| Normal | ≥ 40% | No action required |
-| Warning | < 40% | Amber indicator, operator awareness |
-| Critical | < 20% | RTH command rejected — insufficient power for safe return |
-| Recovery | < 5% | Auto-recovery triggered by simulation |
+| Level    | Threshold | Action                                                    |
+| -------- | --------- | --------------------------------------------------------- |
+| Normal   | ≥ 40%     | No action required                                        |
+| Warning  | < 40%     | Amber indicator, operator awareness                       |
+| Critical | < 20%     | RTH command rejected — insufficient power for safe return |
+| Recovery | < 5%      | Auto-recovery triggered by simulation                     |
 
 ### Domain Events
+
 State changes that matter to the operator are broadcast as domain events via WebSocket — not just telemetry snapshots:
 
 - `BatteryCritical` — emitted once when battery crosses 15% threshold (edge detection, not repeated every tick)
@@ -139,35 +144,39 @@ Events are immutable past-tense facts. They flow from domain layer → WebSocket
 ## Tech Stack
 
 ### Frontend — Vercel
-| Technology | Why |
-|---|---|
-| Next.js 16 App Router | File-based routing, SSR for auth pages, React Server Components |
-| React 19 + React Compiler | Automatic memoization — no manual `useMemo`/`useCallback` needed |
-| Tailwind CSS v4 | CSS-first config, `@theme inline` for design tokens |
-| TanStack Query | Server state management — staleTime, dependent queries, deduplication |
-| Zustand + persist | Selector-based subscriptions prevent unnecessary re-renders. Built-in persist middleware handles localStorage + SSR hydration guard without extra packages |
-| MapLibre GL JS | Open-source WebGL map, no Google Maps vendor lock-in |
-| Recharts | Composable SVG charts, works with React 19 |
+
+| Technology                | Why                                                                                                                                                        |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Next.js 16 App Router     | File-based routing, SSR for auth pages, React Server Components                                                                                            |
+| React 19 + React Compiler | Automatic memoization — no manual `useMemo`/`useCallback` needed                                                                                           |
+| Tailwind CSS v4           | CSS-first config, `@theme inline` for design tokens                                                                                                        |
+| TanStack Query            | Server state management — staleTime, dependent queries, deduplication                                                                                      |
+| Zustand + persist         | Selector-based subscriptions prevent unnecessary re-renders. Built-in persist middleware handles localStorage + SSR hydration guard without extra packages |
+| MapLibre GL JS            | Open-source WebGL map, no Google Maps vendor lock-in                                                                                                       |
+| Recharts                  | Composable SVG charts, works with React 19                                                                                                                 |
 
 ### Backend — Railway
-| Technology | Why |
-|---|---|
-| Fastify 5 | 2x faster than Express, schema-based validation, WebSocket plugin |
-| PostgreSQL 16 + Prisma | Type-safe queries, migration history, relation integrity |
-| JWT + bcrypt | Stateless auth — no session storage needed at this scale |
-| Zod | Runtime validation at transport boundary — shared schemas with frontend |
+
+| Technology             | Why                                                                     |
+| ---------------------- | ----------------------------------------------------------------------- |
+| Fastify 5              | 2x faster than Express, schema-based validation, WebSocket plugin       |
+| PostgreSQL 16 + Prisma | Type-safe queries, migration history, relation integrity                |
+| JWT + bcrypt           | Stateless auth — no session storage needed at this scale                |
+| Zod                    | Runtime validation at transport boundary — shared schemas with frontend |
 
 ### Shared
-| Technology | Why |
-|---|---|
-| npm workspaces monorepo | Shared TypeScript types between FE and BE — zero drift between contracts |
-| `@uav/shared` package | `Drone`, `WSMessage`, `DomainEvent` types compile-time guaranteed on both sides |
+
+| Technology              | Why                                                                             |
+| ----------------------- | ------------------------------------------------------------------------------- |
+| npm workspaces monorepo | Shared TypeScript types between FE and BE — zero drift between contracts        |
+| `@uav/shared` package   | `Drone`, `WSMessage`, `DomainEvent` types compile-time guaranteed on both sides |
 
 ---
 
 ## Local Setup
 
 ### Prerequisites
+
 - Node.js 22+
 - Docker (for local Postgres)
 - MapTiler API key — [free tier](https://www.maptiler.com/cloud/), 100k requests/month
@@ -214,16 +223,16 @@ with `{ "email": "you@example.com", "password": "password123" }`
 
 Honest list — decisions, not omissions.
 
-| Feature | Status | Reason |
-|---|---|---|
-| Ping/pong heartbeat on server | Deferred | Client-side heartbeat covers most real cases. Server-side adds ~30 lines on both sides — next hardening step |
-| Refresh tokens | Deferred | JWT TTL is 1h. Refresh flow is well-understood but adds complexity without demo value |
-| Cross-tab logout sync | Deferred | `storage` event listener would broadcast logout across tabs — low priority for single-operator demo |
-| E2E tests | Deferred | Playwright suite is the natural next deliverable |
-| Mobile responsive | Out of scope | Desktop-first GCS — operators use laptops, not phones |
-| Real mission planning | Out of scope | Waypoint editor, geofencing, flight path — requires separate mission service |
-| Multi-operator support | Out of scope | Single JWT session — concurrent operators would need presence layer |
-| Telemetry retention policy tuning | Deferred | Current 1h window is conservative — production would tune based on operational requirements |
+| Feature                           | Status       | Reason                                                                                                       |
+| --------------------------------- | ------------ | ------------------------------------------------------------------------------------------------------------ |
+| Ping/pong heartbeat on server     | Deferred     | Client-side heartbeat covers most real cases. Server-side adds ~30 lines on both sides — next hardening step |
+| Refresh tokens                    | Deferred     | JWT TTL is 1h. Refresh flow is well-understood but adds complexity without demo value                        |
+| Cross-tab logout sync             | Deferred     | `storage` event listener would broadcast logout across tabs — low priority for single-operator demo          |
+| E2E tests                         | Deferred     | Playwright suite is the natural next deliverable                                                             |
+| Mobile responsive                 | Out of scope | Desktop-first GCS — operators use laptops, not phones                                                        |
+| Real mission planning             | Out of scope | Waypoint editor, geofencing, flight path — requires separate mission service                                 |
+| Multi-operator support            | Out of scope | Single JWT session — concurrent operators would need presence layer                                          |
+| Telemetry retention policy tuning | Deferred     | Current 1h window is conservative — production would tune based on operational requirements                  |
 
 ---
 
