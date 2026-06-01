@@ -49,7 +49,7 @@ export const BatteryChart = ({ droneId }: { droneId: string | null }) => {
 
         <CartesianGrid
           strokeDasharray="3 3"
-          stroke="var(--border-subtle"
+          stroke="var(--border-subtle)"
           vertical={false}
         />
 

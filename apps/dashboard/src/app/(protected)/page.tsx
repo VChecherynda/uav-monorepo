@@ -71,7 +71,7 @@ export default function Home() {
             <div
               className="flex items-center gap-2"
               style={{
-                color: "var(--accent-critical",
+                color: "var(--accent-critical)",
                 fontFamily: "var(--font-mono)",
               }}
             >
