@@ -99,7 +99,20 @@ export default function Home() {
         </main>
       ) : (
         <>
-          <main className="col-span-8 row-span-1 overflow-hidden">
+          <main className="relative col-span-8 row-span-1 overflow-hidden">
+            <div
+              className="absolute top-3 left-3 z-10 tactical-badge font-mono pointer-events-none"
+              style={{
+                borderColor: "var(--accent-warn)",
+              }}
+            >
+              <span
+                className="text-xs tracking-widest"
+                style={{ color: "var(--accent-warn)" }}
+              >
+                SIMULATED DATA · DEMO ENVIRONMENT
+              </span>
+            </div>
             <DroneMap drones={drones} />
           </main>
 
