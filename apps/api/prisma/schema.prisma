@@ -21,8 +21,8 @@ model Drone {
   altitude    Int
   lng         Float
   lat         Float
-  homeLng     Float       @default(30.5234)
-  homeLat     Float       @default(50.4501)
+  homeLng     Float       @default(133.8800)
+  homeLat     Float       @default(-23.7000)
   updatedAt   DateTime    @updatedAt
   createdAt   DateTime    @default(now())
   telemetries Telemetry[]

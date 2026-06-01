@@ -8,7 +8,7 @@ import "maplibre-gl/dist/maplibre-gl.css";
 
 const MAP_STYLE_URL = `https://api.maptiler.com/maps/darkmatter/style.json?key=${process.env.NEXT_PUBLIC_MAPTILER_KEY}`;
 const MAP_ZOOM = 11;
-const INITIAL_MAP_POSITION: [number, number] = [30.5234, 50.4501];
+const INITIAL_MAP_POSITION: [number, number] = [133.88, -23.7];
 
 const DRONE_STATUS_COLOR: Record<string, string> = {
   active: "#2ea043",
@@ -65,7 +65,7 @@ export const DroneMap = ({ drones }: { drones: Drone[] }) => {
     const map = new maplibregl.Map({
       container: containerRef.current,
       style: MAP_STYLE_URL,
-      center: INITIAL_MAP_POSITION, // Київ
+      center: INITIAL_MAP_POSITION,
       zoom: MAP_ZOOM,
     });
 
