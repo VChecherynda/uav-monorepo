@@ -18,6 +18,12 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "UAV Fleet // Command",
   description: "UAV Fleet Management — Ground Control Station",
+  openGraph: {
+    title: "UAV Fleet Management — Ground Control Station",
+    description:
+      "Real-time drone fleet monitoring. WebSocket telemetry, DDD architecture.",
+    images: ["/og-image.png"],
+  },
 };
 
 export default function RootLayout({
