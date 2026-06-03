@@ -3,9 +3,9 @@
 import type { Drone } from "@uav/shared";
 import { useSendCommand } from "@/contexts/fleet-commands";
 import { predictDroneChange } from "@/contexts/fleet-commands";
+import { useDrones } from "../hooks/useDrones";
 
 type DronePanelProps = {
-  drones: Drone[];
   onCardClick: (id: string) => void;
   selectedId: string | null;
 };
@@ -59,11 +59,9 @@ function BatteryBar({ value }: { value: number }) {
   );
 }
 
-export const DronePanel = ({
-  drones,
-  selectedId,
-  onCardClick,
-}: DronePanelProps) => {
+export const DronePanel = ({ selectedId, onCardClick }: DronePanelProps) => {
+  const drones = useDrones();
+
   return (
     <div className="flex flex-col gap-4">
       {drones.map((drone) => (

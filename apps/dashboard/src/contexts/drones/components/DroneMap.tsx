@@ -1,10 +1,10 @@
 "use client";
 
 import { useRef, useEffect } from "react";
-import type { Drone } from "@uav/shared";
 
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
+import { useDrones } from "../hooks/useDrones";
 
 const MAP_STYLE_URL = `https://api.maptiler.com/maps/darkmatter/style.json?key=${process.env.NEXT_PUBLIC_MAPTILER_KEY}`;
 const MAP_ZOOM = 11;
@@ -45,7 +45,9 @@ function createDroneMarkerElement(status: string): HTMLDivElement {
   return wrapper;
 }
 
-export const DroneMap = ({ drones }: { drones: Drone[] }) => {
+export const DroneMap = () => {
+  const drones = useDrones();
+
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const markersRef = useRef<

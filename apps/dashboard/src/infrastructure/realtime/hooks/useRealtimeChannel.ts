@@ -1,8 +1,7 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuthStore } from "@/contexts/auth";
-import { useDronesStore } from "@/contexts/drones";
 import type { WSConnectionStatus, WSMessage } from "@uav/shared";
-import { useNotificationsStore } from "@/contexts/notifications/stores/useNotificationsStore";
+import { routeMessage } from "../lib/routeMessage";
 
 const WS_URL =
   process.env.NEXT_PUBLIC_WS_URL ?? "ws://localhost:4000/ws/drones";
@@ -11,11 +10,7 @@ const MAX_RETRIES = 3;
 const MAX_RETRY_DELAY = 16000;
 const HEARTBEAT_TIMEOUT_MS = 6000;
 
-export function useDronesLive() {
-  const serverDrones = useDronesStore((s) => s.serverDrones);
-  const optimisticOverrides = useDronesStore((s) => s.optimisticOverrides);
-  const setServerDrones = useDronesStore((s) => s.setServerDrones);
-
+export function useRealtimeChannel() {
   const [status, setStatus] = useState<WSConnectionStatus>("connecting");
   const [retryTrigger, setRetryTrigger] = useState(0);
 
@@ -25,15 +20,6 @@ export function useDronesLive() {
   const heartbeatTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const retryRef = useRef<number>(0);
-
-  const drones = useMemo(
-    () =>
-      serverDrones.map((drone) => {
-        const override = optimisticOverrides.get(drone.id);
-        return override ? { ...drone, ...override } : drone;
-      }),
-    [serverDrones, optimisticOverrides],
-  );
 
   useEffect(() => {
     let cancelled = false;
@@ -69,20 +55,9 @@ export function useDronesLive() {
 
       ws.onmessage = (event) => {
         resetHeartbeat(ws);
-
         try {
           const message = JSON.parse(event.data) as WSMessage;
-
-          switch (message.type) {
-            case "drones:snapshot":
-              setServerDrones(message.data);
-              break;
-            case "DroneCommandRejected":
-            case "BatteryCritical":
-            case "DroneRecovered":
-              useNotificationsStore.getState().addNotification(message);
-              break;
-          }
+          routeMessage(message);
         } catch (e) {
           console.error("Bad WS payload", e);
         }
@@ -135,7 +110,7 @@ export function useDronesLive() {
 
       wsRef.current?.close();
     };
-  }, [token, retryTrigger, setServerDrones]);
+  }, [token, retryTrigger]);
 
   const reconnect = () => {
     retryRef.current = 0;
@@ -143,7 +118,6 @@ export function useDronesLive() {
   };
 
   return {
-    drones,
     status,
     reconnect,
   };
