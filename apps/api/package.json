@@ -8,6 +8,8 @@
     "dev:ci": "tsx src/server.ts",
     "build": "tsc -p tsconfig.json",
     "start": "node dist/server.js",
+    "test": "vitest",
+    "test:run": "vitest run",
     "release": "prisma migrate deploy",
     "postinstall": "prisma generate"
   },
@@ -29,6 +31,7 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^25.6.2",
     "@uav/shared": "*",
+    "vitest": "^3.2.4",
     "pino-pretty": "^13.1.3",
     "prisma": "^6.19.3",
     "tsx": "^4.21.0",

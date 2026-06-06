@@ -1,7 +1,8 @@
 import type { Drone as PrismaDrone } from "@prisma/client";
-import type { Drone } from "@uav/shared";
+import type { Mission as PrismaMission } from "@prisma/client";
+import type { Drone, Mission } from "@uav/shared";
 
-export function mapDrone(d: PrismaDrone) {
+export function mapDrone(d: PrismaDrone): Drone {
   return {
     id: d.id,
     name: d.name,
@@ -10,6 +11,15 @@ export function mapDrone(d: PrismaDrone) {
     altitude: d.altitude,
     lng: d.lng,
     lat: d.lat,
+  };
+}
+
+export function mapMission(m: PrismaMission): Mission {
+  return {
+    id: m.id,
+    droneId: m.droneId,
+    status: m.status as Mission["status"],
+    reason: m.reason ?? undefined,
   };
 }
 

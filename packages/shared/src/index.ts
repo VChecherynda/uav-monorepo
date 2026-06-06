@@ -2,6 +2,13 @@ export type DroneAction = "return-home" | "land" | "takeoff";
 
 export type DroneStatus = "active" | "idle" | "offline" | "returning";
 
+export type MissionStatus =
+  | "draft"
+  | "assigned"
+  | "in-progress"
+  | "completed"
+  | "aborted";
+
 export type User = {
   id: string;
   email: string;
@@ -24,6 +31,13 @@ export type Telemetry = {
   altitude: number;
   lng: number;
   lat: number;
+};
+
+export type Mission = {
+  id: string;
+  droneId: string;
+  status: MissionStatus;
+  reason: string | undefined;
 };
 
 export type WSConnectionStatus =
@@ -66,5 +80,20 @@ export type DomainEvent =
 export type CommandResult =
   | { status: "success"; drone: Drone }
   | { status: "rejected"; reason: CommandRejectionReason };
+
+export type AssignResult =
+  | {
+      status: "success";
+      mission: Mission;
+    }
+  | { status: "rejected"; reason: string };
+
+export type StartMissionServiceResult =
+  | {
+      status: "success";
+      mission: Mission;
+      drone: Drone;
+    }
+  | { status: "rejected"; reason: string };
 
 export type WSMessage = SnapshotMessage | DomainEvent;
