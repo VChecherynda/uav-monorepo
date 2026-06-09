@@ -14,6 +14,17 @@ export type User = {
   email: string;
 };
 
+export type Coordinate = {
+  lng: number;
+  lat: number;
+};
+
+export type Geofence = {
+  id: string;
+  name: string;
+  area: Coordinate[];
+};
+
 export type Drone = {
   id: string;
   name: string;
