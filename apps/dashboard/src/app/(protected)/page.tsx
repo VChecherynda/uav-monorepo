@@ -5,11 +5,8 @@ import { BatteryChart } from "@/contexts/telemetry";
 import { LogoutButton } from "@/contexts/auth";
 import { CrosshairIcon, SignalLostIcon } from "@/components";
 
-import { useState } from "react";
-
 export default function Home() {
   const { status, reconnect } = useRealtimeChannel();
-  const [droneId, setDroneId] = useState<string | null>(null);
 
   return (
     <div className="grid grid-cols-12 grid-rows-[56px_1fr_200px] h-screen bg-deep">
@@ -89,13 +86,13 @@ export default function Home() {
           </main>
 
           <aside className="col-span-4 row-span-1 flex flex-col gap-3 overflow-auto p-3 border border-subtle">
-            <DronePanel selectedId={droneId} onCardClick={setDroneId} />
+            <DronePanel />
           </aside>
         </>
       )}
 
       <section className="col-span-12 border-t border-subtle bg-surface flex flex-col justify-center px-4">
-        <BatteryChart droneId={droneId} />
+        <BatteryChart />
       </section>
     </div>
   );

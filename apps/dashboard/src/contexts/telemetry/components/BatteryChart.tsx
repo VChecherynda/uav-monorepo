@@ -10,9 +10,11 @@ import {
   ResponsiveContainer,
   CartesianGrid,
 } from "recharts";
-import { useTelemetry } from "@/contexts/telemetry/hooks/useTelemetry";
+import { useTelemetry } from "@/contexts/telemetry";
+import { useDronesStore } from "@/contexts/drones";
 
-export const BatteryChart = ({ droneId }: { droneId: string | null }) => {
+export const BatteryChart = () => {
+  const droneId = useDronesStore((s) => s.droneId);
   const { data = [] } = useTelemetry(droneId);
 
   const sorted = [...data].reverse();

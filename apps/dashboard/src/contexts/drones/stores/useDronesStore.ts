@@ -2,9 +2,11 @@ import { create } from "zustand";
 import { Drone } from "@uav/shared";
 
 type DronesState = {
+  droneId: string | null;
   serverDrones: Drone[];
   optimisticOverrides: Map<string, Partial<Drone>>;
 
+  selectDrone: (droneId: string) => void;
   setServerDrones: (drones: Drone[]) => void;
   applyOptimistic: (droneId: string, changes: Partial<Drone>) => void;
   clearOptimistic: (droneId: string) => void;
@@ -12,6 +14,7 @@ type DronesState = {
 };
 
 export const useDronesStore = create<DronesState>((set) => ({
+  droneId: null,
   serverDrones: [],
   optimisticOverrides: new Map(),
 
@@ -37,6 +40,13 @@ export const useDronesStore = create<DronesState>((set) => ({
         optimisticOverrides: nextOverrides,
       };
     }),
+
+  selectDrone: (droneId) => {
+    set((state) => ({
+      ...state,
+      droneId,
+    }));
+  },
 
   applyOptimistic: (droneId, changes) => {
     set((state) => {

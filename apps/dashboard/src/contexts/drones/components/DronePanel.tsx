@@ -4,11 +4,7 @@ import type { Drone } from "@uav/shared";
 import { useSendCommand } from "@/contexts/fleet-commands";
 import { predictDroneChange } from "@/contexts/fleet-commands";
 import { useDrones } from "../hooks/useDrones";
-
-type DronePanelProps = {
-  onCardClick: (id: string) => void;
-  selectedId: string | null;
-};
+import { useDronesStore } from "../stores/useDronesStore";
 
 const STATUS_DOT: Record<Drone["status"], { color: string; glow: string }> = {
   active: { color: "var(--accent-ok)", glow: "var(--glow-ok)" },
@@ -59,18 +55,14 @@ function BatteryBar({ value }: { value: number }) {
   );
 }
 
-export const DronePanel = ({ selectedId, onCardClick }: DronePanelProps) => {
+export const DronePanel = () => {
   const drones = useDrones();
+  const selectDrone = useDronesStore((s) => s.selectDrone);
 
   return (
     <div className="flex flex-col gap-4">
       {drones.map((drone) => (
-        <DroneCard
-          key={drone.id}
-          drone={drone}
-          isSelected={drone.id === selectedId}
-          onCardClick={onCardClick}
-        />
+        <DroneCard key={drone.id} drone={drone} onCardClick={selectDrone} />
       ))}
     </div>
   );
@@ -79,13 +71,12 @@ export const DronePanel = ({ selectedId, onCardClick }: DronePanelProps) => {
 function DroneCard({
   drone,
   onCardClick,
-  isSelected,
 }: {
   drone: Drone;
   onCardClick: (id: string) => void;
-  isSelected: boolean;
 }) {
   const sendCmd = useSendCommand();
+  const isSelected = useDronesStore((s) => s.droneId === drone.id);
   const canReturnHome =
     predictDroneChange("return-home", drone.status) !== undefined;
 
