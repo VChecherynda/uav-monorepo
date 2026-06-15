@@ -62,11 +62,32 @@ export type SnapshotMessage = {
   data: Drone[];
 };
 
-export type CommandRejectionReason =
-  | { code: "DRONE_NOT_FOUND"; message: string }
+export type DroneNotFoundReason = { code: "DRONE_NOT_FOUND"; message: string };
+
+export type MissionNotFoundReason = {
+  code: "MISSION_NOT_FOUND";
+  message: string;
+};
+
+export type DroneCommandConflictReason =
   | { code: "DRONE_OFFLINE"; message: string }
-  | { code: "INSUFFICIENT_BATTERY"; message: string; currentBattery: number }
-  | { code: "ALREADY_RUNNING"; message: string };
+  | { code: "INSUFFICIENT_BATTERY"; message: string }
+  | { code: "INVALID_TRANSITION"; message: string };
+
+export type CommandRejectionReason =
+  | DroneNotFoundReason
+  | DroneCommandConflictReason;
+
+export type MissionConflictReason =
+  | { code: "DRONE_IS_NOT_READY"; message: string }
+  | { code: "MISSION_IS_NOT_DRAFT"; message: string }
+  | { code: "MISSION_IS_NOT_ASSIGNED"; message: string }
+  | { code: "MISSION_HAS_NO_WAYPOINTS"; message: string };
+
+export type MissionRejectionReason =
+  | DroneNotFoundReason
+  | MissionNotFoundReason
+  | MissionConflictReason;
 
 export type DomainEvent =
   | {
@@ -97,7 +118,7 @@ export type AssignResult =
       status: "success";
       mission: Mission;
     }
-  | { status: "rejected"; reason: string };
+  | { status: "rejected"; reason: MissionRejectionReason };
 
 export type StartMissionServiceResult =
   | {
@@ -105,6 +126,9 @@ export type StartMissionServiceResult =
       mission: Mission;
       drone: Drone;
     }
-  | { status: "rejected"; reason: string };
+  | {
+      status: "rejected";
+      reason: MissionRejectionReason;
+    };
 
 export type WSMessage = SnapshotMessage | DomainEvent;

@@ -14,7 +14,10 @@ export async function assignMission(
   if (!missionRow) {
     return {
       status: "rejected",
-      reason: "Mission not found",
+      reason: {
+        code: "MISSION_NOT_FOUND",
+        message: "Mission not found",
+      },
     };
   }
 
@@ -23,7 +26,7 @@ export async function assignMission(
   if (!droneRow) {
     return {
       status: "rejected",
-      reason: "Drone not found",
+      reason: { code: "DRONE_NOT_FOUND", message: "Drone not found" },
     };
   }
 
@@ -54,7 +57,10 @@ export async function startMissionService(
   if (!missionRow) {
     return {
       status: "rejected",
-      reason: "Mission not found",
+      reason: {
+        code: "MISSION_NOT_FOUND",
+        message: "Mission not found",
+      },
     };
   }
 
@@ -70,7 +76,7 @@ export async function startMissionService(
   if (!droneRow) {
     return {
       status: "rejected",
-      reason: "Drone not found",
+      reason: { code: "DRONE_NOT_FOUND", message: "Drone not found" },
     };
   }
 

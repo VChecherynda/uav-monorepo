@@ -30,12 +30,15 @@ describe("assignDrone", () => {
     [
       draftMission,
       { ...idleDrone, status: "active" as const },
-      "Drone is busy",
+      { code: "DRONE_IS_NOT_READY", message: "Drone is not ready for mission" },
     ],
     [
       { ...draftMission, status: "assigned" as const },
       idleDrone,
-      "Only draft missions can be assigned",
+      {
+        code: "MISSION_IS_NOT_DRAFT",
+        message: "Only draft missions can be assigned",
+      },
     ],
   ])("rejects with reason: %s", (mission, drone, reason) => {
     expect(assignDrone(mission, drone)).toEqual({ status: "rejected", reason });
@@ -58,18 +61,32 @@ describe("startMission", () => {
   });
 
   it.each([
-    [draftMission, idleDrone, 3, "Only assigned missions can start"],
+    [
+      draftMission,
+      idleDrone,
+      3,
+      {
+        code: "MISSION_IS_NOT_ASSIGNED",
+        message: "Only assigned missions can start",
+      },
+    ],
     [
       { ...draftMission, status: "assigned" as const },
       { ...idleDrone, status: "active" as const },
       3,
-      "Drone is not idle",
+      {
+        code: "DRONE_IS_NOT_READY",
+        message: "Drone is not idle",
+      },
     ],
     [
       { ...draftMission, status: "assigned" as const },
       idleDrone,
       0,
-      "Mission should have waypoints",
+      {
+        code: "MISSION_HAS_NO_WAYPOINTS",
+        message: "Mission should have waypoints",
+      },
     ],
   ])("rejects with reason: %s", (mission, drone, count, reason) => {
     expect(startMission(mission, drone, count)).toEqual({

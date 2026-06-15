@@ -5,10 +5,22 @@ import {
   assignMission,
   startMissionService,
 } from "../services/missionService.js";
+import type { MissionRejectionReason } from "@uav/shared";
 
 const AssignSchema = z.object({
   droneId: z.string(),
 });
+
+function statusFor(reason: MissionRejectionReason): number {
+  if (
+    reason.code === "MISSION_NOT_FOUND" ||
+    reason.code === "DRONE_NOT_FOUND"
+  ) {
+    return 404;
+  }
+
+  return 409;
+}
 
 export function missionRoutes(app: FastifyInstance) {
   app.get("/missions", async () => {
@@ -31,7 +43,7 @@ export function missionRoutes(app: FastifyInstance) {
     const { droneId } = parsed.data;
     const result = await assignMission(id, droneId);
     if (result.status === "rejected") {
-      return reply.code(409).send(result);
+      return reply.code(statusFor(result.reason)).send(result.reason);
     }
 
     return reply.send(result);
@@ -42,7 +54,7 @@ export function missionRoutes(app: FastifyInstance) {
 
     const result = await startMissionService(id);
     if (result.status === "rejected") {
-      return reply.code(409).send(result);
+      return reply.code(statusFor(result.reason)).send(result.reason);
     }
 
     return reply.send(result);

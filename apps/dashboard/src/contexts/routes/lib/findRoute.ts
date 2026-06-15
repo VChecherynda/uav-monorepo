@@ -32,6 +32,7 @@ export function findRoute(
   start: Candidate,
   target: string,
 ): string[] | undefined {
+  // Priority queue
   const queue: Candidate[] = [start];
   const seen = new Set<string>();
   const cameFrom = new Map<string, string>();
