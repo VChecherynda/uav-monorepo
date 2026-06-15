@@ -1,8 +1,8 @@
 import { useMutation } from "@tanstack/react-query";
 import { sendCommand } from "@/contexts/fleet-commands";
 import { useDronesStore } from "@/contexts/drones";
-import { CommandResult, DroneAction, Drone } from "@uav/shared";
-import { predictDroneChange } from "../lib/predictDroneChange";
+import type { CommandResult, DroneAction, Drone } from "@uav/shared";
+import { predictDroneChange } from "@uav/shared";
 import { useEffect, useRef } from "react";
 
 type Vars = { id: string; action: DroneAction };
