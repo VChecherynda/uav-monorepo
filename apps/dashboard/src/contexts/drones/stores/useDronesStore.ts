@@ -42,10 +42,7 @@ export const useDronesStore = create<DronesState>((set) => ({
     }),
 
   selectDrone: (droneId) => {
-    set((state) => ({
-      ...state,
-      droneId,
-    }));
+    set((state) => ({ droneId: state.droneId === droneId ? null : droneId }));
   },
 
   applyOptimistic: (droneId, changes) => {
