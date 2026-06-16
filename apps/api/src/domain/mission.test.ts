@@ -21,8 +21,11 @@ const idleDrone = {
 describe("assignDrone", () => {
   it("assigns an idle to the a draft mission", () => {
     expect(assignDrone(draftMission, idleDrone)).toEqual({
-      droneId: "d1",
-      status: "assigned",
+      status: "success",
+      mission: {
+        droneId: "d1",
+        status: "assigned",
+      },
     });
   });
 

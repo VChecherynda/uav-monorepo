@@ -1,12 +1,10 @@
 import type { Mission, Drone, MissionConflictReason } from "@uav/shared";
 
-export type AssignedMissionPatch = Pick<Mission, "droneId" | "status">;
-
 export const assignDrone = (
   mission: Mission,
   drone: Drone,
 ):
-  | AssignedMissionPatch
+  | { status: "success"; mission: Pick<Mission, "droneId" | "status"> }
   | { status: "rejected"; reason: MissionConflictReason } => {
   if (drone.status !== "idle") {
     return {
@@ -29,8 +27,11 @@ export const assignDrone = (
   }
 
   return {
-    droneId: drone.id,
-    status: "assigned",
+    status: "success",
+    mission: {
+      droneId: drone.id,
+      status: "assigned",
+    },
   };
 };
 

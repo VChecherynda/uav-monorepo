@@ -38,7 +38,7 @@ export async function assignMission(
 
   const updated = await prisma.mission.update({
     where: { id: missionId },
-    data: next,
+    data: next.mission,
   });
 
   return {
