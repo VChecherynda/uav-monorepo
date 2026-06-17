@@ -38,6 +38,12 @@ jobs:
         run: npx playwright install --with-deps chromium
         working-directory: apps/dashboard
 
+      - name: Run unit tests
+        run: |
+          npm run test --workspace=packages/shared -- --run
+          npm run test --workspace=apps/api -- --run
+          npm run test --workspace=apps/dashboard -- --run
+
       - name: Setup DB
         run: |
           npx prisma migrate deploy
@@ -54,9 +60,8 @@ jobs:
       - name: Wait for API
         run: npx wait-on http://localhost:4000/health -t 30000
 
-      - name: Run tests
+      - name: Run e2e tests
         run: |
-          npm run test --workspace=apps/dashboard -- --run
           npm run test:e2e  --workspace=apps/dashboard
         env:
           NEXT_PUBLIC_API_URL: http://localhost:4000

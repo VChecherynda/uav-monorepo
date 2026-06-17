@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { predictDroneChange } from "@uav/shared";
+import { predictDroneChange } from "./index";
 
 describe("predictDroneChange", () => {
   describe("valid transitions", () => {
