@@ -20,11 +20,28 @@ const graph: AdjacencyList = {
   C: [{ id: "D", weight: 7 }],
 };
 
+const graphWithTrap: AdjacencyList = {
+  A: [
+    { id: "B", weight: 2 },
+    { id: "C", weight: 1 },
+  ],
+  B: [{ id: "D", weight: 9 }],
+  C: [{ id: "D", weight: 2 }],
+};
+
 describe("findRoute when a path exists", () => {
   it("returns shortest path between connected edges", () => {
     expect(findRoute(graph, { id: "A", distance: 0 }, "D")).toEqual([
       "A",
       "B",
+      "D",
+    ]);
+  });
+
+  it("returns shortest path when decoy path reaches the same target", () => {
+    expect(findRoute(graphWithTrap, { id: "A", distance: 0 }, "D")).toEqual([
+      "A",
+      "C",
       "D",
     ]);
   });
