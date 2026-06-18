@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { assignDrone, startMission } from "../domain/mission.js";
+import { assignDrone, abortMission, startMission } from "../domain/mission.js";
 
 const draftMission = {
   id: "m1",
@@ -96,5 +96,58 @@ describe("startMission", () => {
       status: "rejected",
       reason,
     });
+  });
+});
+
+describe("abortMission", () => {
+  it("mission with assigned status aborted successfuly", () => {
+    expect(abortMission({ ...draftMission, status: "assigned" })).toEqual({
+      status: "success",
+      mission: { status: "aborted" },
+      drone: { status: "idle" },
+    });
+  });
+
+  it("mission with in-progress status aborted successfuly", () => {
+    expect(abortMission({ ...draftMission, status: "in-progress" })).toEqual({
+      status: "success",
+      mission: { status: "aborted" },
+      drone: { status: "returning" },
+    });
+  });
+
+  it.each([
+    [
+      { ...draftMission, status: "draft" as const },
+      {
+        status: "rejected",
+        reason: {
+          code: "MISSION_CANNOT_BE_ABORTED",
+          message: 'Cannot abort mission in status "draft"',
+        },
+      },
+    ],
+    [
+      { ...draftMission, status: "completed" as const },
+      {
+        status: "rejected",
+        reason: {
+          code: "MISSION_CANNOT_BE_ABORTED",
+          message: 'Cannot abort mission in status "completed"',
+        },
+      },
+    ],
+    [
+      { ...draftMission, status: "aborted" as const },
+      {
+        status: "rejected",
+        reason: {
+          code: "MISSION_CANNOT_BE_ABORTED",
+          message: 'Cannot abort mission in status "aborted"',
+        },
+      },
+    ],
+  ])("rejects with status %s", (mission, result) => {
+    expect(abortMission(mission)).toEqual(result);
   });
 });

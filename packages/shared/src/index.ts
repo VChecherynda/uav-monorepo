@@ -82,7 +82,8 @@ export type MissionConflictReason =
   | { code: "DRONE_IS_NOT_READY"; message: string }
   | { code: "MISSION_IS_NOT_DRAFT"; message: string }
   | { code: "MISSION_IS_NOT_ASSIGNED"; message: string }
-  | { code: "MISSION_HAS_NO_WAYPOINTS"; message: string };
+  | { code: "MISSION_HAS_NO_WAYPOINTS"; message: string }
+  | { code: "MISSION_CANNOT_BE_ABORTED"; message: string };
 
 export type MissionRejectionReason =
   | DroneNotFoundReason

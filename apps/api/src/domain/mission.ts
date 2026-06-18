@@ -41,6 +41,12 @@ export type StartMissionPatch = {
   drone: Pick<Drone, "status">;
 };
 
+export type AbortMissionPatch = {
+  status: "success";
+  mission: Pick<Mission, "status">;
+  drone: Pick<Drone, "status">;
+};
+
 export const startMission = (
   mission: Mission,
   drone: Drone,
@@ -80,4 +86,34 @@ export const startMission = (
     mission: { status: "in-progress" },
     drone: { status: "active" },
   };
+};
+
+export const abortMission = (
+  mission: Mission,
+):
+  | AbortMissionPatch
+  | { status: "rejected"; reason: MissionConflictReason } => {
+  if (mission.status !== "assigned" && mission.status !== "in-progress") {
+    return {
+      status: "rejected",
+      reason: {
+        code: "MISSION_CANNOT_BE_ABORTED",
+        message: `Cannot abort mission in status "${mission.status}"`,
+      },
+    };
+  }
+
+  if (mission.status === "assigned") {
+    return {
+      status: "success",
+      mission: { status: "aborted" },
+      drone: { status: "idle" },
+    };
+  } else {
+    return {
+      status: "success",
+      mission: { status: "aborted" },
+      drone: { status: "returning" },
+    };
+  }
 };
