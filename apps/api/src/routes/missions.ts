@@ -35,33 +35,41 @@ export function missionRoutes(app: FastifyInstance) {
     return missions;
   });
 
-  app.post("/missions/:id/assign", async (req, reply) => {
-    const { id } = req.params as { id: string };
+  app.post(
+    "/missions/:id/assign",
+    { preHandler: authenticate },
+    async (req, reply) => {
+      const { id } = req.params as { id: string };
 
-    const parsed = AssignSchema.safeParse(req.body);
-    if (!parsed.success) {
-      return reply.code(400).send(z.flattenError(parsed.error));
-    }
+      const parsed = AssignSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return reply.code(400).send(z.flattenError(parsed.error));
+      }
 
-    const { droneId } = parsed.data;
-    const result = await assignMission(id, droneId);
-    if (result.status === "rejected") {
-      return reply.code(statusFor(result.reason)).send(result.reason);
-    }
+      const { droneId } = parsed.data;
+      const result = await assignMission(id, droneId);
+      if (result.status === "rejected") {
+        return reply.code(statusFor(result.reason)).send(result.reason);
+      }
 
-    return reply.send(result);
-  });
+      return reply.send(result);
+    },
+  );
 
-  app.post("/missions/:id/start", async (req, reply) => {
-    const { id } = req.params as { id: string };
+  app.post(
+    "/missions/:id/start",
+    { preHandler: authenticate },
+    async (req, reply) => {
+      const { id } = req.params as { id: string };
 
-    const result = await startMissionService(id);
-    if (result.status === "rejected") {
-      return reply.code(statusFor(result.reason)).send(result.reason);
-    }
+      const result = await startMissionService(id);
+      if (result.status === "rejected") {
+        return reply.code(statusFor(result.reason)).send(result.reason);
+      }
 
-    return reply.send(result);
-  });
+      return reply.send(result);
+    },
+  );
 
   app.post(
     "/missions/:id/abort",
