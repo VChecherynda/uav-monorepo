@@ -83,7 +83,8 @@ export type MissionConflictReason =
   | { code: "MISSION_IS_NOT_DRAFT"; message: string }
   | { code: "MISSION_IS_NOT_ASSIGNED"; message: string }
   | { code: "MISSION_HAS_NO_WAYPOINTS"; message: string }
-  | { code: "MISSION_CANNOT_BE_ABORTED"; message: string };
+  | { code: "MISSION_CANNOT_BE_ABORTED"; message: string }
+  | { code: "MISSION_IS_NOT_IN_PROGRESS"; message: string };
 
 export type MissionRejectionReason =
   | DroneNotFoundReason
@@ -122,6 +123,28 @@ export type AssignResult =
   | { status: "rejected"; reason: MissionRejectionReason };
 
 export type StartMissionServiceResult =
+  | {
+      status: "success";
+      mission: Mission;
+      drone: Drone;
+    }
+  | {
+      status: "rejected";
+      reason: MissionRejectionReason;
+    };
+
+export type AbortMissionServiceResult =
+  | {
+      status: "success";
+      mission: Mission;
+      drone: Drone;
+    }
+  | {
+      status: "rejected";
+      reason: MissionRejectionReason;
+    };
+
+export type CompleteMissionServiceResult =
   | {
       status: "success";
       mission: Mission;

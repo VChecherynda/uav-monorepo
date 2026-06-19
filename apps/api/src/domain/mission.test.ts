@@ -1,5 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { assignDrone, abortMission, startMission } from "../domain/mission.js";
+import {
+  assignDrone,
+  abortMission,
+  startMission,
+  completeMission,
+} from "../domain/mission.js";
 
 const draftMission = {
   id: "m1",
@@ -149,5 +154,32 @@ describe("abortMission", () => {
     ],
   ])("rejects with status %s", (mission, result) => {
     expect(abortMission(mission)).toEqual(result);
+  });
+});
+
+describe("completeMission", () => {
+  it("mission with in-progress status completed successfuly", () => {
+    expect(completeMission({ ...draftMission, status: "in-progress" })).toEqual(
+      {
+        status: "success",
+        mission: { status: "completed" },
+        drone: { status: "idle" },
+      },
+    );
+  });
+
+  it.each([
+    [{ ...draftMission, status: "draft" as const }],
+    [{ ...draftMission, status: "assigned" as const }],
+    [{ ...draftMission, status: "completed" as const }],
+    [{ ...draftMission, status: "aborted" as const }],
+  ])("rejects with status %s", (mission) => {
+    expect(completeMission(mission)).toEqual({
+      status: "rejected",
+      reason: {
+        code: "MISSION_IS_NOT_IN_PROGRESS",
+        message: "Only in-progress missions can be completed",
+      },
+    });
   });
 });

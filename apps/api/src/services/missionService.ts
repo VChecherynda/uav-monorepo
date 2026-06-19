@@ -1,5 +1,15 @@
-import type { AssignResult, StartMissionServiceResult } from "@uav/shared";
-import { assignDrone, startMission } from "../domain/mission.js";
+import type {
+  AssignResult,
+  StartMissionServiceResult,
+  AbortMissionServiceResult,
+  CompleteMissionServiceResult,
+} from "@uav/shared";
+import {
+  assignDrone,
+  startMission,
+  abortMission,
+  completeMission,
+} from "../domain/mission.js";
 import { mapMission, mapDrone } from "../lib/mappers.js";
 import { prisma } from "../lib/prisma.js";
 
@@ -97,6 +107,108 @@ export async function startMissionService(
     }),
     prisma.drone.update({
       where: { id: droneId },
+      data: next.drone,
+    }),
+  ]);
+
+  return {
+    status: "success",
+    mission: mapMission(updatedMission),
+    drone: mapDrone(updatedDrone),
+  };
+}
+
+export async function abortMissionService(
+  missionId: string,
+): Promise<AbortMissionServiceResult> {
+  const missionRow = await prisma.mission.findUnique({
+    where: { id: missionId },
+  });
+
+  if (!missionRow) {
+    return {
+      status: "rejected",
+      reason: {
+        code: "MISSION_NOT_FOUND",
+        message: "Mission not found",
+      },
+    };
+  }
+
+  const droneRow = await prisma.drone.findUnique({
+    where: { id: missionRow.droneId },
+  });
+
+  if (!droneRow) {
+    return {
+      status: "rejected",
+      reason: { code: "DRONE_NOT_FOUND", message: "Drone not found" },
+    };
+  }
+
+  const next = abortMission(mapMission(missionRow));
+  if (next.status === "rejected") {
+    return next;
+  }
+
+  const [updatedMission, updatedDrone] = await prisma.$transaction([
+    prisma.mission.update({
+      where: { id: missionId },
+      data: next.mission,
+    }),
+    prisma.drone.update({
+      where: { id: droneRow.id },
+      data: next.drone,
+    }),
+  ]);
+
+  return {
+    status: "success",
+    mission: mapMission(updatedMission),
+    drone: mapDrone(updatedDrone),
+  };
+}
+
+export async function completeMissionService(
+  missionId: string,
+): Promise<CompleteMissionServiceResult> {
+  const missionRow = await prisma.mission.findUnique({
+    where: { id: missionId },
+  });
+
+  if (!missionRow) {
+    return {
+      status: "rejected",
+      reason: {
+        code: "MISSION_NOT_FOUND",
+        message: "Mission not found",
+      },
+    };
+  }
+
+  const droneRow = await prisma.drone.findUnique({
+    where: { id: missionRow.droneId },
+  });
+
+  if (!droneRow) {
+    return {
+      status: "rejected",
+      reason: { code: "DRONE_NOT_FOUND", message: "Drone not found" },
+    };
+  }
+
+  const next = completeMission(mapMission(missionRow));
+  if (next.status === "rejected") {
+    return next;
+  }
+
+  const [updatedMission, updatedDrone] = await prisma.$transaction([
+    prisma.mission.update({
+      where: { id: missionId },
+      data: next.mission,
+    }),
+    prisma.drone.update({
+      where: { id: droneRow.id },
       data: next.drone,
     }),
   ]);

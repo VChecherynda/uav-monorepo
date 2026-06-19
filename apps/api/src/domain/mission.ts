@@ -47,6 +47,12 @@ export type AbortMissionPatch = {
   drone: Pick<Drone, "status">;
 };
 
+export type CompleteMissionPatch = {
+  status: "success";
+  mission: Pick<Mission, "status">;
+  drone: Pick<Drone, "status">;
+};
+
 export const startMission = (
   mission: Mission,
   drone: Drone,
@@ -116,4 +122,26 @@ export const abortMission = (
       drone: { status: "returning" },
     };
   }
+};
+
+export const completeMission = (
+  mission: Mission,
+):
+  | CompleteMissionPatch
+  | { status: "rejected"; reason: MissionConflictReason } => {
+  if (mission.status !== "in-progress") {
+    return {
+      status: "rejected",
+      reason: {
+        code: "MISSION_IS_NOT_IN_PROGRESS",
+        message: "Only in-progress missions can be completed",
+      },
+    };
+  }
+
+  return {
+    status: "success",
+    mission: { status: "completed" },
+    drone: { status: "idle" },
+  };
 };

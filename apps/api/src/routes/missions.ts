@@ -1,8 +1,11 @@
 import { z } from "zod";
 import { prisma } from "../lib/prisma.js";
+import { authenticate } from "../lib/auth.js";
 import type { FastifyInstance } from "fastify";
 import {
   assignMission,
+  completeMissionService,
+  abortMissionService,
   startMissionService,
 } from "../services/missionService.js";
 import type { MissionRejectionReason } from "@uav/shared";
@@ -59,4 +62,34 @@ export function missionRoutes(app: FastifyInstance) {
 
     return reply.send(result);
   });
+
+  app.post(
+    "/missions/:id/abort",
+    { preHandler: authenticate },
+    async (req, reply) => {
+      const { id } = req.params as { id: string };
+
+      const result = await abortMissionService(id);
+      if (result.status === "rejected") {
+        return reply.code(statusFor(result.reason)).send(result.reason);
+      }
+
+      return reply.send(result);
+    },
+  );
+
+  app.post(
+    "/missions/:id/complete",
+    { preHandler: authenticate },
+    async (req, reply) => {
+      const { id } = req.params as { id: string };
+
+      const result = await completeMissionService(id);
+      if (result.status === "rejected") {
+        return reply.code(statusFor(result.reason)).send(result.reason);
+      }
+
+      return reply.send(result);
+    },
+  );
 }
