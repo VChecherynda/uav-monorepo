@@ -4,7 +4,10 @@ export const assignDrone = (
   mission: Mission,
   drone: Drone,
 ):
-  | { status: "success"; mission: Pick<Mission, "droneId" | "status"> }
+  | {
+      status: "success";
+      mission: Pick<Mission, "status"> & { droneId: string };
+    }
   | { status: "rejected"; reason: MissionConflictReason } => {
   if (drone.status !== "idle") {
     return {

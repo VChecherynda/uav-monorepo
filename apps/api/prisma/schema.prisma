@@ -44,11 +44,11 @@ model Telemetry {
 
 model Mission {
   id        String     @id @default(cuid())
-  droneId   String
+  droneId   String?
   status    String     @default("draft") // "draft" | "assigned" | "in-progress | "completed" | "aborted"
   reason    String?
   createdAt DateTime   @default(now())
-  drone     Drone      @relation(fields: [droneId], references: [id])
+  drone     Drone?     @relation(fields: [droneId], references: [id], onDelete: Restrict)
   waypoints Waypoint[]
 }
 

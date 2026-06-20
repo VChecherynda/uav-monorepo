@@ -2,13 +2,6 @@ import { z } from "zod";
 import { prisma } from "../lib/prisma.js";
 import { authenticate } from "../lib/auth.js";
 import type { FastifyInstance } from "fastify";
-import type {
-  CommandRejectionReason,
-  CommandResult,
-  DomainEvent,
-  DroneNotFoundReason,
-} from "@uav/shared";
-import { broadcastEvent } from "./ws.js";
 import { mapDrone, mapDrones } from "../lib/mappers.js";
 import { sendCommandService } from "../services/sendCommandService.js";
 
