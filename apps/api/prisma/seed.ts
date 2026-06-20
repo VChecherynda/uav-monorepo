@@ -38,6 +38,8 @@ const drones = [
 
 async function main() {
   await prisma.telemetry.deleteMany();
+  await prisma.waypoint.deleteMany();
+  await prisma.mission.deleteMany();
   await prisma.drone.deleteMany();
   await prisma.drone.createMany({ data: drones });
   await prisma.user.deleteMany();
@@ -50,6 +52,25 @@ async function main() {
 
   const createdDrones = await prisma.drone.findMany({
     orderBy: { name: "asc" },
+  });
+
+  const falcon = createdDrones.find((d) => d.name === "Falcon-1");
+  if (!falcon) throw new Error("Seed: Falcon-1 not found");
+
+  const hawk = createdDrones.find((d) => d.name === "Hawk-2");
+  if (!hawk) throw new Error("Seed: Hawk-2 not found");
+
+  const owl = createdDrones.find((d) => d.name === "Owl-3");
+  if (!owl) throw new Error("Seed: Owl-3 not found");
+
+  await prisma.mission.createMany({
+    data: [
+      { status: "draft", droneId: null },
+      { status: "assigned", droneId: hawk.id },
+      { status: "in-progress", droneId: falcon.id },
+      { status: "completed", droneId: owl.id },
+      { status: "aborted", droneId: owl.id },
+    ],
   });
 
   for (const drone of createdDrones) {
@@ -71,7 +92,9 @@ async function main() {
     await prisma.telemetry.createMany({ data: telemetryHistory });
   }
 
-  console.log(`Seeded ${drones.length} drones with telemetry history`);
+  console.log(
+    `Seeded ${drones.length} drones with telemetry history and 5 missions`,
+  );
 }
 
 main()
