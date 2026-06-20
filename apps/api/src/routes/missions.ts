@@ -9,6 +9,7 @@ import {
   startMissionService,
 } from "../services/missionService.js";
 import type { MissionRejectionReason } from "@uav/shared";
+import { mapMissions } from "../lib/mappers.js";
 
 const AssignSchema = z.object({
   droneId: z.string(),
@@ -25,14 +26,14 @@ function statusFor(reason: MissionRejectionReason): number {
   return 409;
 }
 
-export function missionRoutes(app: FastifyInstance) {
+export async function missionRoutes(app: FastifyInstance) {
   app.get("/missions", async () => {
     const missions = await prisma.mission.findMany({
       orderBy: { createdAt: "desc" },
       include: { waypoints: true },
     });
 
-    return missions;
+    return mapMissions(missions);
   });
 
   app.post(

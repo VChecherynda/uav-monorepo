@@ -17,7 +17,7 @@ export function mapDrone(d: PrismaDrone): Drone {
 export function mapMission(m: PrismaMission): Mission {
   return {
     id: m.id,
-    droneId: m.droneId,
+    droneId: m.droneId ?? undefined,
     status: m.status as Mission["status"],
     reason: m.reason ?? undefined,
   };
@@ -25,4 +25,8 @@ export function mapMission(m: PrismaMission): Mission {
 
 export function mapDrones(drones: PrismaDrone[]): Drone[] {
   return drones.map(mapDrone);
+}
+
+export function mapMissions(missions: PrismaMission[]): Mission[] {
+  return missions.map(mapMission);
 }
