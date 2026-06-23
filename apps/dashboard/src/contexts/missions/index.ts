@@ -5,3 +5,5 @@ export { abortMission } from "./api/abortMission";
 export { completeMission } from "./api/completeMission";
 
 export { useMissionsStore } from "./stores/useMissionsStore";
+
+export { MissionPanel } from "./components/MissionPanel";

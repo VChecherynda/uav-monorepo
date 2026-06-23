@@ -3,6 +3,7 @@ import { ConnectionBadge, DroneMap, DronePanel } from "@/contexts/drones";
 import { useRealtimeChannel } from "@/infrastructure/realtime";
 import { BatteryChart } from "@/contexts/telemetry";
 import { LogoutButton } from "@/contexts/auth";
+import { MissionPanel } from "@/contexts/missions";
 import { CrosshairIcon, SignalLostIcon } from "@/components";
 
 export default function Home() {
@@ -87,6 +88,7 @@ export default function Home() {
 
           <aside className="col-span-4 row-span-1 flex flex-col gap-3 overflow-auto p-3 border border-subtle">
             <DronePanel />
+            <MissionPanel />
           </aside>
         </>
       )}
