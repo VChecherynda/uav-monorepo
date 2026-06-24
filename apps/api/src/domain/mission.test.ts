@@ -8,6 +8,7 @@ import {
 
 const draftMission = {
   id: "m1",
+  name: "test_name",
   droneId: "",
   status: "draft" as const,
   reason: undefined,
