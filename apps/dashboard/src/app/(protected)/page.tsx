@@ -5,9 +5,13 @@ import { BatteryChart } from "@/contexts/telemetry";
 import { LogoutButton } from "@/contexts/auth";
 import { MissionPanel } from "@/contexts/missions";
 import { CrosshairIcon, SignalLostIcon } from "@/components";
+import { useState } from "react";
+
+type Tab = "drones" | "missions";
 
 export default function Home() {
   const { status, reconnect } = useRealtimeChannel();
+  const [activeTab, setActiveTab] = useState<Tab>("drones");
 
   return (
     <div className="grid grid-cols-12 grid-rows-[56px_1fr_200px] h-screen bg-deep">
@@ -87,8 +91,23 @@ export default function Home() {
           </main>
 
           <aside className="col-span-4 row-span-1 flex flex-col gap-3 overflow-auto p-3 border border-subtle">
-            <DronePanel />
-            <MissionPanel />
+            <div className="flex gap-2">
+              <button
+                onClick={() => setActiveTab("drones")}
+                className={`btn-tab px-3 py-1 rounded border ${activeTab === "drones" ? "active" : ""}`}
+              >
+                Drones
+              </button>
+              <button
+                onClick={() => setActiveTab("missions")}
+                className={`btn-tab px-3 py-1 rounded border ${activeTab === "missions" ? "active" : ""}`}
+              >
+                Missions
+              </button>
+            </div>
+
+            {activeTab === "drones" && <DronePanel />}
+            {activeTab === "missions" && <MissionPanel />}
           </aside>
         </>
       )}

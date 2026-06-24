@@ -194,6 +194,20 @@ body {
   cursor: not-allowed;
 }
 
+.btn-tab {
+  border-color: var(--text-muted);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  transition:
+    border-color 150ms,
+    color 150ms;
+}
+
+.btn-tab.active {
+  border-color: var(--accent-info);
+  color: var(--accent-info);
+  background: var(--bg-elevated);
+}
 /* Typography utilities */
 .font-mono {
   font-family: var(--font-mono);
