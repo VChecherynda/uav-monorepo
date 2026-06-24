@@ -109,7 +109,13 @@ export const MissionCard = ({ mission }: { mission: Mission }) => {
 
   return (
     <div className="drone-card flex flex-col gap-3 rounded border px-4 py-3">
-      <p className="label">Mission: {mission.status}</p>
+      <div className="flex flex-col gap-1">
+        <p className="text-sm font-semibold truncate text-primary">
+          {mission.name}
+        </p>
+        <p className="label">{mission.status}</p>
+      </div>
+
       <div className="flex gap-2">{actions}</div>
     </div>
   );

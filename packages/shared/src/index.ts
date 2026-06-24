@@ -46,6 +46,7 @@ export type Telemetry = {
 
 export type Mission = {
   id: string;
+  name: string;
   droneId: string | undefined;
   status: MissionStatus;
   reason: string | undefined;

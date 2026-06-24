@@ -65,11 +65,23 @@ async function main() {
 
   await prisma.mission.createMany({
     data: [
-      { status: "draft", droneId: null },
-      { status: "assigned", droneId: hawk.id },
-      { status: "in-progress", droneId: falcon.id },
-      { status: "completed", droneId: owl.id },
-      { status: "aborted", droneId: owl.id },
+      { status: "draft", name: "Recon sector 1", droneId: null },
+      {
+        status: "assigned",
+        name: "Destroy infantry sector 2",
+        droneId: hawk.id,
+      },
+      {
+        status: "in-progress",
+        name: "Destroy infantry sector 3",
+        droneId: falcon.id,
+      },
+      { status: "completed", name: "Recon sector 2", droneId: owl.id },
+      {
+        status: "aborted",
+        name: "Destroy warehouse sector 2",
+        droneId: owl.id,
+      },
     ],
   });
 

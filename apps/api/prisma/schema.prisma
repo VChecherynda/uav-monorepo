@@ -44,6 +44,7 @@ model Telemetry {
 
 model Mission {
   id        String     @id @default(cuid())
+  name      String     @db.VarChar(120)
   droneId   String?
   status    String     @default("draft") // "draft" | "assigned" | "in-progress | "completed" | "aborted"
   reason    String?
