@@ -1,6 +1,6 @@
 "use client";
 
-import type { Mission, MissionStatus } from "@uav/shared";
+import type { Drone, Mission, MissionStatus } from "@uav/shared";
 import { useDronesStore } from "@/contexts/drones";
 import { useAssignMission } from "../hooks/useAssignMission";
 import { useState } from "react";
@@ -14,6 +14,15 @@ const MISSION_ACTIONS: Partial<Record<MissionStatus, MissionAction[]>> = {
   assigned: ["start", "abort"],
   "in-progress": ["abort", "complete"],
 };
+
+function getDroneLabel(mission: Mission, drones: Drone[]) {
+  if (!mission.droneId) return "Drone is not assigned";
+
+  const drone = drones.find((d) => d.id === mission.droneId);
+  if (!drone) return "Assigned drone not found";
+
+  return drone.name;
+}
 
 export const MissionCard = ({ mission }: { mission: Mission }) => {
   const serverDrones = useDronesStore((s) => s.serverDrones);
@@ -107,6 +116,8 @@ export const MissionCard = ({ mission }: { mission: Mission }) => {
       actions = null;
   }
 
+  const droneLabel = getDroneLabel(mission, serverDrones);
+
   return (
     <div className="drone-card flex flex-col gap-3 rounded border px-4 py-3">
       <div className="flex flex-col gap-1">
@@ -114,6 +125,7 @@ export const MissionCard = ({ mission }: { mission: Mission }) => {
           {mission.name}
         </p>
         <p className="label">{mission.status}</p>
+        <p className="text-data">{droneLabel}</p>
       </div>
 
       <div className="flex gap-2">{actions}</div>
