@@ -24,6 +24,8 @@ export function segmentsIntersect(
   );
 }
 
+// TODO(geometry): diagonal corner-to-corner segment crosses zone interior
+// but passes the filter (cross===0 on vertices, strict <0). See debt #1.
 export function segmentIntersectsPolygon(
   s: Coordinate,
   g: Coordinate,
