@@ -11,35 +11,68 @@ export function cross(o: Coordinate, a: Coordinate, b: Coordinate) {
   return oa.x * ob.y - oa.y * ob.x;
 }
 
-export function segmentsIntersect(
-  aStart: Coordinate,
-  aEnd: Coordinate,
-  bStart: Coordinate,
-  bEnd: Coordinate,
-): boolean {
-  // left part and right the same sign it means line (a) doesn`t cross line (b)
-  return (
-    cross(aStart, aEnd, bStart) * cross(aStart, aEnd, bEnd) < 0 &&
-    cross(bStart, bEnd, aStart) * cross(bStart, bEnd, aEnd) < 0
-  );
+type Vec = {
+  x: number;
+  y: number;
+};
+
+export function sub(p: Coordinate, q: Coordinate): Vec {
+  return { x: p.lng - q.lng, y: p.lat - q.lat };
 }
 
-// TODO(geometry): diagonal corner-to-corner segment crosses zone interior
-// but passes the filter (cross===0 on vertices, strict <0). See debt #1.
-export function segmentIntersectsPolygon(
+export function crossVec(v: Vec, w: Vec): number {
+  return v.x * w.y - v.y * w.x;
+}
+
+export function collectCrossings(
   s: Coordinate,
   g: Coordinate,
   area: Coordinate[],
-): boolean {
-  if (isPointInGeofence(s, area) || isPointInGeofence(g, area)) {
-    return true;
-  }
+): number[] {
+  const crossingTs: number[] = [];
+  const d = sub(g, s);
 
   for (let i = 0; i < area.length; i++) {
     const a = area[i];
     const b = area[(i + 1) % area.length];
 
-    if (segmentsIntersect(a, b, s, g)) {
+    const e = sub(b, a);
+    const as = sub(a, s);
+
+    const denom = crossVec(d, e);
+    if (denom === 0) {
+      continue;
+    }
+
+    const t = crossVec(as, e) / denom;
+    const u = crossVec(as, d) / denom;
+
+    if (t >= 0 && t <= 1 && u >= 0 && u <= 1) {
+      crossingTs.push(t);
+    }
+  }
+
+  return crossingTs;
+}
+
+export function segmentIntersectsPolygon(
+  s: Coordinate,
+  g: Coordinate,
+  area: Coordinate[],
+): boolean {
+  const crossingTs = collectCrossings(s, g, area);
+  const sortedTs = [0, ...crossingTs, 1].sort((a, b) => a - b);
+  const d = sub(g, s);
+
+  for (let i = 0; i < sortedTs.length - 1; i++) {
+    const t1 = sortedTs[i];
+    const t2 = sortedTs[i + 1];
+
+    const tMid = (t1 + t2) / 2;
+    const lng = s.lng + tMid * d.x;
+    const lat = s.lat + tMid * d.y;
+
+    if (isPointInGeofence({ lng, lat }, area)) {
       return true;
     }
   }

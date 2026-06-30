@@ -1,9 +1,5 @@
 import { describe, it, expect } from "vitest";
-import {
-  cross,
-  segmentsIntersect,
-  segmentIntersectsPolygon,
-} from "./segmentsIntersect";
+import { cross, segmentIntersectsPolygon } from "./segmentsIntersect";
 import { Coordinate } from "@uav/shared";
 
 describe("cross", () => {
@@ -23,61 +19,21 @@ describe("cross", () => {
   });
 });
 
-describe("segmentsIntersect", () => {
-  it.each([
-    [
-      { lng: 2, lat: 2 },
-      { lng: 4, lat: 5 },
-      { lng: 3, lat: 0 },
-      { lng: 3, lat: 4 },
-      true,
-      "cross",
-    ],
-    [
-      { lng: 2, lat: 4 },
-      { lng: 4, lat: 4 },
-      { lng: 6, lat: 0 },
-      { lng: 6, lat: 6 },
-      false,
-      "doesn`t cross",
-    ],
-    [
-      { lng: 6, lat: 0 },
-      { lng: 6, lat: 6 },
-      { lng: 2, lat: 4 },
-      { lng: 4, lat: 4 },
-      false,
-      "doesn`t cross",
-    ],
-    [
-      { lng: 2, lat: 4 },
-      { lng: 4, lat: 7 },
-      { lng: 2, lat: 2 },
-      { lng: 4, lat: 5 },
-      false,
-      "doesn`t cross",
-    ],
-  ] as const)(
-    "segment b $5 segment a",
-    (aStart, aEnd, bStart, bEnd, result, _label) => {
-      expect(segmentsIntersect(aStart, aEnd, bStart, bEnd)).toBe(result);
-    },
-  );
-});
-
 describe("segmentIntersectsPolygon", () => {
-  const area: Coordinate[] = [
+  const L_SHAPE: Coordinate[] = [
     { lng: 0, lat: 0 },
     { lng: 10, lat: 0 },
-    { lng: 10, lat: 10 },
+    { lng: 10, lat: 5 },
+    { lng: 5, lat: 5 },
+    { lng: 5, lat: 10 },
     { lng: 0, lat: 10 },
   ];
 
   it.each([
-    [{ lng: -5, lat: 15 }, { lng: 15, lat: 15 }, false, "doesn`t cross"],
-    [{ lng: -5, lat: 5 }, { lng: 15, lat: 5 }, true, "cross"],
-    [{ lng: 2, lat: 5 }, { lng: 6, lat: 5 }, true, "cross"],
+    [{ lng: 10, lat: 10 }, { lng: 5, lat: 5 }, false, "doesn`t cross"],
+    [{ lng: 8, lat: 8 }, { lng: 2, lat: 2 }, true, "cross"],
+    [{ lng: 8, lat: 8 }, { lng: -15, lat: -15 }, true, "cross"],
   ] as const)("segment SG $3 area", (s, g, result, _label) => {
-    expect(segmentIntersectsPolygon(s, g, area)).toBe(result);
+    expect(segmentIntersectsPolygon(s, g, L_SHAPE)).toBe(result);
   });
 });
