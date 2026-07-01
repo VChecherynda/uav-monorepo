@@ -9,7 +9,7 @@
   ],
   "scripts": {
     "dev:api": "npm run dev --workspace=apps/api",
-    "dev:dashboard": "npm run dev --workspace=apps/dashboard",
+    "dev:dashboard": "npm run build:shared && (npm run dev --workspace=@uav/shared & npm run dev --workspace=apps/dashboard)",
     "build:shared": "npm run build --workspace=@uav/shared",
     "build": "npm run build:shared && npm run build --workspaces --if-present"
   }
