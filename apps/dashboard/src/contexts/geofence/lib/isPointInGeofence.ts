@@ -1,7 +1,4 @@
-import { Coordinate } from "@uav/shared";
-// TODO(seam): cross is a pure geometry primitive — move to @uav/shared.
-// Temporary cross-context import (geofence → routes) until then.
-import { cross } from "@/contexts/routes/lib/segmentsIntersect";
+import { Coordinate, cross } from "@uav/shared";
 
 export function isPointInGeofence(p: Coordinate, area: Coordinate[]): boolean {
   let inside = false;

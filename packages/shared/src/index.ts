@@ -1,3 +1,6 @@
+export * from "./geometry.js";
+import type { Coordinate } from "./geometry.js";
+
 export type DroneAction = "return-home" | "land" | "takeoff";
 
 export type DroneStatus = "active" | "idle" | "offline" | "returning";
@@ -12,11 +15,6 @@ export type MissionStatus =
 export type User = {
   id: string;
   email: string;
-};
-
-export type Coordinate = {
-  lng: number;
-  lat: number;
 };
 
 export type Geofence = {

@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { cross, segmentIntersectsPolygon } from "./segmentsIntersect";
-import { Coordinate } from "@uav/shared";
+import { cross, Coordinate } from "@uav/shared";
+import { segmentIntersectsPolygon } from "./segmentsIntersect";
 
 describe("cross", () => {
   it.each([
