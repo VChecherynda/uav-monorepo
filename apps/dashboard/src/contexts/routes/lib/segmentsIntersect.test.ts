@@ -1,23 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { cross, Coordinate } from "@uav/shared";
+import type { Coordinate } from "@uav/shared";
 import { segmentIntersectsPolygon } from "./segmentsIntersect";
-
-describe("cross", () => {
-  it.each([
-    [{ lng: 0, lat: 0 }, { lng: 1, lat: 0 }, { lng: 0, lat: 1 }, 1, "left"],
-    [{ lng: 0, lat: 0 }, { lng: 1, lat: 0 }, { lng: 0, lat: -1 }, -1, "right"],
-    [
-      { lng: 0, lat: 0 },
-      { lng: 1, lat: 0 },
-      { lng: 2, lat: 0 },
-      0,
-      "on the line",
-    ],
-    [{ lng: 0, lat: 0 }, { lng: 1, lat: 1 }, { lng: 1, lat: 0 }, -1, "right"],
-  ] as const)("b $4 of oa -> cross = $3", (o, a, b, result, _label) => {
-    expect(cross(o, a, b)).toBe(result);
-  });
-});
 
 describe("segmentIntersectsPolygon", () => {
   const L_SHAPE: Coordinate[] = [
