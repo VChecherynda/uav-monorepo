@@ -11,11 +11,6 @@ import type {
 } from "./drone.js";
 import type { Mission, MissionConflictReason } from "./mission.js";
 
-export type User = {
-  id: string;
-  email: string;
-};
-
 export type Geofence = {
   id: string;
   name: string;
