@@ -1,5 +1,6 @@
 export * from "./geometry.js";
 export * from "./drone.js";
+export * from "./mission.js";
 export * from "./telemetry.js";
 
 import type { Coordinate } from "./geometry.js";
@@ -8,13 +9,7 @@ import type {
   Drone,
   DroneCommandConflictReason,
 } from "./drone.js";
-
-export type MissionStatus =
-  | "draft"
-  | "assigned"
-  | "in-progress"
-  | "completed"
-  | "aborted";
+import type { Mission, MissionConflictReason } from "./mission.js";
 
 export type User = {
   id: string;
@@ -25,14 +20,6 @@ export type Geofence = {
   id: string;
   name: string;
   area: Coordinate[];
-};
-
-export type Mission = {
-  id: string;
-  name: string;
-  droneId: string | undefined;
-  status: MissionStatus;
-  reason: string | undefined;
 };
 
 export type WSConnectionStatus =
@@ -56,15 +43,6 @@ export type MissionNotFoundReason = {
 export type CommandRejectionReason =
   | DroneNotFoundReason
   | DroneCommandConflictReason;
-
-export type MissionConflictReason =
-  | { code: "DRONE_IS_NOT_READY"; message: string }
-  | { code: "MISSION_IS_NOT_DRAFT"; message: string }
-  | { code: "MISSION_IS_NOT_ASSIGNED"; message: string }
-  | { code: "MISSION_HAS_NO_WAYPOINTS"; message: string }
-  | { code: "MISSION_HAS_NO_DRONE"; message: string }
-  | { code: "MISSION_CANNOT_BE_ABORTED"; message: string }
-  | { code: "MISSION_IS_NOT_IN_PROGRESS"; message: string };
 
 export type MissionRejectionReason =
   | DroneNotFoundReason
