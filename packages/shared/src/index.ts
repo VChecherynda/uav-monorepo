@@ -1,5 +1,6 @@
 export * from "./geometry.js";
 export * from "./drone.js";
+export * from "./telemetry.js";
 
 import type { Coordinate } from "./geometry.js";
 import type {
@@ -24,15 +25,6 @@ export type Geofence = {
   id: string;
   name: string;
   area: Coordinate[];
-};
-
-export type Telemetry = {
-  id: string;
-  droneId: string;
-  battery: number;
-  altitude: number;
-  lng: number;
-  lat: number;
 };
 
 export type Mission = {
