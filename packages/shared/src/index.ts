@@ -3,6 +3,7 @@ export * from "./drone.js";
 export * from "./mission.js";
 export * from "./telemetry.js";
 export * from "./reasons.js";
+export * from "./commands.js";
 
 import type { DroneAction, Drone } from "./drone.js";
 import type { Mission } from "./mission.js";
@@ -41,10 +42,6 @@ export type DomainEvent =
       droneId: string;
       at: string;
     };
-
-export type CommandResult =
-  | { status: "success"; drone: Drone }
-  | { status: "rejected"; reason: CommandRejectionReason };
 
 export type AssignResult =
   | {
