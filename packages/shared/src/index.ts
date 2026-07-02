@@ -4,13 +4,10 @@ export * from "./mission.js";
 export * from "./telemetry.js";
 export * from "./reasons.js";
 export * from "./commands.js";
+export * from "./mission-results.js";
 
 import type { DroneAction, Drone } from "./drone.js";
-import type { Mission } from "./mission.js";
-import type {
-  CommandRejectionReason,
-  MissionRejectionReason,
-} from "./reasons.js";
+import type { CommandRejectionReason } from "./reasons.js";
 
 export type WSConnectionStatus =
   | "connecting"
@@ -41,46 +38,6 @@ export type DomainEvent =
       type: "DroneRecovered";
       droneId: string;
       at: string;
-    };
-
-export type AssignResult =
-  | {
-      status: "success";
-      mission: Mission;
-    }
-  | { status: "rejected"; reason: MissionRejectionReason };
-
-export type StartMissionServiceResult =
-  | {
-      status: "success";
-      mission: Mission;
-      drone: Drone;
-    }
-  | {
-      status: "rejected";
-      reason: MissionRejectionReason;
-    };
-
-export type AbortMissionServiceResult =
-  | {
-      status: "success";
-      mission: Mission;
-      drone: Drone;
-    }
-  | {
-      status: "rejected";
-      reason: MissionRejectionReason;
-    };
-
-export type CompleteMissionServiceResult =
-  | {
-      status: "success";
-      mission: Mission;
-      drone: Drone;
-    }
-  | {
-      status: "rejected";
-      reason: MissionRejectionReason;
     };
 
 export type WSMessage = SnapshotMessage | DomainEvent;
