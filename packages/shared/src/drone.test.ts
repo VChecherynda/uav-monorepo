@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { predictDroneChange } from "./index";
+import { predictDroneChange } from "./drone.js";
 
 describe("predictDroneChange", () => {
   describe("valid transitions", () => {
