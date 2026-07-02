@@ -2,13 +2,14 @@ export * from "./geometry.js";
 export * from "./drone.js";
 export * from "./mission.js";
 export * from "./telemetry.js";
+export * from "./reasons.js";
 
+import type { DroneAction, Drone } from "./drone.js";
+import type { Mission } from "./mission.js";
 import type {
-  DroneAction,
-  Drone,
-  DroneCommandConflictReason,
-} from "./drone.js";
-import type { Mission, MissionConflictReason } from "./mission.js";
+  CommandRejectionReason,
+  MissionRejectionReason,
+} from "./reasons.js";
 
 export type WSConnectionStatus =
   | "connecting"
@@ -20,22 +21,6 @@ export type SnapshotMessage = {
   type: "drones:snapshot";
   data: Drone[];
 };
-
-export type DroneNotFoundReason = { code: "DRONE_NOT_FOUND"; message: string };
-
-export type MissionNotFoundReason = {
-  code: "MISSION_NOT_FOUND";
-  message: string;
-};
-
-export type CommandRejectionReason =
-  | DroneNotFoundReason
-  | DroneCommandConflictReason;
-
-export type MissionRejectionReason =
-  | DroneNotFoundReason
-  | MissionNotFoundReason
-  | MissionConflictReason;
 
 export type DomainEvent =
   | {
