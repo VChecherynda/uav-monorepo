@@ -1,1 +1,1 @@
-export { isPointInGeofence } from "./lib/isPointInGeofence";
+export { isPointInPolygon } from "./lib/isPointInPolygon";

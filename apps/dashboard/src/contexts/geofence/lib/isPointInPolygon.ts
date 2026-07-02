@@ -1,6 +1,6 @@
 import { Coordinate, cross } from "@uav/shared";
 
-export function isPointInGeofence(p: Coordinate, area: Coordinate[]): boolean {
+export function isPointInPolygon(p: Coordinate, area: Coordinate[]): boolean {
   let inside = false;
 
   for (let i = 0; i < area.length; i++) {

@@ -1,4 +1,4 @@
-import { isPointInGeofence } from "@/contexts/geofence";
+import { isPointInPolygon } from "@/contexts/geofence";
 import { sub, crossVec } from "@uav/shared";
 import type { Coordinate } from "@uav/shared";
 
@@ -50,7 +50,7 @@ export function segmentIntersectsPolygon(
     const lng = s.lng + tMid * d.x;
     const lat = s.lat + tMid * d.y;
 
-    if (isPointInGeofence({ lng, lat }, area)) {
+    if (isPointInPolygon({ lng, lat }, area)) {
       return true;
     }
   }

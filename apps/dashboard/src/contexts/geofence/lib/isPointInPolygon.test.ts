@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { isPointInGeofence } from "./isPointInGeofence";
+import { isPointInPolygon } from "./isPointInPolygon";
 
 import { Coordinate } from "@uav/shared";
 
@@ -29,28 +29,28 @@ const SQUARE: Coordinate[] = [
   }, // D
 ];
 
-describe("isPointInGeofence - points inside", () => {
+describe("isPointInPolygon - points inside", () => {
   it.each([
     [{ lng: 8, lat: 8 }, "center"],
     [{ lng: 5, lat: 5 }, "center"],
     [{ lng: 2, lat: 2 }, "center"],
   ] as const)("$1 -> inside", (point, _label) => {
-    expect(isPointInGeofence(point, SQUARE)).toBe(true);
+    expect(isPointInPolygon(point, SQUARE)).toBe(true);
   });
 });
 
-describe("isPointInGeofence - points outside", () => {
+describe("isPointInPolygon - points outside", () => {
   it.each([
     [{ lng: 20, lat: 5 }, "right of square"],
     [{ lng: -5, lat: 5 }, "left of square"],
     [{ lng: 5, lat: 20 }, "above square"],
     [{ lng: 5, lat: -5 }, "below square"],
   ] as const)("$1 -> outside", (point, _label) => {
-    expect(isPointInGeofence(point, SQUARE)).toBe(false);
+    expect(isPointInPolygon(point, SQUARE)).toBe(false);
   });
 });
 
-describe("isPointInGeofence - points on the sides and vertex", () => {
+describe("isPointInPolygon - points on the sides and vertex", () => {
   it.each([
     [{ lng: 0, lat: 0 }, "bottom left vertex"],
     [{ lng: 10, lat: 0 }, "bottom right vertex"],
@@ -59,13 +59,13 @@ describe("isPointInGeofence - points on the sides and vertex", () => {
     [{ lng: 5, lat: 0 }, "middle of bottom side"],
     [{ lng: 0, lat: 5 }, "middle of the left side"],
   ] as const)("$1", (point, _label) => {
-    expect(isPointInGeofence(point, SQUARE)).toBe(false);
+    expect(isPointInPolygon(point, SQUARE)).toBe(false);
   });
 
   it.each([
     [{ lng: 5, lat: 5 }, "in the middle of the area"],
     [{ lng: 0.1, lat: 5 }, "close to the side"],
   ] as const)("$1", (point, _label) => {
-    expect(isPointInGeofence(point, SQUARE)).toBe(true);
+    expect(isPointInPolygon(point, SQUARE)).toBe(true);
   });
 });
