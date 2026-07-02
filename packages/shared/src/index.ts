@@ -3,19 +3,12 @@ export * from "./drone.js";
 export * from "./mission.js";
 export * from "./telemetry.js";
 
-import type { Coordinate } from "./geometry.js";
 import type {
   DroneAction,
   Drone,
   DroneCommandConflictReason,
 } from "./drone.js";
 import type { Mission, MissionConflictReason } from "./mission.js";
-
-export type Geofence = {
-  id: string;
-  name: string;
-  area: Coordinate[];
-};
 
 export type WSConnectionStatus =
   | "connecting"
