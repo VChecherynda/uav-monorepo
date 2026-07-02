@@ -1,6 +1,6 @@
-import { Coordinate } from "@uav/shared";
+import type { Coordinate } from "@uav/shared";
+import { segmentIntersectsPolygon } from "@uav/shared";
 import { AdjacencyList } from "./findRoute";
-import { segmentIntersectsPolygon } from "./segmentsIntersect";
 
 export function buildVisibilityGraph(
   s: Coordinate,
