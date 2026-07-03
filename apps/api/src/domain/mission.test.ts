@@ -5,6 +5,7 @@ import {
   startMission,
   completeMission,
 } from "../domain/mission.js";
+import type { Geofence } from "@uav/shared";
 
 const draftMission = {
   id: "m1",
@@ -19,9 +20,38 @@ const idleDrone = {
   name: "test_d1",
   status: "idle" as const,
   altitude: 0,
-  lng: 0,
-  lat: 0,
+  lng: 8,
+  lat: 12,
   battery: 80,
+};
+
+const defaultWaypoints = [
+  { lng: 8, lat: 12 },
+  { lng: 12, lat: 22 },
+  { lng: 33, lat: 30 },
+  { lng: 38, lat: 30 },
+];
+
+const noFlyZone1 = {
+  id: "id_1",
+  name: "zone 1",
+  area: [
+    { lng: 10, lat: 5 },
+    { lng: 20, lat: 5 },
+    { lng: 20, lat: 15 },
+    { lng: 10, lat: 15 },
+  ],
+};
+
+const noFlyZone2 = {
+  id: "id_2",
+  name: "zone 2",
+  area: [
+    { lng: 30, lat: 15 },
+    { lng: 40, lat: 15 },
+    { lng: 40, lat: 25 },
+    { lng: 30, lat: 25 },
+  ],
 };
 
 describe("assignDrone", () => {
@@ -60,7 +90,8 @@ describe("startMission", () => {
       startMission(
         { ...draftMission, status: "assigned" as const },
         idleDrone,
-        3,
+        defaultWaypoints,
+        [noFlyZone1, noFlyZone2],
       ),
     ).toEqual({
       status: "success",
@@ -73,7 +104,7 @@ describe("startMission", () => {
     [
       draftMission,
       idleDrone,
-      3,
+      defaultWaypoints,
       {
         code: "MISSION_IS_NOT_ASSIGNED",
         message: "Only assigned missions can start",
@@ -82,7 +113,7 @@ describe("startMission", () => {
     [
       { ...draftMission, status: "assigned" as const },
       { ...idleDrone, status: "active" as const },
-      3,
+      defaultWaypoints,
       {
         code: "DRONE_IS_NOT_READY",
         message: "Drone is not idle",
@@ -91,14 +122,70 @@ describe("startMission", () => {
     [
       { ...draftMission, status: "assigned" as const },
       idleDrone,
-      0,
+      [],
       {
         code: "MISSION_HAS_NO_WAYPOINTS",
         message: "Mission should have waypoints",
       },
     ],
-  ])("rejects with reason: %s", (mission, drone, count, reason) => {
-    expect(startMission(mission, drone, count)).toEqual({
+    [
+      { ...draftMission, status: "assigned" as const },
+      idleDrone,
+      [
+        { lng: 15, lat: 12 },
+        { lng: 23, lat: 30 },
+        { lng: 38, lat: 30 },
+      ],
+      {
+        code: "ROUTE_VIOLATES_ZONE",
+        message:
+          "Waypoint 1 is inside zone zone 1; Segment 1 crosses zone zone 1; Segment 2 crosses zone zone 1",
+      },
+    ],
+    [
+      { ...draftMission, status: "assigned" as const },
+      idleDrone,
+      [
+        { lng: 12, lat: 22 },
+        { lng: 37, lat: 22 },
+        { lng: 38, lat: 30 },
+      ],
+      {
+        code: "ROUTE_VIOLATES_ZONE",
+        message:
+          "Waypoint 2 is inside zone zone 2; Segment 2 crosses zone zone 2; Segment 3 crosses zone zone 2",
+      },
+    ],
+    [
+      { ...draftMission, status: "assigned" as const },
+      idleDrone,
+      [
+        { lng: 12, lat: 22 },
+        { lng: 45, lat: 22 },
+        { lng: 50, lat: 30 },
+      ],
+      {
+        code: "ROUTE_VIOLATES_ZONE",
+        message: "Segment 2 crosses zone zone 2",
+      },
+    ],
+    [
+      { ...draftMission, status: "assigned" as const },
+      idleDrone,
+      [
+        { lng: 23, lat: 12 },
+        { lng: 23, lat: 30 },
+        { lng: 38, lat: 30 },
+      ],
+      {
+        code: "ROUTE_VIOLATES_ZONE",
+        message: "Segment 1 crosses zone zone 1",
+      },
+    ],
+  ])("rejects with reason: %s", (mission, drone, waypoints, reason) => {
+    expect(
+      startMission(mission, drone, waypoints, [noFlyZone1, noFlyZone2]),
+    ).toEqual({
       status: "rejected",
       reason,
     });

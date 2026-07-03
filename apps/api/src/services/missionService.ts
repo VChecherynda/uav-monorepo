@@ -3,6 +3,7 @@ import type {
   StartMissionServiceResult,
   AbortMissionServiceResult,
   CompleteMissionServiceResult,
+  Geofence,
 } from "@uav/shared";
 import {
   assignDrone,
@@ -10,8 +11,32 @@ import {
   abortMission,
   completeMission,
 } from "../domain/mission.js";
-import { mapMission, mapDrone } from "../lib/mappers.js";
+import { mapMission, mapDrone, mapWaypoints } from "../lib/mappers.js";
 import { prisma } from "../lib/prisma.js";
+
+// TODO: move zones to DB table (known debt).
+const ZONES: Geofence[] = [
+  {
+    id: "zone-airport",
+    name: "Alice Springs Airport",
+    area: [
+      { lng: 133.892, lat: -23.812 },
+      { lng: 133.912, lat: -23.812 },
+      { lng: 133.912, lat: -23.792 },
+      { lng: 133.892, lat: -23.792 },
+    ],
+  },
+  {
+    id: "zone-restricted-north",
+    name: "Restricted North",
+    area: [
+      { lng: 133.86, lat: -23.66 },
+      { lng: 133.89, lat: -23.66 },
+      { lng: 133.89, lat: -23.64 },
+      { lng: 133.86, lat: -23.64 },
+    ],
+  },
+];
 
 export async function assignMission(
   missionId: string,
@@ -85,10 +110,11 @@ export async function startMissionService(
     };
   }
 
-  const [droneRow, waypointsCount] = await Promise.all([
+  const [droneRow, waypoints] = await Promise.all([
     prisma.drone.findUnique({ where: { id: droneId } }),
-    prisma.waypoint.count({
+    prisma.waypoint.findMany({
       where: { missionId },
+      orderBy: { recordedAt: "asc" },
     }),
   ]);
 
@@ -102,7 +128,8 @@ export async function startMissionService(
   const next = startMission(
     mapMission(missionRow),
     mapDrone(droneRow),
-    waypointsCount,
+    mapWaypoints(waypoints),
+    ZONES,
   );
 
   if (next.status === "rejected") {

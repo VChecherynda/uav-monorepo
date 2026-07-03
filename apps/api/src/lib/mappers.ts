@@ -1,6 +1,7 @@
 import type { Drone as PrismaDrone } from "@prisma/client";
 import type { Mission as PrismaMission } from "@prisma/client";
-import type { Drone, Mission } from "@uav/shared";
+import type { Waypoint as PrismaWaypoint } from "@prisma/client";
+import type { Drone, Mission, Coordinate } from "@uav/shared";
 
 export function mapDrone(d: PrismaDrone): Drone {
   return {
@@ -22,6 +23,17 @@ export function mapMission(m: PrismaMission): Mission {
     status: m.status as Mission["status"],
     reason: m.reason ?? undefined,
   };
+}
+
+export function mapWaypoint(w: PrismaWaypoint): Coordinate {
+  return {
+    lng: w.lng,
+    lat: w.lat,
+  };
+}
+
+export function mapWaypoints(waypoints: PrismaWaypoint[]): Coordinate[] {
+  return waypoints.map(mapWaypoint);
 }
 
 export function mapDrones(drones: PrismaDrone[]): Drone[] {

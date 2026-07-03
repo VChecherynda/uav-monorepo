@@ -1,4 +1,11 @@
-import type { Mission, Drone, MissionConflictReason } from "@uav/shared";
+import type {
+  Mission,
+  Geofence,
+  Drone,
+  MissionConflictReason,
+  Coordinate,
+} from "@uav/shared";
+import { isPointInPolygon, segmentIntersectsPolygon } from "@uav/shared";
 
 export const assignDrone = (
   mission: Mission,
@@ -59,7 +66,8 @@ export type CompleteMissionPatch = {
 export const startMission = (
   mission: Mission,
   drone: Drone,
-  waypointCount: number,
+  waypoints: Coordinate[],
+  zones: Geofence[],
 ):
   | StartMissionPatch
   | { status: "rejected"; reason: MissionConflictReason } => {
@@ -80,12 +88,58 @@ export const startMission = (
     };
   }
 
-  if (!waypointCount) {
+  if (!waypoints.length) {
     return {
       status: "rejected",
       reason: {
         code: "MISSION_HAS_NO_WAYPOINTS",
         message: "Mission should have waypoints",
+      },
+    };
+  }
+
+  const rejectedMessages: string[] = [];
+  const route = [{ lng: drone.lng, lat: drone.lat }, ...waypoints];
+
+  for (let i = 0; i < zones.length; i++) {
+    const zone = zones[i];
+    if (!zone) {
+      continue;
+    }
+
+    for (let j = 0; j < waypoints.length; j++) {
+      const w = waypoints[j];
+      if (!w) {
+        continue;
+      }
+
+      const result = isPointInPolygon(w, zone.area);
+      if (result) {
+        rejectedMessages.push(`Waypoint ${j + 1} is inside zone ${zone.name}`);
+      }
+    }
+
+    for (let j = 0; j < route.length - 1; j++) {
+      const s = route[j];
+      const g = route[j + 1];
+
+      if (!s || !g) {
+        continue;
+      }
+
+      const result = segmentIntersectsPolygon(s, g, zone.area);
+      if (result) {
+        rejectedMessages.push(`Segment ${j + 1} crosses zone ${zone.name}`);
+      }
+    }
+  }
+
+  if (rejectedMessages.length) {
+    return {
+      status: "rejected",
+      reason: {
+        code: "ROUTE_VIOLATES_ZONE",
+        message: rejectedMessages.join("; "),
       },
     };
   }
