@@ -83,7 +83,7 @@ function DroneCard({
   return (
     <div
       onClick={() => onCardClick(drone.id)}
-      className={`drone-card flex flex-col gap-3 rounded border px-4 py-3 cursor-pointer ${
+      className={`card flex flex-col gap-3 rounded border px-4 py-3 cursor-pointer ${
         isSelected ? "selected" : ""
       }`}
       style={{

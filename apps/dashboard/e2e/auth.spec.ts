@@ -20,9 +20,7 @@ test("operator logs in and sees the fleet", async ({ page }) => {
 test("operator issues RTH and sees optimistic update then confirmation", async ({
   page,
 }) => {
-  const falconCard = page
-    .locator(".drone-card")
-    .filter({ hasText: "Falcon-1" });
+  const falconCard = page.locator(".card").filter({ hasText: "Falcon-1" });
 
   const rthButton = falconCard.getByRole("button", { name: "RTH" });
   await rthButton.click();

@@ -135,7 +135,7 @@ body {
   color: var(--text-muted);
 }
 
-.drone-card {
+.card {
   background: var(--bg-surface);
   border-color: var(--border-subtle);
   transition:
@@ -143,11 +143,11 @@ body {
     border-color 150ms;
 }
 
-.drone-card:hover {
+.card:hover {
   background: var(--bg-elevated);
 }
 
-.drone-card.selected {
+.card.selected {
   background: var(--bg-elevated);
   border-color: var(--accent-info);
 }
