@@ -1,11 +1,16 @@
 "use client";
-import { ConnectionBadge, DroneMap, DronePanel } from "@/contexts/drones";
+import {
+  ConnectionBadge,
+  DroneMarkersLayer,
+  DronePanel,
+} from "@/contexts/drones";
 import { useRealtimeChannel } from "@/infrastructure/realtime";
 import { BatteryChart } from "@/contexts/telemetry";
 import { LogoutButton } from "@/contexts/auth";
 import { MissionPanel } from "@/contexts/missions";
 import { CrosshairIcon, SignalLostIcon } from "@/components";
 import { useState } from "react";
+import { MapCanvas } from "@/infrastructure/map";
 
 type Tab = "drones" | "missions";
 
@@ -87,7 +92,9 @@ export default function Home() {
                 SIMULATED DATA · DEMO ENVIRONMENT
               </span>
             </div>
-            <DroneMap />
+            <MapCanvas>
+              <DroneMarkersLayer />
+            </MapCanvas>
           </main>
 
           <aside className="col-span-4 row-span-1 flex flex-col gap-3 overflow-auto p-3 border border-subtle">

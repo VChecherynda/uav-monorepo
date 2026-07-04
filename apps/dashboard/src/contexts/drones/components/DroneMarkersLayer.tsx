@@ -1,14 +1,9 @@
 "use client";
 
-import { useRef, useEffect } from "react";
-
+import { useEffect, useRef } from "react";
 import maplibregl from "maplibre-gl";
-import "maplibre-gl/dist/maplibre-gl.css";
 import { useDrones } from "../hooks/useDrones";
-
-const MAP_STYLE_URL = `https://api.maptiler.com/maps/darkmatter/style.json?key=${process.env.NEXT_PUBLIC_MAPTILER_KEY}`;
-const MAP_ZOOM = 11;
-const INITIAL_MAP_POSITION: [number, number] = [133.88, -23.7];
+import { useMap } from "@/infrastructure/map";
 
 const DRONE_STATUS_COLOR: Record<string, string> = {
   active: "#2ea043",
@@ -25,31 +20,29 @@ function createDroneMarkerElement(status: string): HTMLDivElement {
   wrapper.style.cursor = "pointer";
 
   wrapper.innerHTML = `
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-      xmlns="http://www.w3.org/2000/svg">
-      <!-- Propeller arms -->
-      <line x1="4" y1="4" x2="20" y2="20" stroke="${color}" stroke-width="1.5"/>
-      <line x1="20" y1="4" x2="4" y2="20" stroke="${color}" stroke-width="1.5"/>
-
-      <!-- Propellers -->
-      <circle cx="4"  cy="4"  r="3" fill="${color}" fill-opacity="0.3" stroke="${color}" stroke-width="1"/>
-      <circle cx="20" cy="4"  r="3" fill="${color}" fill-opacity="0.3" stroke="${color}" stroke-width="1"/>
-      <circle cx="4"  cy="20" r="3" fill="${color}" fill-opacity="0.3" stroke="${color}" stroke-width="1"/>
-      <circle cx="20" cy="20" r="3" fill="${color}" fill-opacity="0.3" stroke="${color}" stroke-width="1"/>
-
-      <!-- Center body -->
-      <circle cx="12" cy="12" r="3" fill="${color}"/>
-    </svg>
-  `;
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+        xmlns="http://www.w3.org/2000/svg">
+        <!-- Propeller arms -->
+        <line x1="4" y1="4" x2="20" y2="20" stroke="${color}" stroke-width="1.5"/>
+        <line x1="20" y1="4" x2="4" y2="20" stroke="${color}" stroke-width="1.5"/>
+  
+        <!-- Propellers -->
+        <circle cx="4"  cy="4"  r="3" fill="${color}" fill-opacity="0.3" stroke="${color}" stroke-width="1"/>
+        <circle cx="20" cy="4"  r="3" fill="${color}" fill-opacity="0.3" stroke="${color}" stroke-width="1"/>
+        <circle cx="4"  cy="20" r="3" fill="${color}" fill-opacity="0.3" stroke="${color}" stroke-width="1"/>
+        <circle cx="20" cy="20" r="3" fill="${color}" fill-opacity="0.3" stroke="${color}" stroke-width="1"/>
+  
+        <!-- Center body -->
+        <circle cx="12" cy="12" r="3" fill="${color}"/>
+      </svg>
+    `;
 
   return wrapper;
 }
 
-export const DroneMap = () => {
+export function DroneMarkersLayer() {
+  const map = useMap();
   const drones = useDrones();
-
-  const containerRef = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<maplibregl.Map | null>(null);
   const markersRef = useRef<
     Map<
       string,
@@ -62,33 +55,6 @@ export const DroneMap = () => {
   >(new Map());
 
   useEffect(() => {
-    if (!containerRef.current) return;
-
-    const map = new maplibregl.Map({
-      container: containerRef.current,
-      style: MAP_STYLE_URL,
-      center: INITIAL_MAP_POSITION,
-      zoom: MAP_ZOOM,
-    });
-
-    mapRef.current = map;
-
-    return () => {
-      map.remove();
-      mapRef.current = null;
-
-      markersRef.current.forEach((value, id) => {
-        value.marker.remove();
-        markersRef.current.delete(id);
-      });
-    };
-  }, []);
-
-  useEffect(() => {
-    const map = mapRef.current;
-
-    if (!map) return;
-
     // Check stale drones in the ref.
     // seen - [A,B,C] - poll 1
     // seeb - [A,B] - poll 2
@@ -144,7 +110,15 @@ export const DroneMap = () => {
         markersRef.current.delete(id);
       }
     });
-  }, [drones]);
+  }, [drones, map]);
 
-  return <div ref={containerRef} className="w-full h-full" />;
-};
+  useEffect(() => {
+    const markers = markersRef.current;
+    return () => {
+      markers.forEach((v) => v.marker.remove());
+      markers.clear();
+    };
+  }, []);
+
+  return null;
+}
