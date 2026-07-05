@@ -2,6 +2,7 @@
 
 import type { Drone, Mission, MissionStatus } from "@uav/shared";
 import { useDronesStore } from "@/contexts/drones";
+import { PlanRouteButton } from "@/contexts/routes";
 import { useAssignMission } from "../hooks/useAssignMission";
 import { useState } from "react";
 import { useStartMission } from "../hooks/useStartMission";
@@ -51,6 +52,8 @@ export const MissionCard = ({ mission }: { mission: Mission }) => {
               </option>
             ))}
           </select>
+
+          <PlanRouteButton missionId={mission.id} />
 
           <button
             className="btn-rth px-3 py-1 text-xs rounded border self-start"
