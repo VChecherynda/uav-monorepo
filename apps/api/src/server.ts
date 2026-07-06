@@ -30,7 +30,10 @@ const allowedOrigins = (process.env.CORS_ORIGINS ?? "http://localhost:3000")
   .split(",")
   .map((o) => o.trim());
 
-await app.register(cors, { origin: allowedOrigins });
+await app.register(cors, {
+  origin: allowedOrigins,
+  methods: ["GET", "POST", "PUT", "DELETE"],
+});
 
 await app.register(websocket, {});
 await app.register(wsRoutes);

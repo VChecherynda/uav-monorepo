@@ -2,12 +2,13 @@
 
 import type { Drone, Mission, MissionStatus } from "@uav/shared";
 import { useDronesStore } from "@/contexts/drones";
-import { PlanRouteButton } from "@/contexts/routes";
+import { PlanRouteButton, useRouteDraftStore } from "@/contexts/routes";
 import { useAssignMission } from "../hooks/useAssignMission";
 import { useState } from "react";
 import { useStartMission } from "../hooks/useStartMission";
 import { useAbortMission } from "../hooks/useAbortMission";
 import { useCompleteMission } from "../hooks/useCompleteMission";
+import { useReplaceWaypoints } from "../hooks/useReplaceWaypoints";
 
 type MissionAction = "assign" | "start" | "abort" | "complete";
 
@@ -27,10 +28,14 @@ function getDroneLabel(mission: Mission, drones: Drone[]) {
 
 export const MissionCard = ({ mission }: { mission: Mission }) => {
   const serverDrones = useDronesStore((s) => s.serverDrones);
+  const replace = useReplaceWaypoints();
   const assign = useAssignMission();
   const start = useStartMission();
   const complete = useCompleteMission();
   const abort = useAbortMission();
+  const canSave = useRouteDraftStore(
+    (s) => s.planningMissionId === mission.id && s.waypoints.length > 0,
+  );
 
   const idleDrones = serverDrones.filter((d) => d.status === "idle");
   const [selectedDroneId, setSelectedDroneId] = useState<string>("");
@@ -64,8 +69,23 @@ export const MissionCard = ({ mission }: { mission: Mission }) => {
           >
             Assign
           </button>
+
+          {canSave && (
+            <button
+              className="btn-rth px-3 py-1 text-xs rounded border self-start"
+              disabled={replace.isPending}
+              onClick={() => replace.mutate(mission.id)}
+            >
+              Save
+            </button>
+          )}
+
           {assign.error && (
             <span className="error-message">{assign.error.message}</span>
+          )}
+
+          {replace.error && (
+            <span className="error-message">{replace.error.message}</span>
           )}
         </div>
       );
