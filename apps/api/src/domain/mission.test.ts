@@ -4,8 +4,8 @@ import {
   abortMission,
   startMission,
   completeMission,
+  canReplaceWaypoints,
 } from "../domain/mission.js";
-import type { Geofence } from "@uav/shared";
 
 const draftMission = {
   id: "m1",
@@ -81,6 +81,27 @@ describe("assignDrone", () => {
     ],
   ])("rejects with reason: %s", (mission, drone, reason) => {
     expect(assignDrone(mission, drone)).toEqual({ status: "rejected", reason });
+  });
+});
+
+describe("canReplaceWaypoints", () => {
+  it("can replace mission waypoints", () => {
+    expect(canReplaceWaypoints(draftMission)).toEqual({ status: "success" });
+  });
+
+  it.each([
+    [{ ...draftMission, status: "assigned" as const }],
+    [{ ...draftMission, status: "in-progress" as const }],
+    [{ ...draftMission, status: "completed" as const }],
+    [{ ...draftMission, status: "aborted" as const }],
+  ])("rejects with reason: mission is not draft", (mission) => {
+    expect(canReplaceWaypoints(mission)).toEqual({
+      status: "rejected",
+      reason: {
+        code: "MISSION_IS_NOT_DRAFT",
+        message: "Waypoints can only be replaced while mission is draft",
+      },
+    });
   });
 });
 

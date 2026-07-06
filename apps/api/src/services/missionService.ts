@@ -1,15 +1,18 @@
 import type {
   AssignResult,
+  ReplaceWaypointsResult,
   StartMissionServiceResult,
   AbortMissionServiceResult,
   CompleteMissionServiceResult,
   Geofence,
+  Coordinate,
 } from "@uav/shared";
 import {
   assignDrone,
   startMission,
   abortMission,
   completeMission,
+  canReplaceWaypoints,
 } from "../domain/mission.js";
 import { mapMission, mapDrone, mapWaypoints } from "../lib/mappers.js";
 import { prisma } from "../lib/prisma.js";
@@ -79,6 +82,44 @@ export async function assignMission(
   return {
     status: "success",
     mission: mapMission(updated),
+  };
+}
+
+export async function replaceWaypointsService(
+  missionId: string,
+  waypoints: Coordinate[],
+): Promise<ReplaceWaypointsResult> {
+  const missionRow = await prisma.mission.findUnique({
+    where: { id: missionId },
+  });
+
+  if (!missionRow) {
+    return {
+      status: "rejected",
+      reason: {
+        code: "MISSION_NOT_FOUND",
+        message: "Mission not found",
+      },
+    };
+  }
+
+  const next = canReplaceWaypoints(mapMission(missionRow));
+  if (next.status === "rejected") {
+    return next;
+  }
+
+  const [_, savedWaypoints] = await prisma.$transaction([
+    prisma.waypoint.deleteMany({
+      where: { missionId },
+    }),
+    prisma.waypoint.createManyAndReturn({
+      data: waypoints.map((w) => ({ missionId, ...w })),
+    }),
+  ]);
+
+  return {
+    status: "success",
+    waypoints: mapWaypoints(savedWaypoints),
   };
 }
 

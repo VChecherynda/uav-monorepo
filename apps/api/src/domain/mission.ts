@@ -63,6 +63,26 @@ export type CompleteMissionPatch = {
   drone: Pick<Drone, "status">;
 };
 
+export const canReplaceWaypoints = (
+  mission: Mission,
+):
+  | { status: "success" }
+  | { status: "rejected"; reason: MissionConflictReason } => {
+  if (mission.status !== "draft") {
+    return {
+      status: "rejected",
+      reason: {
+        code: "MISSION_IS_NOT_DRAFT",
+        message: "Waypoints can only be replaced while mission is draft",
+      },
+    };
+  }
+
+  return {
+    status: "success",
+  };
+};
+
 export const startMission = (
   mission: Mission,
   drone: Drone,

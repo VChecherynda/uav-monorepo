@@ -4,6 +4,7 @@ import { authenticate } from "../lib/auth.js";
 import type { FastifyInstance } from "fastify";
 import {
   assignMission,
+  replaceWaypointsService,
   completeMissionService,
   abortMissionService,
   startMissionService,
@@ -14,6 +15,15 @@ import { mapMissions } from "../lib/mappers.js";
 const AssignSchema = z.object({
   droneId: z.string(),
 });
+
+const WaypointsSchema = z
+  .array(
+    z.object({
+      lng: z.number().min(-180).max(180),
+      lat: z.number().min(-90).max(90),
+    }),
+  )
+  .nonempty();
 
 function statusFor(reason: MissionRejectionReason): number {
   if (
@@ -49,6 +59,26 @@ export async function missionRoutes(app: FastifyInstance) {
 
       const { droneId } = parsed.data;
       const result = await assignMission(id, droneId);
+      if (result.status === "rejected") {
+        return reply.code(statusFor(result.reason)).send(result.reason);
+      }
+
+      return reply.send(result);
+    },
+  );
+
+  app.put(
+    "/missions/:id/waypoints",
+    { preHandler: authenticate },
+    async (req, reply) => {
+      const { id } = req.params as { id: string };
+
+      const parsed = WaypointsSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return reply.code(400).send(z.flattenError(parsed.error));
+      }
+
+      const result = await replaceWaypointsService(id, parsed.data);
       if (result.status === "rejected") {
         return reply.code(statusFor(result.reason)).send(result.reason);
       }
