@@ -21,22 +21,26 @@ const toGeoJSON = (
   properties: {},
 });
 
+const SOURCE_ID = "route-draft";
+const LAYER_ID = "route-draft-line";
+
 export function RouteDraftLayer() {
   const map = useMap();
   const waypoints = useRouteDraftStore((s) => s.waypoints);
 
   useEffect(() => {
-    map.addSource("route-draft", {
+    map.addSource(SOURCE_ID, {
       type: "geojson",
       data: toGeoJSON([]),
     });
 
     map.addLayer({
-      id: "route-draft-line",
+      id: LAYER_ID,
       type: "line",
-      source: "route-draft",
+      source: SOURCE_ID,
       paint: {
         "line-color": "#58a6ff",
+        "line-dasharray": [10, 2.4],
         "line-width": 2,
       },
     });
@@ -52,13 +56,13 @@ export function RouteDraftLayer() {
 
     return () => {
       map.off("click", handleClick);
-      map.removeLayer("route-draft-line");
-      map.removeSource("route-draft");
+      map.removeLayer(LAYER_ID);
+      map.removeSource(SOURCE_ID);
     };
   }, [map]);
 
   useEffect(() => {
-    const source = map.getSource("route-draft") as GeoJSONSource;
+    const source = map.getSource(SOURCE_ID) as GeoJSONSource;
     if (!source) return;
 
     source.setData(toGeoJSON(waypoints));
