@@ -7,7 +7,7 @@ import {
 import { useRealtimeChannel } from "@/infrastructure/realtime";
 import { BatteryChart } from "@/contexts/telemetry";
 import { LogoutButton } from "@/contexts/auth";
-import { MissionPanel } from "@/contexts/missions";
+import { MissionPanel, MissionRouteLayer } from "@/contexts/missions";
 import { CrosshairIcon, SignalLostIcon } from "@/components";
 import { useState } from "react";
 import { MapCanvas } from "@/infrastructure/map";
@@ -95,6 +95,7 @@ export default function Home() {
             </div>
             <MapCanvas>
               <DroneMarkersLayer />
+              <MissionRouteLayer />
               <RouteDraftLayer />
             </MapCanvas>
           </main>

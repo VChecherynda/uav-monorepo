@@ -10,7 +10,10 @@ export function PlanRouteButton({ missionId }: { missionId: string }) {
   if (planningMissionId === missionId) {
     return (
       <button
-        onClick={cancelPlanning}
+        onClick={(e) => {
+          e.stopPropagation();
+          cancelPlanning();
+        }}
         className="btn-rth px-3 py-1 text-xs rounded border self-start"
       >
         CANCEL
@@ -20,7 +23,10 @@ export function PlanRouteButton({ missionId }: { missionId: string }) {
 
   return (
     <button
-      onClick={() => startPlanning(missionId)}
+      onClick={(e) => {
+        e.stopPropagation();
+        startPlanning(missionId);
+      }}
       className="btn-rth px-3 py-1 text-xs rounded border self-start"
     >
       START PLANNING
