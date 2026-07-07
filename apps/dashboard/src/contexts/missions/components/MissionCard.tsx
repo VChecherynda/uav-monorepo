@@ -18,6 +18,14 @@ const MISSION_ACTIONS: Partial<Record<MissionStatus, MissionAction[]>> = {
   "in-progress": ["abort", "complete"],
 };
 
+const STATUS_COLOR: Record<MissionStatus, string> = {
+  draft: "var(--text-muted)",
+  assigned: "var(--accent-info)",
+  "in-progress": "var(--accent-ok)",
+  completed: "var(--text-secondary)",
+  aborted: "var(--accent-critical)",
+};
+
 function getDroneLabel(mission: Mission, drones: Drone[]) {
   if (!mission.droneId) return "Drone is not assigned";
 
@@ -68,32 +76,31 @@ export const MissionCard = ({ mission }: { mission: Mission }) => {
             ))}
           </select>
 
-          <PlanRouteButton missionId={mission.id} />
-
-          <button
-            className="btn-rth px-3 py-1 text-xs rounded border self-start"
-            disabled={!selectedDroneId || assign.isPending}
-            onClick={(e) => {
-              e.stopPropagation();
-              assign.mutate({ id: mission.id, droneId: selectedDroneId });
-            }}
-          >
-            Assign
-          </button>
-
-          {canSave && (
+          <div className="flex flex-wrap gap-2">
+            <PlanRouteButton missionId={mission.id} />
             <button
-              className="btn-rth px-3 py-1 text-xs rounded border self-start"
-              disabled={replace.isPending}
+              className="btn-rth px-3 py-1 text-xs rounded border"
+              disabled={!selectedDroneId || assign.isPending}
               onClick={(e) => {
                 e.stopPropagation();
-
-                replace.mutate(mission.id);
+                assign.mutate({ id: mission.id, droneId: selectedDroneId });
               }}
             >
-              Save
+              ASSIGN
             </button>
-          )}
+            {canSave && (
+              <button
+                className="btn-rth px-3 py-1 text-xs rounded border"
+                disabled={replace.isPending}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  replace.mutate(mission.id);
+                }}
+              >
+                SAVE
+              </button>
+            )}
+          </div>
 
           {assign.error && (
             <span className="error-message">{assign.error.message}</span>
@@ -115,15 +122,15 @@ export const MissionCard = ({ mission }: { mission: Mission }) => {
         switch (a) {
           case "start":
             mutation = start;
-            label = "Start";
+            label = "START";
             break;
           case "abort":
             mutation = abort;
-            label = "Abort";
+            label = "ABORT";
             break;
           case "complete":
             mutation = complete;
-            label = "Complete";
+            label = "COMPLETE";
             break;
           default:
             return null;
@@ -175,7 +182,12 @@ export const MissionCard = ({ mission }: { mission: Mission }) => {
         <p className="text-sm font-semibold truncate text-primary">
           {mission.name}
         </p>
-        <p className="label">{mission.status}</p>
+        <span
+          className="status-badge self-start"
+          style={{ color: STATUS_COLOR[mission.status] }}
+        >
+          {mission.status}
+        </span>
         <p className="text-data">{droneLabel}</p>
       </div>
 
