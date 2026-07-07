@@ -35,7 +35,7 @@ const idleDrone = {
 
 const noFlyZone1 = {
   id: "id_1",
-  name: "zone 1",
+  name: "Alpha",
   area: [
     { lng: 10, lat: 5 },
     { lng: 20, lat: 5 },
@@ -46,7 +46,7 @@ const noFlyZone1 = {
 
 const noFlyZone2 = {
   id: "id_2",
-  name: "zone 2",
+  name: "Bravo",
   area: [
     { lng: 30, lat: 15 },
     { lng: 40, lat: 15 },
@@ -160,7 +160,7 @@ describe("startMission", () => {
       {
         code: "ROUTE_VIOLATES_ZONE",
         message:
-          "Waypoint 1 is inside zone zone 1; Segment 1 crosses zone zone 1; Segment 2 crosses zone zone 1",
+          "Waypoint 1 is inside zone Alpha; Segment 1 crosses zone Alpha; Segment 2 crosses zone Alpha",
       },
     ],
     [
@@ -177,7 +177,7 @@ describe("startMission", () => {
       {
         code: "ROUTE_VIOLATES_ZONE",
         message:
-          "Waypoint 2 is inside zone zone 2; Segment 2 crosses zone zone 2; Segment 3 crosses zone zone 2",
+          "Waypoint 2 is inside zone Bravo; Segment 2 crosses zone Bravo; Segment 3 crosses zone Bravo",
       },
     ],
     [
@@ -193,7 +193,7 @@ describe("startMission", () => {
       idleDrone,
       {
         code: "ROUTE_VIOLATES_ZONE",
-        message: "Segment 2 crosses zone zone 2",
+        message: "Segment 2 crosses zone Bravo",
       },
     ],
     [
@@ -209,7 +209,7 @@ describe("startMission", () => {
       idleDrone,
       {
         code: "ROUTE_VIOLATES_ZONE",
-        message: "Segment 1 crosses zone zone 1",
+        message: "Segment 1 crosses zone Alpha",
       },
     ],
   ])("rejects with reason: %s", (mission, drone, reason) => {
