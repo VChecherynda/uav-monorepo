@@ -7,10 +7,18 @@ import {
   canReplaceWaypoints,
 } from "../domain/mission.js";
 
+const defaultWaypoints = [
+  { lng: 8, lat: 12 },
+  { lng: 12, lat: 22 },
+  { lng: 33, lat: 30 },
+  { lng: 38, lat: 30 },
+];
+
 const draftMission = {
   id: "m1",
   name: "test_name",
   droneId: "",
+  waypoints: defaultWaypoints,
   status: "draft" as const,
   reason: undefined,
 };
@@ -24,13 +32,6 @@ const idleDrone = {
   lat: 12,
   battery: 80,
 };
-
-const defaultWaypoints = [
-  { lng: 8, lat: 12 },
-  { lng: 12, lat: 22 },
-  { lng: 33, lat: 30 },
-  { lng: 38, lat: 30 },
-];
 
 const noFlyZone1 = {
   id: "id_1",
@@ -111,7 +112,6 @@ describe("startMission", () => {
       startMission(
         { ...draftMission, status: "assigned" as const },
         idleDrone,
-        defaultWaypoints,
         [noFlyZone1, noFlyZone2],
       ),
     ).toEqual({
@@ -125,7 +125,6 @@ describe("startMission", () => {
     [
       draftMission,
       idleDrone,
-      defaultWaypoints,
       {
         code: "MISSION_IS_NOT_ASSIGNED",
         message: "Only assigned missions can start",
@@ -134,29 +133,30 @@ describe("startMission", () => {
     [
       { ...draftMission, status: "assigned" as const },
       { ...idleDrone, status: "active" as const },
-      defaultWaypoints,
       {
         code: "DRONE_IS_NOT_READY",
         message: "Drone is not idle",
       },
     ],
     [
-      { ...draftMission, status: "assigned" as const },
+      { ...draftMission, waypoints: [], status: "assigned" as const },
       idleDrone,
-      [],
       {
         code: "MISSION_HAS_NO_WAYPOINTS",
         message: "Mission should have waypoints",
       },
     ],
     [
-      { ...draftMission, status: "assigned" as const },
+      {
+        ...draftMission,
+        waypoints: [
+          { lng: 15, lat: 12 },
+          { lng: 23, lat: 30 },
+          { lng: 38, lat: 30 },
+        ],
+        status: "assigned" as const,
+      },
       idleDrone,
-      [
-        { lng: 15, lat: 12 },
-        { lng: 23, lat: 30 },
-        { lng: 38, lat: 30 },
-      ],
       {
         code: "ROUTE_VIOLATES_ZONE",
         message:
@@ -164,13 +164,16 @@ describe("startMission", () => {
       },
     ],
     [
-      { ...draftMission, status: "assigned" as const },
+      {
+        ...draftMission,
+        waypoints: [
+          { lng: 12, lat: 22 },
+          { lng: 37, lat: 22 },
+          { lng: 38, lat: 30 },
+        ],
+        status: "assigned" as const,
+      },
       idleDrone,
-      [
-        { lng: 12, lat: 22 },
-        { lng: 37, lat: 22 },
-        { lng: 38, lat: 30 },
-      ],
       {
         code: "ROUTE_VIOLATES_ZONE",
         message:
@@ -178,35 +181,39 @@ describe("startMission", () => {
       },
     ],
     [
-      { ...draftMission, status: "assigned" as const },
+      {
+        ...draftMission,
+        waypoints: [
+          { lng: 12, lat: 22 },
+          { lng: 45, lat: 22 },
+          { lng: 50, lat: 30 },
+        ],
+        status: "assigned" as const,
+      },
       idleDrone,
-      [
-        { lng: 12, lat: 22 },
-        { lng: 45, lat: 22 },
-        { lng: 50, lat: 30 },
-      ],
       {
         code: "ROUTE_VIOLATES_ZONE",
         message: "Segment 2 crosses zone zone 2",
       },
     ],
     [
-      { ...draftMission, status: "assigned" as const },
+      {
+        ...draftMission,
+        waypoints: [
+          { lng: 23, lat: 12 },
+          { lng: 23, lat: 30 },
+          { lng: 38, lat: 30 },
+        ],
+        status: "assigned" as const,
+      },
       idleDrone,
-      [
-        { lng: 23, lat: 12 },
-        { lng: 23, lat: 30 },
-        { lng: 38, lat: 30 },
-      ],
       {
         code: "ROUTE_VIOLATES_ZONE",
         message: "Segment 1 crosses zone zone 1",
       },
     ],
-  ])("rejects with reason: %s", (mission, drone, waypoints, reason) => {
-    expect(
-      startMission(mission, drone, waypoints, [noFlyZone1, noFlyZone2]),
-    ).toEqual({
+  ])("rejects with reason: %s", (mission, drone, reason) => {
+    expect(startMission(mission, drone, [noFlyZone1, noFlyZone2])).toEqual({
       status: "rejected",
       reason,
     });

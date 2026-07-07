@@ -40,7 +40,7 @@ export async function missionRoutes(app: FastifyInstance) {
   app.get("/missions", async () => {
     const missions = await prisma.mission.findMany({
       orderBy: { createdAt: "desc" },
-      include: { waypoints: true },
+      include: { waypoints: { orderBy: { order: "asc" } } },
     });
 
     return mapMissions(missions);

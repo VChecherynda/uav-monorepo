@@ -47,6 +47,7 @@ export async function assignMission(
 ): Promise<AssignResult> {
   const missionRow = await prisma.mission.findUnique({
     where: { id: missionId },
+    include: { waypoints: { orderBy: { order: "asc" } } },
   });
 
   if (!missionRow) {
@@ -76,6 +77,7 @@ export async function assignMission(
 
   const updated = await prisma.mission.update({
     where: { id: missionId },
+    include: { waypoints: { orderBy: { order: "asc" } } },
     data: next.mission,
   });
 
@@ -91,6 +93,7 @@ export async function replaceWaypointsService(
 ): Promise<ReplaceWaypointsResult> {
   const missionRow = await prisma.mission.findUnique({
     where: { id: missionId },
+    include: { waypoints: { orderBy: { order: "asc" } } },
   });
 
   if (!missionRow) {
@@ -113,7 +116,7 @@ export async function replaceWaypointsService(
       where: { missionId },
     }),
     prisma.waypoint.createManyAndReturn({
-      data: waypoints.map((w) => ({ missionId, ...w })),
+      data: waypoints.map((w, idx) => ({ missionId, order: idx, ...w })),
     }),
   ]);
 
@@ -128,6 +131,7 @@ export async function startMissionService(
 ): Promise<StartMissionServiceResult> {
   const missionRow = await prisma.mission.findUnique({
     where: { id: missionId },
+    include: { waypoints: { orderBy: { order: "asc" } } },
   });
 
   if (!missionRow) {
@@ -151,13 +155,7 @@ export async function startMissionService(
     };
   }
 
-  const [droneRow, waypoints] = await Promise.all([
-    prisma.drone.findUnique({ where: { id: droneId } }),
-    prisma.waypoint.findMany({
-      where: { missionId },
-      orderBy: { recordedAt: "asc" },
-    }),
-  ]);
+  const droneRow = await prisma.drone.findUnique({ where: { id: droneId } });
 
   if (!droneRow) {
     return {
@@ -166,12 +164,7 @@ export async function startMissionService(
     };
   }
 
-  const next = startMission(
-    mapMission(missionRow),
-    mapDrone(droneRow),
-    mapWaypoints(waypoints),
-    ZONES,
-  );
+  const next = startMission(mapMission(missionRow), mapDrone(droneRow), ZONES);
 
   if (next.status === "rejected") {
     return next;
@@ -180,6 +173,7 @@ export async function startMissionService(
   const [updatedMission, updatedDrone] = await prisma.$transaction([
     prisma.mission.update({
       where: { id: missionId },
+      include: { waypoints: { orderBy: { order: "asc" } } },
       data: next.mission,
     }),
     prisma.drone.update({
@@ -200,6 +194,7 @@ export async function abortMissionService(
 ): Promise<AbortMissionServiceResult> {
   const missionRow = await prisma.mission.findUnique({
     where: { id: missionId },
+    include: { waypoints: { orderBy: { order: "asc" } } },
   });
 
   if (!missionRow) {
@@ -220,6 +215,7 @@ export async function abortMissionService(
   const [updatedMission, updatedDrone] = await prisma.$transaction([
     prisma.mission.update({
       where: { id: missionId },
+      include: { waypoints: { orderBy: { order: "asc" } } },
       data: next.mission,
     }),
     prisma.drone.update({
@@ -240,6 +236,7 @@ export async function completeMissionService(
 ): Promise<CompleteMissionServiceResult> {
   const missionRow = await prisma.mission.findUnique({
     where: { id: missionId },
+    include: { waypoints: { orderBy: { order: "asc" } } },
   });
 
   if (!missionRow) {
@@ -260,6 +257,7 @@ export async function completeMissionService(
   const [updatedMission, updatedDrone] = await prisma.$transaction([
     prisma.mission.update({
       where: { id: missionId },
+      include: { waypoints: { orderBy: { order: "asc" } } },
       data: next.mission,
     }),
     prisma.drone.update({

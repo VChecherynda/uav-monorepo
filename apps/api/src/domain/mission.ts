@@ -86,7 +86,6 @@ export const canReplaceWaypoints = (
 export const startMission = (
   mission: Mission,
   drone: Drone,
-  waypoints: Coordinate[],
   zones: Geofence[],
 ):
   | StartMissionPatch
@@ -108,7 +107,7 @@ export const startMission = (
     };
   }
 
-  if (!waypoints.length) {
+  if (!mission.waypoints.length) {
     return {
       status: "rejected",
       reason: {
@@ -119,7 +118,7 @@ export const startMission = (
   }
 
   const rejectedMessages: string[] = [];
-  const route = [{ lng: drone.lng, lat: drone.lat }, ...waypoints];
+  const route = [{ lng: drone.lng, lat: drone.lat }, ...mission.waypoints];
 
   for (let i = 0; i < zones.length; i++) {
     const zone = zones[i];
@@ -127,8 +126,8 @@ export const startMission = (
       continue;
     }
 
-    for (let j = 0; j < waypoints.length; j++) {
-      const w = waypoints[j];
+    for (let j = 0; j < mission.waypoints.length; j++) {
+      const w = mission.waypoints[j];
       if (!w) {
         continue;
       }

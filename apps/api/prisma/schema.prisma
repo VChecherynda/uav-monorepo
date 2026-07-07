@@ -58,6 +58,7 @@ model Waypoint {
   lng        Float
   lat        Float
   missionId  String
+  order      Int
   recordedAt DateTime @default(now())
   mission    Mission  @relation(fields: [missionId], references: [id])
 }

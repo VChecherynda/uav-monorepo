@@ -1,3 +1,5 @@
+import type { Coordinate } from "./geometry.js";
+
 export type MissionStatus =
   | "draft"
   | "assigned"
@@ -9,6 +11,7 @@ export type Mission = {
   id: string;
   name: string;
   droneId: string | undefined;
+  waypoints: Coordinate[];
   status: MissionStatus;
   reason: string | undefined;
 };
