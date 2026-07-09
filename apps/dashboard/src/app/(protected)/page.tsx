@@ -11,7 +11,7 @@ import { MissionPanel, MissionRouteLayer } from "@/contexts/missions";
 import { CrosshairIcon, SignalLostIcon } from "@/components";
 import { useState } from "react";
 import { MapCanvas } from "@/infrastructure/map";
-import { RouteDraftLayer } from "@/contexts/routes";
+import { PlanningModeBadge, RouteDraftLayer } from "@/contexts/routes";
 
 type Tab = "drones" | "missions";
 
@@ -93,6 +93,9 @@ export default function Home() {
                 SIMULATED DATA · DEMO ENVIRONMENT
               </span>
             </div>
+
+            <PlanningModeBadge />
+
             <MapCanvas>
               <DroneMarkersLayer />
               <MissionRouteLayer />
