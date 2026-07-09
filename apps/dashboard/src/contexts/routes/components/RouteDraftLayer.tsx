@@ -6,7 +6,8 @@ import { useRouteDraftStore } from "../stores/useRouteDraftStore";
 import type { MapMouseEvent, GeoJSONSource } from "maplibre-gl";
 
 const SOURCE_ID = "route-draft";
-const LAYER_ID = "route-draft-line";
+const LINE_LAYER_ID = "route-draft-line";
+const POINT_LAYER_ID = "route-draft-point";
 
 export function RouteDraftLayer() {
   const map = useMap();
@@ -19,13 +20,24 @@ export function RouteDraftLayer() {
     });
 
     map.addLayer({
-      id: LAYER_ID,
+      id: LINE_LAYER_ID,
       type: "line",
       source: SOURCE_ID,
       paint: {
         "line-color": "#58a6ff",
         "line-dasharray": [10, 2.4],
         "line-width": 2,
+      },
+    });
+
+    map.addLayer({
+      id: POINT_LAYER_ID,
+      type: "circle",
+      source: SOURCE_ID,
+      paint: {
+        "circle-color": "#0a0e14",
+        "circle-stroke-width": 2,
+        "circle-stroke-color": "#58a6ff",
       },
     });
 
@@ -40,7 +52,8 @@ export function RouteDraftLayer() {
 
     return () => {
       map.off("click", handleClick);
-      map.removeLayer(LAYER_ID);
+      map.removeLayer(LINE_LAYER_ID);
+      map.removeLayer(POINT_LAYER_ID);
       map.removeSource(SOURCE_ID);
     };
   }, [map]);
