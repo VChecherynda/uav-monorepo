@@ -6,6 +6,8 @@ import type {
   CompleteMissionServiceResult,
   Geofence,
   Coordinate,
+  MissionConflictReason,
+  MissionNotFoundReason,
 } from "@uav/shared";
 import {
   assignDrone,
@@ -40,6 +42,12 @@ const ZONES: Geofence[] = [
     ],
   },
 ];
+
+class MissionRejectedError extends Error {
+  constructor(public reason: MissionConflictReason | MissionNotFoundReason) {
+    super(reason.message);
+  }
+}
 
 export async function assignMission(
   missionId: string,
@@ -91,39 +99,41 @@ export async function replaceWaypointsService(
   missionId: string,
   waypoints: Coordinate[],
 ): Promise<ReplaceWaypointsResult> {
-  const missionRow = await prisma.mission.findUnique({
-    where: { id: missionId },
-    include: { waypoints: { orderBy: { order: "asc" } } },
-  });
+  try {
+    const savedWaypoints = await prisma.$transaction(async (tx) => {
+      const missionRow = await tx.mission.findUnique({
+        where: { id: missionId },
+        include: { waypoints: { orderBy: { order: "asc" } } },
+      });
+      if (!missionRow) {
+        throw new MissionRejectedError({
+          code: "MISSION_NOT_FOUND",
+          message: "Mission not found",
+        });
+      }
 
-  if (!missionRow) {
+      const next = canReplaceWaypoints(mapMission(missionRow));
+      if (next.status === "rejected") {
+        throw new MissionRejectedError(next.reason); // ← доменний reason їде в throw
+      }
+
+      await tx.waypoint.deleteMany({ where: { missionId } });
+      return tx.waypoint.createManyAndReturn({
+        data: waypoints.map((w, idx) => ({ missionId, order: idx, ...w })),
+      });
+    });
+
     return {
-      status: "rejected",
-      reason: {
-        code: "MISSION_NOT_FOUND",
-        message: "Mission not found",
-      },
+      status: "success",
+      waypoints: mapWaypoints(savedWaypoints),
     };
+  } catch (e) {
+    if (e instanceof MissionRejectedError) {
+      return { status: "rejected", reason: e.reason };
+    }
+
+    throw e;
   }
-
-  const next = canReplaceWaypoints(mapMission(missionRow));
-  if (next.status === "rejected") {
-    return next;
-  }
-
-  const [_, savedWaypoints] = await prisma.$transaction([
-    prisma.waypoint.deleteMany({
-      where: { missionId },
-    }),
-    prisma.waypoint.createManyAndReturn({
-      data: waypoints.map((w, idx) => ({ missionId, order: idx, ...w })),
-    }),
-  ]);
-
-  return {
-    status: "success",
-    waypoints: mapWaypoints(savedWaypoints),
-  };
 }
 
 export async function startMissionService(
