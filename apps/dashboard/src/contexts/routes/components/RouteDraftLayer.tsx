@@ -1,25 +1,9 @@
 "use client";
 
-import { useMap } from "@/infrastructure/map";
+import { toGeoJSON, useMap } from "@/infrastructure/map";
 import { useEffect } from "react";
 import { useRouteDraftStore } from "../stores/useRouteDraftStore";
-import type {
-  MapMouseEvent,
-  GeoJSONSourceSpecification,
-  GeoJSONSource,
-} from "maplibre-gl";
-import type { Coordinate } from "@uav/shared";
-
-const toGeoJSON = (
-  waypoints: Coordinate[],
-): GeoJSONSourceSpecification["data"] => ({
-  type: "Feature",
-  geometry: {
-    type: "LineString",
-    coordinates: waypoints.map((w) => [w.lng, w.lat]),
-  },
-  properties: {},
-});
+import type { MapMouseEvent, GeoJSONSource } from "maplibre-gl";
 
 const SOURCE_ID = "route-draft";
 const LAYER_ID = "route-draft-line";

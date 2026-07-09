@@ -1,21 +1,10 @@
 "use client";
 
-import { useMap } from "@/infrastructure/map";
+import { toGeoJSON, useMap } from "@/infrastructure/map";
 import { useEffect } from "react";
 import { useMissionsStore } from "../stores/useMissionsStore";
-import type { GeoJSONSourceSpecification, GeoJSONSource } from "maplibre-gl";
+import type { GeoJSONSource } from "maplibre-gl";
 import type { Coordinate } from "@uav/shared";
-
-const toGeoJSON = (
-  waypoints: Coordinate[],
-): GeoJSONSourceSpecification["data"] => ({
-  type: "Feature",
-  geometry: {
-    type: "LineString",
-    coordinates: waypoints.map((w) => [w.lng, w.lat]),
-  },
-  properties: {},
-});
 
 const EMPTY: Coordinate[] = [];
 const SOURCE_ID = "mission-route";
