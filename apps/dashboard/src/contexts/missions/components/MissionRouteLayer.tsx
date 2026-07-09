@@ -8,7 +8,8 @@ import type { Coordinate } from "@uav/shared";
 
 const EMPTY: Coordinate[] = [];
 const SOURCE_ID = "mission-route";
-const LAYER_ID = "mission-route-line";
+const LINE_LAYER_ID = "mission-route-line";
+const POINT_LAYER_ID = "mission-route-point";
 
 export function MissionRouteLayer() {
   const map = useMap();
@@ -24,7 +25,7 @@ export function MissionRouteLayer() {
     });
 
     map.addLayer({
-      id: LAYER_ID,
+      id: LINE_LAYER_ID,
       type: "line",
       source: SOURCE_ID,
       paint: {
@@ -33,8 +34,19 @@ export function MissionRouteLayer() {
       },
     });
 
+    map.addLayer({
+      id: POINT_LAYER_ID,
+      type: "circle",
+      source: SOURCE_ID,
+      paint: {
+        "circle-color": "#58a6ff",
+        "circle-radius": 4,
+      },
+    });
+
     return () => {
-      map.removeLayer(LAYER_ID);
+      map.removeLayer(LINE_LAYER_ID);
+      map.removeLayer(POINT_LAYER_ID);
       map.removeSource(SOURCE_ID);
     };
   }, [map]);
