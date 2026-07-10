@@ -25,7 +25,9 @@ export async function apiFetch<T>(
     const error = await response
       .json()
       .catch(() => ({ error: "Request failed" }));
-    throw new Error(error.error ?? `HTTP status: ${response.status}`);
+    throw new Error(
+      error.message ?? error.error ?? `HTTP status: ${response.status}`,
+    );
   }
 
   return response.json();
