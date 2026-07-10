@@ -24,7 +24,7 @@ export function RouteDraftLayer() {
       type: "line",
       source: SOURCE_ID,
       paint: {
-        "line-color": "#58a6ff",
+        "line-color": "#d29922",
         "line-dasharray": [10, 2.4],
         "line-width": 2,
       },
@@ -37,7 +37,7 @@ export function RouteDraftLayer() {
       paint: {
         "circle-color": "#0a0e14",
         "circle-stroke-width": 2,
-        "circle-stroke-color": "#58a6ff",
+        "circle-stroke-color": "#d29922",
       },
     });
 
