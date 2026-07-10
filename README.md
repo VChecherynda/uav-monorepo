@@ -91,6 +91,24 @@ return { status: "rejected", reason: { code: "INSUFFICIENT_BATTERY" } };
 
 HTTP status codes describe transport results — whether the request was received and processed. A rejected command is a valid domain outcome: the drone received the command, understood it, and declined based on a business rule. Using 4xx would cause middleware, proxies, and monitoring systems to treat a low-battery drone as a system error.
 
+### Route visibility policy
+
+`selectedMissionId` (missions) and `planningMissionId` (route draft) are
+independent stores and are never forcibly linked. Both routes stay visible
+on the map at the same time:
+
+- **Same mission selected and planned** — the saved route remains visible
+  under the draft, so the operator sees "current vs. new" instead of
+  redrawing from memory.
+- **Different missions** — a legitimate fleet scenario (deconfliction):
+  the operator plans one mission while referencing another mission's
+  route in the same airspace.
+
+The draft is distinguished visually, not by hiding data: dashed line,
+hollow circles, and the planning accent color (`--accent-warn`) shared
+with the PLANNING MODE badge. Saved routes are solid blue with filled
+circles.
+
 ---
 
 ## Domain Concepts
