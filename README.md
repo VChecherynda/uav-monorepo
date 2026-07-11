@@ -252,6 +252,18 @@ Honest list — decisions, not omissions.
 | Multi-operator support            | Out of scope | Single JWT session — concurrent operators would need presence layer                                          |
 | Telemetry retention policy tuning | Deferred     | Current 1h window is conservative — production would tune based on operational requirements                  |
 
+- **Row-level locking (SELECT FOR UPDATE) for `replaceWaypoints` / `startMission`** —
+  current interactive transactions guard against races within a single request
+  (e.g. start vs simulation tick), but two concurrent requests still read
+  independent snapshots: both guards may pass, assigning one drone to two
+  missions. Deferred: requires raw SQL locking; the common race is already
+  closed by interactive tx.
+
+- **Integration test for concurrent starts** — two parallel `startMission`
+  requests against a real database, proving the "one drone = one active mission"
+  invariant under actual DB concurrency. Unit tests can't catch this: mocks
+  run sequentially, so the race physically can't occur in them.
+
 ---
 
 Built by [Vadym Checherynda](https://linkedin.com/in/vadym-checherynda-8b15ba119/)
