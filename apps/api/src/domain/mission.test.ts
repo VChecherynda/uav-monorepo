@@ -5,6 +5,7 @@ import {
   startMission,
   completeMission,
   canReplaceWaypoints,
+  canAssignMission,
 } from "../domain/mission.js";
 
 const defaultWaypoints = [
@@ -82,6 +83,24 @@ describe("assignDrone", () => {
     ],
   ])("rejects with reason: %s", (mission, drone, reason) => {
     expect(assignDrone(mission, drone)).toEqual({ status: "rejected", reason });
+  });
+});
+
+describe("canMissionAssigned", () => {
+  it("can mission be assigned", () => {
+    expect(
+      canAssignMission({
+        ...draftMission,
+        waypoints: [],
+        status: "assigned" as const,
+      }),
+    ).toEqual({
+      status: "rejected",
+      reason: {
+        code: "MISSION_HAS_NO_WAYPOINTS",
+        message: "Mission should have waypoints",
+      },
+    });
   });
 });
 

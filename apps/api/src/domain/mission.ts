@@ -63,6 +63,26 @@ export type CompleteMissionPatch = {
   drone: Pick<Drone, "status">;
 };
 
+export const canAssignMission = (
+  mission: Mission,
+):
+  | { status: "success" }
+  | { status: "rejected"; reason: MissionConflictReason } => {
+  if (!mission.waypoints.length) {
+    return {
+      status: "rejected",
+      reason: {
+        code: "MISSION_HAS_NO_WAYPOINTS",
+        message: "Mission should have waypoints",
+      },
+    };
+  }
+
+  return {
+    status: "success",
+  };
+};
+
 export const canReplaceWaypoints = (
   mission: Mission,
 ):
