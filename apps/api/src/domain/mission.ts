@@ -88,7 +88,7 @@ export const canReplaceWaypoints = (
 ):
   | { status: "success" }
   | { status: "rejected"; reason: MissionConflictReason } => {
-  if (mission.status !== "draft") {
+  if (mission.status !== "draft" && mission.status !== "assigned") {
     return {
       status: "rejected",
       reason: {

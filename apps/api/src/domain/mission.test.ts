@@ -105,12 +105,16 @@ describe("canMissionAssigned", () => {
 });
 
 describe("canReplaceWaypoints", () => {
-  it("can replace mission waypoints", () => {
-    expect(canReplaceWaypoints(draftMission)).toEqual({ status: "success" });
+  it.each([
+    [{ ...draftMission }],
+    [{ ...draftMission, status: "assigned" as const }],
+  ])("can replace mission waypoints", (mission) => {
+    expect(canReplaceWaypoints(mission)).toEqual({
+      status: "success",
+    });
   });
 
   it.each([
-    [{ ...draftMission, status: "assigned" as const }],
     [{ ...draftMission, status: "in-progress" as const }],
     [{ ...draftMission, status: "completed" as const }],
     [{ ...draftMission, status: "aborted" as const }],
