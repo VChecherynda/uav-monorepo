@@ -118,12 +118,13 @@ describe("canReplaceWaypoints", () => {
     [{ ...draftMission, status: "in-progress" as const }],
     [{ ...draftMission, status: "completed" as const }],
     [{ ...draftMission, status: "aborted" as const }],
-  ])("rejects with reason: mission is not draft", (mission) => {
+  ])("rejects waypoint replacement for locked mission %s", (mission) => {
     expect(canReplaceWaypoints(mission)).toEqual({
       status: "rejected",
       reason: {
-        code: "MISSION_IS_NOT_DRAFT",
-        message: "Waypoints can only be replaced while mission is draft",
+        code: "WAYPOINTS_CANNOT_BE_REPLACED",
+        message:
+          "Waypoints can only be replaced while mission is draft or assigned",
       },
     });
   });

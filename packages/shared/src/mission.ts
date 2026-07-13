@@ -24,4 +24,5 @@ export type MissionConflictReason =
   | { code: "MISSION_HAS_NO_DRONE"; message: string }
   | { code: "MISSION_CANNOT_BE_ABORTED"; message: string }
   | { code: "MISSION_IS_NOT_IN_PROGRESS"; message: string }
+  | { code: "WAYPOINTS_CANNOT_BE_REPLACED"; message: string }
   | { code: "ROUTE_VIOLATES_ZONE"; message: string };

@@ -92,8 +92,9 @@ export const canReplaceWaypoints = (
     return {
       status: "rejected",
       reason: {
-        code: "MISSION_IS_NOT_DRAFT",
-        message: "Waypoints can only be replaced while mission is draft",
+        code: "WAYPOINTS_CANNOT_BE_REPLACED",
+        message:
+          "Waypoints can only be replaced while mission is draft or assigned",
       },
     };
   }
