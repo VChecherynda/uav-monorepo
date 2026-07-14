@@ -36,6 +36,7 @@ describe("buildVisibilityGraph", () => {
     const graph = buildVisibilityGraph(S, G, SQUARE);
     const edge = graph["S"].find((e) => e.id === "corner-0");
 
+    expect(edge).toBeDefined();
     expect(edge?.weight).toBe(Math.sqrt(50));
   });
 
