@@ -45,6 +45,7 @@ export function MissionRouteLayer() {
     });
 
     return () => {
+      if (!map.getStyle()) return;
       map.removeLayer(LINE_LAYER_ID);
       map.removeLayer(POINT_LAYER_ID);
       map.removeSource(SOURCE_ID);

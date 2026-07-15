@@ -51,6 +51,7 @@ export function RouteDraftLayer() {
     map.on("click", handleClick);
 
     return () => {
+      if (!map.getStyle()) return;
       map.off("click", handleClick);
       map.removeLayer(LINE_LAYER_ID);
       map.removeLayer(POINT_LAYER_ID);
