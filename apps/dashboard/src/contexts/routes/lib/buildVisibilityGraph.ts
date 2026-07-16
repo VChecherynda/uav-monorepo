@@ -1,11 +1,44 @@
-import type { Coordinate } from "@uav/shared";
-import { segmentIntersectsPolygon } from "@uav/shared";
+import type { Coordinate, Geofence } from "@uav/shared";
+import { isPointInPolygon, segmentIntersectsPolygon } from "@uav/shared";
 import { AdjacencyList } from "./findRoute";
+
+function intersectsAnyZone(
+  u: Coordinate,
+  v: Coordinate,
+  zones: Geofence[],
+): boolean {
+  for (let i = 0; i < zones.length; i++) {
+    if (segmentIntersectsPolygon(u, v, zones[i].area)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+function isInsideAnyZone(
+  c: Coordinate,
+  zoneId: string,
+  zones: Geofence[],
+): boolean {
+  for (let i = 0; i < zones.length; i++) {
+    const zone = zones[i];
+    if (zoneId === zone.id) {
+      continue;
+    }
+
+    if (isPointInPolygon(c, zone.area)) {
+      return true;
+    }
+  }
+
+  return false;
+}
 
 export function buildVisibilityGraph(
   s: Coordinate,
   g: Coordinate,
-  area: Coordinate[],
+  zones: Geofence[],
 ): AdjacencyList {
   const coords = new Map<string, Coordinate>();
   const graph: AdjacencyList = {};
@@ -13,9 +46,20 @@ export function buildVisibilityGraph(
   coords.set("S", s);
   coords.set("G", g);
 
-  area.forEach((c, idx) => {
-    coords.set(`corner-${idx}`, c);
-  });
+  for (let i = 0; i < zones.length; i++) {
+    const zone = zones[i];
+    if (!zone) {
+      continue;
+    }
+
+    for (let j = 0; j < zone.area.length; j++) {
+      const c = zone.area[j];
+      if (isInsideAnyZone(c, zone.id, zones)) {
+        continue;
+      }
+      coords.set(`corner-${zone.id}-${j}`, c);
+    }
+  }
 
   const names = Array.from(coords.keys());
   for (let i = 0; i < names.length; i++) {
@@ -26,7 +70,7 @@ export function buildVisibilityGraph(
       const coordV = coords.get(toName);
 
       if (!coordU || !coordV) continue;
-      if (segmentIntersectsPolygon(coordU, coordV, area)) continue;
+      if (intersectsAnyZone(coordU, coordV, zones)) continue;
 
       const dx = coordV.lng - coordU.lng;
       const dy = coordV.lat - coordU.lat;
