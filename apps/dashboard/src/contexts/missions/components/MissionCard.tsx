@@ -78,37 +78,50 @@ export const MissionCard = ({ mission }: { mission: Mission }) => {
 
           <div className="flex flex-wrap gap-2">
             <PlanRouteButton missionId={mission.id} />
-            <button
-              className="btn-rth px-3 py-1 text-xs rounded border"
-              disabled={!selectedDroneId || assign.isPending}
-              onClick={(e) => {
-                e.stopPropagation();
-                assign.mutate({ id: mission.id, droneId: selectedDroneId });
-              }}
-            >
-              ASSIGN
-            </button>
-            {canSave && (
+            <div className="flex flex-col gap-1 min-w-0">
               <button
                 className="btn-rth px-3 py-1 text-xs rounded border"
-                disabled={replace.isPending}
+                disabled={!selectedDroneId || assign.isPending}
                 onClick={(e) => {
                   e.stopPropagation();
-                  replace.mutate(mission.id);
+                  assign.mutate({ id: mission.id, droneId: selectedDroneId });
                 }}
               >
-                SAVE
+                ASSIGN
               </button>
+
+              {assign.error && (
+                <span
+                  className="error-message truncate"
+                  title={assign.error.message}
+                >
+                  {assign.error.message}
+                </span>
+              )}
+            </div>
+            {canSave && (
+              <div className="flex flex-col gap-1 min-w-0">
+                <button
+                  className="btn-rth px-3 py-1 text-xs rounded border"
+                  disabled={replace.isPending}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    replace.mutate(mission.id);
+                  }}
+                >
+                  SAVE
+                </button>
+                {replace.error && (
+                  <span
+                    className="error-message truncate"
+                    title={replace.error.message}
+                  >
+                    {replace.error.message}
+                  </span>
+                )}
+              </div>
             )}
           </div>
-
-          {assign.error && (
-            <span className="error-message">{assign.error.message}</span>
-          )}
-
-          {replace.error && (
-            <span className="error-message">{replace.error.message}</span>
-          )}
         </div>
       );
       break;
@@ -137,9 +150,9 @@ export const MissionCard = ({ mission }: { mission: Mission }) => {
         }
 
         return (
-          <div key={a}>
+          <div key={a} className="flex flex-col gap-1 min-w-0">
             <button
-              className="btn-rth px-3 py-1 text-xs rounded border"
+              className="btn-rth px-3 py-1 text-xs rounded border self-start"
               disabled={mutation.isPending}
               onClick={(e) => {
                 e.stopPropagation();
@@ -149,7 +162,12 @@ export const MissionCard = ({ mission }: { mission: Mission }) => {
               {label}
             </button>
             {mutation.error && (
-              <span className="error-message">{mutation.error.message}</span>
+              <span
+                className="error-message truncate"
+                title={mutation.error.message}
+              >
+                {mutation.error.message}
+              </span>
             )}
           </div>
         );
