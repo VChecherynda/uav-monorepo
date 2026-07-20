@@ -1,7 +1,9 @@
-import type { Coordinate } from "./geometry.js";
+import { z } from "zod";
 
-export type Geofence = {
-  id: string;
-  name: string;
-  area: Coordinate[];
-};
+export const GeofenceSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  area: z.array(z.object({ lng: z.number(), lat: z.number() })),
+});
+
+export type Geofence = z.infer<typeof GeofenceSchema>;
