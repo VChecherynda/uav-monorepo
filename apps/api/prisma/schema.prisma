@@ -63,6 +63,14 @@ model Waypoint {
   mission    Mission  @relation(fields: [missionId], references: [id])
 }
 
+model Geofence {
+  id        String   @id @default(cuid())
+  name      String
+  area      Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model User {
   id           String   @id @default(cuid())
   email        String   @unique

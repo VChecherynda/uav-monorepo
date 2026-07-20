@@ -36,12 +36,37 @@ const drones = [
   },
 ];
 
+const zones = [
+  {
+    name: "Alice Springs Airport",
+    area: [
+      { lng: 133.892, lat: -23.812 },
+      { lng: 133.912, lat: -23.812 },
+      { lng: 133.912, lat: -23.792 },
+      { lng: 133.892, lat: -23.792 },
+    ],
+  },
+  {
+    name: "Restricted North",
+    area: [
+      { lng: 133.86, lat: -23.66 },
+      { lng: 133.89, lat: -23.66 },
+      { lng: 133.89, lat: -23.64 },
+      { lng: 133.86, lat: -23.64 },
+    ],
+  },
+];
+
 async function main() {
   await prisma.telemetry.deleteMany();
   await prisma.waypoint.deleteMany();
   await prisma.mission.deleteMany();
   await prisma.drone.deleteMany();
+  await prisma.geofence.deleteMany();
+
   await prisma.drone.createMany({ data: drones });
+  await prisma.geofence.createMany({ data: zones });
+
   await prisma.user.deleteMany();
   await prisma.user.create({
     data: {
