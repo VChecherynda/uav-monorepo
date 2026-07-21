@@ -1,12 +1,12 @@
-import type {
-  AssignResult,
-  ReplaceWaypointsResult,
-  StartMissionServiceResult,
-  AbortMissionServiceResult,
-  CompleteMissionServiceResult,
-  Geofence,
-  Coordinate,
-  MissionRejectionReason,
+import {
+  type AssignResult,
+  type ReplaceWaypointsResult,
+  type StartMissionServiceResult,
+  type AbortMissionServiceResult,
+  type CompleteMissionServiceResult,
+  type Coordinate,
+  type MissionRejectionReason,
+  GeofenceSchema,
 } from "@uav/shared";
 import {
   assignDrone,
@@ -18,30 +18,6 @@ import {
 } from "../domain/mission.js";
 import { mapMission, mapDrone, mapWaypoints } from "../lib/mappers.js";
 import { prisma } from "../lib/prisma.js";
-
-// TODO: move zones to DB table (known debt).
-const ZONES: Geofence[] = [
-  {
-    id: "zone-airport",
-    name: "Alice Springs Airport",
-    area: [
-      { lng: 133.892, lat: -23.812 },
-      { lng: 133.912, lat: -23.812 },
-      { lng: 133.912, lat: -23.792 },
-      { lng: 133.892, lat: -23.792 },
-    ],
-  },
-  {
-    id: "zone-restricted-north",
-    name: "Restricted North",
-    area: [
-      { lng: 133.86, lat: -23.66 },
-      { lng: 133.89, lat: -23.66 },
-      { lng: 133.89, lat: -23.64 },
-      { lng: 133.86, lat: -23.64 },
-    ],
-  },
-];
 
 class MissionRejectedError extends Error {
   constructor(public reason: MissionRejectionReason) {
@@ -159,7 +135,6 @@ export async function startMissionService(
           where: { id: missionId },
           include: { waypoints: { orderBy: { order: "asc" } } },
         });
-
         if (!missionRow) {
           throw new MissionRejectedError({
             code: "MISSION_NOT_FOUND",
@@ -176,7 +151,6 @@ export async function startMissionService(
         }
 
         const droneRow = await tx.drone.findUnique({ where: { id: droneId } });
-
         if (!droneRow) {
           throw new MissionRejectedError({
             code: "DRONE_NOT_FOUND",
@@ -184,11 +158,18 @@ export async function startMissionService(
           });
         }
 
+        const zoneRows = await tx.geofence.findMany();
+        const zones = GeofenceSchema.array().parse(zoneRows);
+        if (!zones.length) {
+          throw new Error("No geofences in database");
+        }
+
         const next = startMission(
           mapMission(missionRow),
           mapDrone(droneRow),
-          ZONES,
+          zones,
         );
+
         if (next.status === "rejected") {
           throw new MissionRejectedError(next.reason);
         }
