@@ -1,13 +1,14 @@
 "use client";
 
 import { zonesToGeoJSON, useMapLayer } from "@/infrastructure/map";
-import { ZONES } from "../constants";
+import { useGeofences } from "../hooks/useGeofences";
 
 const SOURCE_ID = "geofence-zone";
 const POLYGON_LAYER_ID = "geofence-zone-polygon";
 
 export function GeofenceLayer() {
-  const data = zonesToGeoJSON(ZONES);
+  const zones = useGeofences();
+  const data = zonesToGeoJSON(zones);
 
   useMapLayer({
     data,
