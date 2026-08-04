@@ -70,7 +70,7 @@ export async function authRoutes(fastify: FastifyInstance) {
 
     if (!user || !isValid) {
       return reply.status(401).send({
-        error: "Invalid credetials",
+        error: "Invalid credentials",
       });
     }
 
