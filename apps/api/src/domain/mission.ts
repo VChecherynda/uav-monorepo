@@ -3,7 +3,6 @@ import type {
   Geofence,
   Drone,
   MissionConflictReason,
-  Coordinate,
 } from "@uav/shared";
 import { isPointInPolygon, segmentIntersectsPolygon } from "@uav/shared";
 
@@ -56,6 +55,19 @@ export type AbortMissionPatch = {
   mission: Pick<Mission, "status">;
   drone: Pick<Drone, "status">;
 };
+
+export type RestoreMissionPatch =
+  | {
+      status: "success";
+      outcome: "reassigned";
+      mission: Pick<Mission, "status">;
+      drone: Pick<Drone, "status">;
+    }
+  | {
+      status: "success";
+      outcome: "unassigned";
+      mission: Pick<Mission, "status"> & { droneId: undefined };
+    };
 
 export type CompleteMissionPatch = {
   status: "success";
@@ -241,4 +253,43 @@ export const completeMission = (
     mission: { status: "completed" },
     drone: { status: "idle" },
   };
+};
+
+export const restoreMission = (
+  mission: Mission,
+  drone: Drone,
+):
+  | RestoreMissionPatch
+  | { status: "rejected"; reason: MissionConflictReason } => {
+  if (mission.status !== "aborted") {
+    return {
+      status: "rejected",
+      reason: {
+        code: "MISSION_CANNOT_BE_RESTORED",
+        message: "Only aborted missions can be restored",
+      },
+    };
+  }
+
+  if (drone.status === "idle") {
+    return {
+      status: "success",
+      outcome: "reassigned",
+      mission: {
+        status: "assigned",
+      },
+      drone: {
+        status: "assigned",
+      },
+    };
+  } else {
+    return {
+      status: "success",
+      outcome: "unassigned",
+      mission: {
+        status: "draft",
+        droneId: undefined,
+      },
+    };
+  }
 };

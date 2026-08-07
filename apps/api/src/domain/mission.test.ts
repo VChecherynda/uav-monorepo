@@ -6,6 +6,7 @@ import {
   completeMission,
   canReplaceWaypoints,
   canAssignMission,
+  restoreMission,
 } from "../domain/mission.js";
 
 const defaultWaypoints = [
@@ -319,6 +320,49 @@ describe("completeMission", () => {
       reason: {
         code: "MISSION_IS_NOT_IN_PROGRESS",
         message: "Only in-progress missions can be completed",
+      },
+    });
+  });
+});
+
+describe("restoreMission", () => {
+  it("mission with aborted status reassigned successfuly", () => {
+    expect(
+      restoreMission({ ...draftMission, status: "aborted" }, idleDrone),
+    ).toEqual({
+      status: "success",
+      outcome: "reassigned",
+      mission: {
+        status: "assigned",
+      },
+      drone: {
+        status: "assigned",
+      },
+    });
+  });
+
+  it("mission with aborted status unassigned successfuly", () => {
+    expect(
+      restoreMission(
+        { ...draftMission, status: "aborted" },
+        { ...idleDrone, status: "offline" },
+      ),
+    ).toStrictEqual({
+      status: "success",
+      outcome: "unassigned",
+      mission: {
+        status: "draft",
+        droneId: undefined,
+      },
+    });
+  });
+
+  it("rejects to restore mission", () => {
+    expect(restoreMission(draftMission, idleDrone)).toEqual({
+      status: "rejected",
+      reason: {
+        code: "MISSION_CANNOT_BE_RESTORED",
+        message: "Only aborted missions can be restored",
       },
     });
   });

@@ -1,6 +1,11 @@
 export type DroneAction = "return-home" | "land" | "takeoff";
 
-export type DroneStatus = "active" | "idle" | "offline" | "returning";
+export type DroneStatus =
+  | "active"
+  | "idle"
+  | "assigned"
+  | "offline"
+  | "returning";
 
 export type Drone = {
   id: string;
