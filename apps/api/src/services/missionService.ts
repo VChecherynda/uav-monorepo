@@ -3,6 +3,7 @@ import {
   type ReplaceWaypointsResult,
   type StartMissionServiceResult,
   type AbortMissionServiceResult,
+  type RestoreMissionServiceResult,
   type CompleteMissionServiceResult,
   type Coordinate,
   type MissionRejectionReason,
@@ -15,6 +16,7 @@ import {
   completeMission,
   canReplaceWaypoints,
   canAssignMission,
+  restoreMission,
 } from "../domain/mission.js";
 import { mapMission, mapDrone, mapWaypoints } from "../lib/mappers.js";
 import { prisma } from "../lib/prisma.js";
@@ -246,6 +248,76 @@ export async function abortMissionService(
     mission: mapMission(updatedMission),
     drone: mapDrone(updatedDrone),
   };
+}
+
+export async function restoreMissionService(
+  missionId: string,
+): Promise<RestoreMissionServiceResult> {
+  const missionRow = await prisma.mission.findUnique({
+    where: { id: missionId },
+    include: { waypoints: { orderBy: { order: "asc" } } },
+  });
+  if (!missionRow) {
+    return {
+      status: "rejected",
+      reason: {
+        code: "MISSION_NOT_FOUND",
+        message: "Mission not found",
+      },
+    };
+  }
+
+  if (!missionRow.droneId) {
+    throw new Error("Mission has no drone");
+  }
+
+  const droneRow = await prisma.drone.findUnique({
+    where: { id: missionRow.droneId },
+  });
+  if (!droneRow) {
+    return {
+      status: "rejected",
+      reason: {
+        code: "DRONE_NOT_FOUND",
+        message: "Drone not found",
+      },
+    };
+  }
+
+  const next = restoreMission(mapMission(missionRow), mapDrone(droneRow));
+  if (next.status === "rejected") {
+    return next;
+  }
+
+  if (next.outcome === "reassigned") {
+    const [updatedMission] = await prisma.$transaction([
+      prisma.mission.update({
+        where: { id: missionId },
+        include: { waypoints: { orderBy: { order: "asc" } } },
+        data: next.mission,
+      }),
+      prisma.drone.update({
+        where: { id: missionRow.droneId },
+        data: next.drone,
+      }),
+    ]);
+
+    return {
+      status: "success",
+      mission: mapMission(updatedMission),
+    };
+  } else {
+    const updatedMission = await prisma.mission.update({
+      where: { id: missionId },
+      include: { waypoints: { orderBy: { order: "asc" } } },
+      data: { ...next.mission, droneId: null },
+    });
+
+    return {
+      status: "success",
+      mission: mapMission(updatedMission),
+    };
+  }
 }
 
 export async function completeMissionService(

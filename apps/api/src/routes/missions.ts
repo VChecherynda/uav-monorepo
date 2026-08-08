@@ -8,6 +8,7 @@ import {
   completeMissionService,
   abortMissionService,
   startMissionService,
+  restoreMissionService,
 } from "../services/missionService.js";
 import type { MissionRejectionReason } from "@uav/shared";
 import { mapMissions } from "../lib/mappers.js";
@@ -109,6 +110,21 @@ export async function missionRoutes(app: FastifyInstance) {
       const { id } = req.params as { id: string };
 
       const result = await abortMissionService(id);
+      if (result.status === "rejected") {
+        return reply.code(statusFor(result.reason)).send(result.reason);
+      }
+
+      return reply.send(result);
+    },
+  );
+
+  app.post(
+    "/missions/:id/restore",
+    { preHandler: authenticate },
+    async (req, reply) => {
+      const { id } = req.params as { id: string };
+
+      const result = await restoreMissionService(id);
       if (result.status === "rejected") {
         return reply.code(statusFor(result.reason)).send(result.reason);
       }

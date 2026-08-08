@@ -39,6 +39,16 @@ export type AbortMissionServiceResult =
       reason: MissionRejectionReason;
     };
 
+export type RestoreMissionServiceResult =
+  | {
+      status: "success";
+      mission: Mission;
+    }
+  | {
+      status: "rejected";
+      reason: MissionRejectionReason;
+    };
+
 export type CompleteMissionServiceResult =
   | {
       status: "success";
