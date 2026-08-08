@@ -271,7 +271,10 @@ export const restoreMission = (
     };
   }
 
-  if (drone.status === "idle") {
+  if (
+    drone.status === "idle" &&
+    canAssignMission(mission).status === "success"
+  ) {
     return {
       status: "success",
       outcome: "reassigned",

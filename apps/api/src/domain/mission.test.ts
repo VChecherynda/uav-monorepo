@@ -357,6 +357,22 @@ describe("restoreMission", () => {
     });
   });
 
+  it("mission with aborted status unassigned successfuly with empty waypoints", () => {
+    expect(
+      restoreMission(
+        { ...draftMission, status: "aborted", waypoints: [] },
+        idleDrone,
+      ),
+    ).toStrictEqual({
+      status: "success",
+      outcome: "unassigned",
+      mission: {
+        status: "draft",
+        droneId: undefined,
+      },
+    });
+  });
+
   it("rejects to restore mission", () => {
     expect(restoreMission(draftMission, idleDrone)).toEqual({
       status: "rejected",
