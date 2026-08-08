@@ -11,6 +11,7 @@ const STATUS_DOT: Record<Drone["status"], { color: string; glow: string }> = {
   idle: { color: "var(--text-muted)", glow: "none" },
   offline: { color: "var(--accent-critical)", glow: "var(--glow-critical)" },
   returning: { color: "var(--accent-warn)", glow: "var(--glow-warn)" },
+  assigned: { color: "var(--accent-ok)", glow: "var(--glow-ok)" },
 };
 
 function StatusDot({ status }: { status: Drone["status"] }) {
