@@ -310,7 +310,7 @@ export async function restoreMissionService(
     const updatedMission = await prisma.mission.update({
       where: { id: missionId },
       include: { waypoints: { orderBy: { order: "asc" } } },
-      data: { ...next.mission, droneId: null },
+      data: next.mission,
     });
 
     return {

@@ -24,7 +24,7 @@ export function mapMission(m: MissionWithWaypoints): Mission {
   return {
     id: m.id,
     name: m.name,
-    droneId: m.droneId ?? undefined,
+    droneId: m.droneId,
     waypoints: mapWaypoints(m.waypoints),
     status: m.status as Mission["status"],
     reason: m.reason ?? undefined,

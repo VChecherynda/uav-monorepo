@@ -66,7 +66,7 @@ export type RestoreMissionPatch =
   | {
       status: "success";
       outcome: "unassigned";
-      mission: Pick<Mission, "status"> & { droneId: undefined };
+      mission: Pick<Mission, "status"> & { droneId: null };
     };
 
 export type CompleteMissionPatch = {
@@ -291,7 +291,7 @@ export const restoreMission = (
       outcome: "unassigned",
       mission: {
         status: "draft",
-        droneId: undefined,
+        droneId: null,
       },
     };
   }

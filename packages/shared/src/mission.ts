@@ -10,7 +10,7 @@ export type MissionStatus =
 export type Mission = {
   id: string;
   name: string;
-  droneId: string | undefined;
+  droneId: string | null;
   waypoints: Coordinate[];
   status: MissionStatus;
   reason: string | undefined;

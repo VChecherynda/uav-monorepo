@@ -352,7 +352,7 @@ describe("restoreMission", () => {
       outcome: "unassigned",
       mission: {
         status: "draft",
-        droneId: undefined,
+        droneId: null,
       },
     });
   });
@@ -368,7 +368,7 @@ describe("restoreMission", () => {
       outcome: "unassigned",
       mission: {
         status: "draft",
-        droneId: undefined,
+        droneId: null,
       },
     });
   });
