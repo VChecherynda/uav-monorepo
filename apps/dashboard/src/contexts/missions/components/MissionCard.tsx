@@ -10,12 +10,16 @@ import { useAbortMission } from "../hooks/useAbortMission";
 import { useCompleteMission } from "../hooks/useCompleteMission";
 import { useReplaceWaypoints } from "../hooks/useReplaceWaypoints";
 import { useMissionsStore } from "../stores/useMissionsStore";
+import { useRestoreMission } from "../hooks/useRestoreMission";
 
 type MissionAction = "assign" | "start" | "abort" | "complete";
 
-const MISSION_ACTIONS: Partial<Record<MissionStatus, MissionAction[]>> = {
+const MISSION_ACTIONS: Record<MissionStatus, MissionAction[]> = {
+  draft: [],
   assigned: ["start", "abort"],
   "in-progress": ["abort", "complete"],
+  completed: [],
+  aborted: [],
 };
 
 const STATUS_COLOR: Record<MissionStatus, string> = {
@@ -42,6 +46,7 @@ export const MissionCard = ({ mission }: { mission: Mission }) => {
   const start = useStartMission();
   const complete = useCompleteMission();
   const abort = useAbortMission();
+  const restore = useRestoreMission();
   const selectMission = useMissionsStore((s) => s.selectMission);
   const isSelected = useMissionsStore(
     (s) => s.selectedMissionId === mission.id,
@@ -174,8 +179,31 @@ export const MissionCard = ({ mission }: { mission: Mission }) => {
       });
       break;
     }
-    case "completed":
     case "aborted":
+      actions = (
+        <div className="flex flex-col gap-1 min-w-0">
+          <button
+            className="btn-rth px-3 py-1 text-xs rounded border self-start"
+            disabled={restore.isPending}
+            onClick={(e) => {
+              e.stopPropagation();
+              restore.mutate(mission.id);
+            }}
+          >
+            RESTORE
+          </button>
+          {restore.error && (
+            <span
+              className="error-message truncate"
+              title={restore.error.message}
+            >
+              {restore.error.message}
+            </span>
+          )}
+        </div>
+      );
+      break;
+    case "completed":
       actions = null;
       break;
     default:
