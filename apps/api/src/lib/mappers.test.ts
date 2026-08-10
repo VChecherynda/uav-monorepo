@@ -11,6 +11,10 @@ const prismaMission: MissionWithWaypoints = {
   waypoints: [],
 };
 
+it("throws error when mapping a row with unknown status", () => {
+  expect(() => mapMission({ ...prismaMission, status: "draftt" })).toThrow();
+});
+
 it("maps prisma mission row into shared Mission", () => {
   expect(mapMission(prismaMission)).toStrictEqual({
     id: "M1",
