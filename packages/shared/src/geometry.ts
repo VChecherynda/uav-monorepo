@@ -1,7 +1,11 @@
-export type Coordinate = {
-  lng: number;
-  lat: number;
-};
+import { z } from "zod";
+
+export const CoordinateSchema = z.object({
+  lng: z.number(),
+  lat: z.number(),
+});
+
+export type Coordinate = z.infer<typeof CoordinateSchema>;
 
 export type Vec = {
   x: number;

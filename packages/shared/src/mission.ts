@@ -1,20 +1,26 @@
-import type { Coordinate } from "./geometry.js";
+import { z } from "zod";
+import { CoordinateSchema } from "./geometry.js";
 
-export type MissionStatus =
-  | "draft"
-  | "assigned"
-  | "in-progress"
-  | "completed"
-  | "aborted";
+export const MissionStatusEnum = z.enum([
+  "draft",
+  "assigned",
+  "in-progress",
+  "completed",
+  "aborted",
+]);
 
-export type Mission = {
-  id: string;
-  name: string;
-  droneId: string | null;
-  waypoints: Coordinate[];
-  status: MissionStatus;
-  reason: string | null;
-};
+export type MissionStatus = z.infer<typeof MissionStatusEnum>;
+
+export const MissionSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  droneId: z.string().nullable(),
+  waypoints: z.array(CoordinateSchema),
+  status: MissionStatusEnum,
+  reason: z.string().nullable(),
+});
+
+export type Mission = z.infer<typeof MissionSchema>;
 
 export type MissionConflictReason =
   | { code: "DRONE_IS_NOT_READY"; message: string }
