@@ -13,7 +13,7 @@ export type Mission = {
   droneId: string | null;
   waypoints: Coordinate[];
   status: MissionStatus;
-  reason: string | undefined;
+  reason: string | null;
 };
 
 export type MissionConflictReason =

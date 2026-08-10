@@ -22,7 +22,7 @@ const draftMission = {
   droneId: "",
   waypoints: defaultWaypoints,
   status: "draft" as const,
-  reason: undefined,
+  reason: null,
 };
 
 const idleDrone = {
