@@ -5,6 +5,7 @@ import {
   type Drone,
   type Mission,
   type Coordinate,
+  DroneStatusSchema,
   MissionStatusSchema,
 } from "@uav/shared";
 
@@ -16,7 +17,7 @@ export function mapDrone(d: PrismaDrone): Drone {
   return {
     id: d.id,
     name: d.name,
-    status: d.status as Drone["status"],
+    status: DroneStatusSchema.parse(d.status),
     battery: d.battery,
     altitude: d.altitude,
     lng: d.lng,
