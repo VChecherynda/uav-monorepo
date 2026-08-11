@@ -5,7 +5,7 @@ import {
   type Drone,
   type Mission,
   type Coordinate,
-  MissionStatusEnum,
+  MissionStatusSchema,
 } from "@uav/shared";
 
 export type MissionWithWaypoints = Prisma.MissionGetPayload<{
@@ -30,7 +30,7 @@ export function mapMission(m: MissionWithWaypoints): Mission {
     name: m.name,
     droneId: m.droneId,
     waypoints: mapWaypoints(m.waypoints),
-    status: MissionStatusEnum.parse(m.status),
+    status: MissionStatusSchema.parse(m.status),
     reason: m.reason,
   };
 }

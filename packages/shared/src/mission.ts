@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { CoordinateSchema } from "./geometry.js";
 
-export const MissionStatusEnum = z.enum([
+export const MissionStatusSchema = z.enum([
   "draft",
   "assigned",
   "in-progress",
@@ -9,14 +9,14 @@ export const MissionStatusEnum = z.enum([
   "aborted",
 ]);
 
-export type MissionStatus = z.infer<typeof MissionStatusEnum>;
+export type MissionStatus = z.infer<typeof MissionStatusSchema>;
 
 export const MissionSchema = z.object({
   id: z.string(),
   name: z.string(),
   droneId: z.string().nullable(),
   waypoints: z.array(CoordinateSchema),
-  status: MissionStatusEnum,
+  status: MissionStatusSchema,
   reason: z.string().nullable(),
 });
 
