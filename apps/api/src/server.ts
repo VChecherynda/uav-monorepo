@@ -3,6 +3,7 @@ import cors from "@fastify/cors";
 import websocket from "@fastify/websocket";
 import { startSimulation } from "./lib/simulation.js";
 import { startHousekeeping } from "./lib/housekeeping.js";
+import { reportServerError } from "./lib/reportServerError.js";
 import { droneRoutes } from "./routes/drones.js";
 import { authRoutes } from "./routes/auth.js";
 import { fleetRoutes } from "./routes/fleet.js";
@@ -35,6 +36,8 @@ await app.register(cors, {
   origin: allowedOrigins,
   methods: ["GET", "POST", "PUT", "DELETE"],
 });
+
+app.setErrorHandler(reportServerError);
 
 await app.register(websocket, {});
 await app.register(wsRoutes);
