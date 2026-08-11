@@ -5,7 +5,7 @@ import type { Drone as PrismaDrone } from "@prisma/client";
 const prismaMission: MissionWithWaypoints = {
   name: "Prisma Mission",
   id: "M1",
-  droneId: null,
+  droneId: "D1",
   status: "draft",
   reason: null,
   createdAt: new Date(),
@@ -30,8 +30,19 @@ it("throws error when mapping a mission row with unknown status", () => {
   expect(() => mapMission({ ...prismaMission, status: "draftt" })).toThrow();
 });
 
-it("maps prisma mission row into shared Mission", () => {
-  expect(mapMission(prismaMission)).toStrictEqual({
+it("drops db-only fields from mission payload", () => {
+  expect(mapMission(prismaMission)).toEqual({
+    id: "M1",
+    name: "Prisma Mission",
+    droneId: "D1",
+    waypoints: [],
+    status: "draft",
+    reason: null,
+  });
+});
+
+it("reports unset fields as null", () => {
+  expect(mapMission({ ...prismaMission, droneId: null })).toStrictEqual({
     id: "M1",
     name: "Prisma Mission",
     droneId: null,
