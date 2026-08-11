@@ -1,21 +1,30 @@
-export type DroneAction = "return-home" | "land" | "takeoff";
+import { z } from "zod";
 
-export type DroneStatus =
-  | "active"
-  | "idle"
-  | "assigned"
-  | "offline"
-  | "returning";
+export const DroneActionSchema = z.enum(["return-home", "land", "takeoff"]);
 
-export type Drone = {
-  id: string;
-  name: string;
-  status: DroneStatus;
-  battery: number;
-  altitude: number;
-  lng: number;
-  lat: number;
-};
+export type DroneAction = z.infer<typeof DroneActionSchema>;
+
+export const DroneStatusSchema = z.enum([
+  "active",
+  "idle",
+  "assigned",
+  "offline",
+  "returning",
+]);
+
+export type DroneStatus = z.infer<typeof DroneStatusSchema>;
+
+export const DroneSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  status: DroneStatusSchema,
+  battery: z.number(),
+  altitude: z.number(),
+  lng: z.number(),
+  lat: z.number(),
+});
+
+export type Drone = z.infer<typeof DroneSchema>;
 
 export type DroneCommandConflictReason =
   | { code: "DRONE_OFFLINE"; message: string }
