@@ -11,21 +11,10 @@ import { missionRoutes } from "./routes/missions.js";
 import { geofenceRoutes } from "./routes/geofence.js";
 import { wsRoutes, hasClients, broadcastDrones } from "./routes/ws.js";
 import { prisma } from "./lib/prisma.js";
+import { logger } from "./lib/logger.js";
 
 const app = Fastify({
-  logger:
-    process.env.NODE_ENV === "production"
-      ? true
-      : {
-          transport: {
-            target: "pino-pretty",
-            options: {
-              colorize: true,
-              translateTime: "HH:MM:ss",
-              ignore: "pid,hostname",
-            },
-          },
-        },
+  loggerInstance: logger,
 });
 
 const allowedOrigins = (process.env.CORS_ORIGINS ?? "http://localhost:3000")
