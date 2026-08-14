@@ -2,12 +2,15 @@ import type { Drone } from "@uav/shared";
 import { prisma } from "./prisma.js";
 import { broadcastEvent } from "../routes/ws.js";
 import { mapDrones } from "./mappers.js";
+import { logger } from "../lib/logger.js";
 
 const SIMULATION_TIMEOUT = 2 * 1000; // 2 sec
 const SKIP_LOG_THROTTLE_MS = 5 * 60 * 1000; // 5 min
 const BATTERY_CRITICAL_THRESHOLD = 15; // battery 15%
 const BATTERY_RECOVERY_THRESHOLD = 5;
 const INITIAL_BATTERY = 100;
+
+const log = logger.child({ module: "simulation" });
 
 const tick = async (broadcastDrones: (drones: Drone[]) => void) => {
   const drones = await prisma.drone.findMany({ orderBy: { name: "asc" } });
@@ -104,19 +107,19 @@ export const startSimulation = (
       skipCount++;
       const now = Date.now();
       if (now - lastSkipLog >= SKIP_LOG_THROTTLE_MS) {
-        console.log(
-          `[simulation] Skipped ${skipCount} ticks in last ${Math.round(
-            (now - lastSkipLog) / 1000,
-          )}s (no WS clients)`,
+        log.info(
+          { skipCount, seconds: Math.round((now - lastSkipLog) / 1000) },
+          "Skipped ticks (no WS clients)",
         );
+
         skipCount = 0;
         lastSkipLog = now;
       }
       return;
     }
 
-    tick(broadcastDrones).catch((err) =>
-      console.error("[simulation] Tick failed:", err),
-    );
+    tick(broadcastDrones).catch((err) => {
+      log.error({ err }, "Tick failed");
+    });
   }, SIMULATION_TIMEOUT);
 };
