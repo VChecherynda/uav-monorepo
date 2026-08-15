@@ -6,6 +6,7 @@ import { logger } from "../lib/logger.js";
 
 const SIMULATION_TIMEOUT = 2 * 1000; // 2 sec
 const SKIP_LOG_THROTTLE_MS = 5 * 60 * 1000; // 5 min
+const ERROR_LOG_THROTTLE_MS = 5 * 60 * 1000; // 5 min
 const BATTERY_CRITICAL_THRESHOLD = 15; // battery 15%
 const BATTERY_RECOVERY_THRESHOLD = 5;
 const INITIAL_BATTERY = 100;
@@ -101,6 +102,9 @@ export const startSimulation = (
 ) => {
   let skipCount = 0;
   let lastSkipLog = Date.now();
+  let repeatedCount = 0;
+  let lastErrorKey = "";
+  let lastErrorLog = 0;
 
   return setInterval(() => {
     if (!hasClients()) {
@@ -119,7 +123,20 @@ export const startSimulation = (
     }
 
     tick(broadcastDrones).catch((err) => {
-      log.error({ err }, "Tick failed");
+      const key =
+        err instanceof Error ? `${err.name}: ${err.message}` : String(err);
+      const now = Date.now();
+
+      if (key !== lastErrorKey || now - lastErrorLog >= ERROR_LOG_THROTTLE_MS) {
+        log.error({ err, repeated: repeatedCount }, "Tick failed");
+
+        repeatedCount = 0;
+        lastErrorKey = key;
+        lastErrorLog = now;
+        return;
+      }
+
+      repeatedCount++;
     });
   }, SIMULATION_TIMEOUT);
 };
