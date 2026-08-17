@@ -20,31 +20,35 @@ const tick = async (broadcastDrones: (drones: Drone[]) => void) => {
       const shouldRecover = d.battery < BATTERY_RECOVERY_THRESHOLD;
 
       if (shouldRecover) {
-        const updated = await prisma.drone.update({
-          where: { id: d.id },
-          data: {
-            status: "idle",
-            battery: INITIAL_BATTERY,
-            altitude: 0,
-            lng: d.homeLng,
-            lat: d.homeLat,
-          },
+        const updated = await prisma.$transaction(async (tx) => {
+          const updatedDrone = await tx.drone.update({
+            where: { id: d.id },
+            data: {
+              status: "idle",
+              battery: INITIAL_BATTERY,
+              altitude: 0,
+              lng: d.homeLng,
+              lat: d.homeLat,
+            },
+          });
+
+          await tx.telemetry.create({
+            data: {
+              droneId: d.id,
+              battery: INITIAL_BATTERY,
+              altitude: 0,
+              lng: d.homeLng,
+              lat: d.homeLat,
+            },
+          });
+
+          return updatedDrone;
         });
 
         broadcastEvent({
           type: "DroneRecovered",
           droneId: d.id,
           at: new Date().toISOString(),
-        });
-
-        await prisma.telemetry.create({
-          data: {
-            droneId: d.id,
-            battery: INITIAL_BATTERY,
-            altitude: 0,
-            lng: d.homeLng,
-            lat: d.homeLat,
-          },
         });
 
         return updated;
@@ -56,13 +60,27 @@ const tick = async (broadcastDrones: (drones: Drone[]) => void) => {
           d.battery - (Math.random() < 0.01 ? 1 : 0),
         );
 
-        const updated = await prisma.drone.update({
-          where: { id: d.id },
-          data: {
-            lng: newLng,
-            lat: newLat,
-            battery: newBattery,
-          },
+        const updated = await prisma.$transaction(async (tx) => {
+          const updatedDrone = await tx.drone.update({
+            where: { id: d.id },
+            data: {
+              lng: newLng,
+              lat: newLat,
+              battery: newBattery,
+            },
+          });
+
+          await tx.telemetry.create({
+            data: {
+              droneId: d.id,
+              battery: newBattery,
+              altitude: d.altitude,
+              lng: newLng,
+              lat: newLat,
+            },
+          });
+
+          return updatedDrone;
         });
 
         const crossedCriticalThreshold =
@@ -77,16 +95,6 @@ const tick = async (broadcastDrones: (drones: Drone[]) => void) => {
             at: new Date().toISOString(),
           });
         }
-
-        await prisma.telemetry.create({
-          data: {
-            droneId: d.id,
-            battery: newBattery,
-            altitude: d.altitude,
-            lng: newLng,
-            lat: newLat,
-          },
-        });
 
         return updated;
       }
