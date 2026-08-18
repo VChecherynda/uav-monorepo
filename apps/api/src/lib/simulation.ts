@@ -14,7 +14,10 @@ const INITIAL_BATTERY = 100;
 
 const log = logger.child({ module: "simulation" });
 
-const tick = async (broadcastDrones: (drones: Drone[]) => void) => {
+const tick = async (
+  broadcastDrones: (drones: Drone[]) => void,
+  throttleDroneLog: (errors: unknown[]) => void,
+) => {
   const drones = await prisma.drone.findMany({ orderBy: { name: "asc" } });
   const updatedDrones = await Promise.allSettled(
     drones.map(async (d) => {
@@ -124,10 +127,7 @@ const tick = async (broadcastDrones: (drones: Drone[]) => void) => {
   );
 
   broadcastDrones(mapDrones(dronesResolved.fulfilled));
-
-  dronesResolved.rejected.forEach((err) =>
-    log.error({ err }, "Drone update failed"),
-  );
+  throttleDroneLog(dronesResolved.rejected);
 };
 
 export const startSimulation = (
@@ -139,6 +139,36 @@ export const startSimulation = (
   let repeatedCount = 0;
   let lastErrorKey = "";
   let lastErrorLog = 0;
+
+  let repeatedDroneErrorCount = 0;
+  let lastDroneErrorKey = "";
+  let lastDroneErrorLog = 0;
+
+  const throttleDroneLog = (errors: unknown[]) => {
+    if (!errors.length) return;
+
+    const err = errors[0];
+    const key =
+      err instanceof Error ? `${err.name}: ${err.message}` : String(err);
+    const now = Date.now();
+
+    if (
+      key !== lastDroneErrorKey ||
+      now - lastDroneErrorLog >= ERROR_LOG_THROTTLE_MS
+    ) {
+      log.error(
+        { err, droneCount: errors.length, repeated: repeatedDroneErrorCount },
+        "Drone update failed",
+      );
+
+      repeatedDroneErrorCount = 0;
+      lastDroneErrorKey = key;
+      lastDroneErrorLog = now;
+      return;
+    }
+
+    repeatedDroneErrorCount++;
+  };
 
   return setInterval(() => {
     if (!hasClients()) {
@@ -156,7 +186,7 @@ export const startSimulation = (
       return;
     }
 
-    tick(broadcastDrones).catch((err) => {
+    tick(broadcastDrones, throttleDroneLog).catch((err) => {
       const key =
         err instanceof Error ? `${err.name}: ${err.message}` : String(err);
       const now = Date.now();
