@@ -3,6 +3,7 @@ import { prisma } from "./prisma.js";
 import { broadcastEvent } from "../routes/ws.js";
 import { mapDrones } from "./mappers.js";
 import { logger } from "../lib/logger.js";
+import type { Drone as PrismaDrone } from "@prisma/client";
 
 const SIMULATION_TIMEOUT = 2 * 1000; // 2 sec
 const SKIP_LOG_THROTTLE_MS = 5 * 60 * 1000; // 5 min
@@ -15,7 +16,7 @@ const log = logger.child({ module: "simulation" });
 
 const tick = async (broadcastDrones: (drones: Drone[]) => void) => {
   const drones = await prisma.drone.findMany({ orderBy: { name: "asc" } });
-  const updatedDrones = await Promise.all(
+  const updatedDrones = await Promise.allSettled(
     drones.map(async (d) => {
       const shouldRecover = d.battery < BATTERY_RECOVERY_THRESHOLD;
 
@@ -101,7 +102,32 @@ const tick = async (broadcastDrones: (drones: Drone[]) => void) => {
     }),
   );
 
-  broadcastDrones(mapDrones(updatedDrones));
+  const dronesResolved = updatedDrones.reduce<{
+    fulfilled: PrismaDrone[];
+    rejected: unknown[];
+  }>(
+    (acc, resolved) => {
+      if (resolved.status === "fulfilled") {
+        acc.fulfilled.push(resolved.value);
+      }
+
+      if (resolved.status === "rejected") {
+        acc.rejected.push(resolved.reason);
+      }
+
+      return acc;
+    },
+    {
+      fulfilled: [],
+      rejected: [],
+    },
+  );
+
+  broadcastDrones(mapDrones(dronesResolved.fulfilled));
+
+  dronesResolved.rejected.forEach((err) =>
+    log.error({ err }, "Drone update failed"),
+  );
 };
 
 export const startSimulation = (
