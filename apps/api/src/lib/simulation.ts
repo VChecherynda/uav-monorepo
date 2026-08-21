@@ -105,28 +105,31 @@ const tick = async (
     }),
   );
 
-  const dronesResolved = updatedDrones.reduce<{
-    fulfilled: PrismaDrone[];
+  const dronesResolved = drones.reduce<{
+    latest: PrismaDrone[];
     rejected: unknown[];
   }>(
-    (acc, resolved) => {
-      if (resolved.status === "fulfilled") {
-        acc.fulfilled.push(resolved.value);
-      }
+    (acc, drone, idx) => {
+      const updatedDrone = updatedDrones[idx];
 
-      if (resolved.status === "rejected") {
-        acc.rejected.push(resolved.reason);
+      if (updatedDrone?.status === "fulfilled") {
+        acc.latest.push(updatedDrone.value);
+      } else {
+        if (updatedDrone?.status === "rejected") {
+          acc.rejected.push(updatedDrone.reason);
+        }
+        acc.latest.push(drone);
       }
 
       return acc;
     },
     {
-      fulfilled: [],
+      latest: [],
       rejected: [],
     },
   );
 
-  broadcastDrones(mapDrones(dronesResolved.fulfilled));
+  broadcastDrones(mapDrones(dronesResolved.latest));
   throttleDroneLog(dronesResolved.rejected);
 };
 
