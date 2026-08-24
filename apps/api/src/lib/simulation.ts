@@ -6,6 +6,8 @@ import { logger } from "../lib/logger.js";
 import type { Drone as PrismaDrone } from "@prisma/client";
 
 const SIMULATION_TIMEOUT = 2 * 1000; // 2 sec
+// Separate on purpose: the skip window may grow (clients can be away for hours)
+// while the error throttle stays at 5 min — today's equal values are a coincidence.
 const SKIP_LOG_THROTTLE_MS = 5 * 60 * 1000; // 5 min
 const ERROR_LOG_THROTTLE_MS = 5 * 60 * 1000; // 5 min
 const BATTERY_CRITICAL_THRESHOLD = 15; // battery 15%
