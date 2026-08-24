@@ -1,5 +1,7 @@
 "use client";
 
+import { Toaster } from "@/contexts/notifications";
+
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/contexts/auth";
@@ -35,5 +37,10 @@ export default function ProtectedLayout({
     );
   }
 
-  return <>{children}</>;
+  return (
+    <>
+      {children}
+      <Toaster />
+    </>
+  );
 }

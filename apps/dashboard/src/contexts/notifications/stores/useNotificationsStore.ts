@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { DomainEvent } from "@uav/shared";
-import { noDeprecation } from "process";
+import { useAuthStore } from "@/contexts/auth";
 
 export type Notification = {
   id: string;
@@ -53,3 +53,9 @@ export const useNotificationsStore = create<NotificationStore>((set) => ({
     set({ notifications: [] });
   },
 }));
+
+useAuthStore.subscribe((state, prev) => {
+  if (prev.token !== state.token) {
+    useNotificationsStore.getState().clearAll();
+  }
+});
