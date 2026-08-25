@@ -22,6 +22,12 @@ export const MissionSchema = z.object({
 
 export type Mission = z.infer<typeof MissionSchema>;
 
+export type ZoneViolation = {
+  kind: "waypoint" | "segment";
+  index: number;
+  zoneId: string;
+};
+
 export type MissionConflictReason =
   | { code: "DRONE_IS_NOT_READY"; message: string }
   | { code: "MISSION_IS_NOT_DRAFT"; message: string }
@@ -32,4 +38,8 @@ export type MissionConflictReason =
   | { code: "MISSION_IS_NOT_IN_PROGRESS"; message: string }
   | { code: "MISSION_CANNOT_BE_RESTORED"; message: string }
   | { code: "WAYPOINTS_CANNOT_BE_REPLACED"; message: string }
-  | { code: "ROUTE_VIOLATES_ZONE"; message: string };
+  | {
+      code: "ROUTE_VIOLATES_ZONE";
+      message: string;
+      violations: ZoneViolation[];
+    };

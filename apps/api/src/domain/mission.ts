@@ -3,6 +3,7 @@ import type {
   Geofence,
   Drone,
   MissionConflictReason,
+  ZoneViolation,
 } from "@uav/shared";
 import { isPointInPolygon, segmentIntersectsPolygon } from "@uav/shared";
 
@@ -150,7 +151,7 @@ export const startMission = (
     };
   }
 
-  const rejectedMessages: string[] = [];
+  const violations: ZoneViolation[] = [];
   const route = [{ lng: drone.lng, lat: drone.lat }, ...mission.waypoints];
 
   for (let i = 0; i < zones.length; i++) {
@@ -167,7 +168,7 @@ export const startMission = (
 
       const result = isPointInPolygon(w, zone.area);
       if (result) {
-        rejectedMessages.push(`Waypoint ${j + 1} is inside zone ${zone.name}`);
+        violations.push({ kind: "waypoint", index: j, zoneId: zone.id });
       }
     }
 
@@ -181,17 +182,29 @@ export const startMission = (
 
       const result = segmentIntersectsPolygon(s, g, zone.area);
       if (result) {
-        rejectedMessages.push(`Segment ${j + 1} crosses zone ${zone.name}`);
+        violations.push({ kind: "segment", index: j, zoneId: zone.id });
       }
     }
   }
 
-  if (rejectedMessages.length) {
+  if (violations.length) {
     return {
       status: "rejected",
       reason: {
         code: "ROUTE_VIOLATES_ZONE",
-        message: rejectedMessages.join("; "),
+        message: violations
+          .map((v) => {
+            const zoneName =
+              zones.find((z) => z.id === v.zoneId)?.name ?? v.zoneId;
+
+            if (v.kind === "waypoint") {
+              return `Waypoint ${v.index + 1} is inside zone ${zoneName}`;
+            }
+
+            return `Segment ${v.index + 1} crosses zone ${zoneName}`;
+          })
+          .join("; "),
+        violations,
       },
     };
   }

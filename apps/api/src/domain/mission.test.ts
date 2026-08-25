@@ -186,6 +186,11 @@ describe("startMission", () => {
         code: "ROUTE_VIOLATES_ZONE",
         message:
           "Waypoint 1 is inside zone Alpha; Segment 1 crosses zone Alpha; Segment 2 crosses zone Alpha",
+        violations: [
+          { kind: "waypoint", index: 0, zoneId: "id_1" },
+          { kind: "segment", index: 0, zoneId: "id_1" },
+          { kind: "segment", index: 1, zoneId: "id_1" },
+        ],
       },
     ],
     [
@@ -203,6 +208,11 @@ describe("startMission", () => {
         code: "ROUTE_VIOLATES_ZONE",
         message:
           "Waypoint 2 is inside zone Bravo; Segment 2 crosses zone Bravo; Segment 3 crosses zone Bravo",
+        violations: [
+          { kind: "waypoint", index: 1, zoneId: "id_2" },
+          { kind: "segment", index: 1, zoneId: "id_2" },
+          { kind: "segment", index: 2, zoneId: "id_2" },
+        ],
       },
     ],
     [
@@ -219,6 +229,7 @@ describe("startMission", () => {
       {
         code: "ROUTE_VIOLATES_ZONE",
         message: "Segment 2 crosses zone Bravo",
+        violations: [{ kind: "segment", index: 1, zoneId: "id_2" }],
       },
     ],
     [
@@ -235,6 +246,7 @@ describe("startMission", () => {
       {
         code: "ROUTE_VIOLATES_ZONE",
         message: "Segment 1 crosses zone Alpha",
+        violations: [{ kind: "segment", index: 0, zoneId: "id_1" }],
       },
     ],
   ])("rejects with reason: %s", (mission, drone, reason) => {
