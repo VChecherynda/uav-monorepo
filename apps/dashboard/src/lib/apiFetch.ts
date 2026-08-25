@@ -2,6 +2,15 @@ import { useAuthStore } from "@/contexts/auth";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
+export class ResponseError extends Error {
+  reason: unknown;
+
+  constructor(message: string, reason: unknown) {
+    super(message);
+    this.reason = reason;
+  }
+}
+
 export async function apiFetch<T>(
   path: string,
   options?: RequestInit,
@@ -25,8 +34,9 @@ export async function apiFetch<T>(
     const error = await response
       .json()
       .catch(() => ({ error: "Request failed" }));
-    throw new Error(
+    throw new ResponseError(
       error.message ?? error.error ?? `HTTP status: ${response.status}`,
+      error,
     );
   }
 
