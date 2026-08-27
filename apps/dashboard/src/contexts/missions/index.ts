@@ -5,6 +5,8 @@ export { abortMission } from "./api/abortMission";
 export { completeMission } from "./api/completeMission";
 
 export { useMissionsStore } from "./stores/useMissionsStore";
+export { useViolationsStore } from "./stores/useViolationsStore";
 
 export { MissionPanel } from "./components/MissionPanel";
 export { MissionRouteLayer } from "./components/MissionRouteLayer";
+export { MissionViolationLayer } from "./components/MissionViolationLayer";

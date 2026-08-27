@@ -13,6 +13,7 @@ import { useState } from "react";
 import { MapCanvas } from "@/infrastructure/map";
 import { PlanningModeBadge, RouteDraftLayer } from "@/contexts/routes";
 import { GeofenceLayer } from "@/contexts/geofences";
+import { MissionViolationLayer } from "@/contexts/missions";
 
 type Tab = "drones" | "missions";
 
@@ -102,6 +103,7 @@ export default function Home() {
               <MissionRouteLayer />
               <RouteDraftLayer />
               <GeofenceLayer />
+              <MissionViolationLayer />
             </MapCanvas>
           </main>
 

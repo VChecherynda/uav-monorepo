@@ -8,7 +8,9 @@ import {
 } from "maplibre-gl";
 import { useMap } from "./useMap";
 
-type LayerConfig = Omit<LayerSpecification, "source">;
+type LayerConfig<T = LayerSpecification> = T extends unknown
+  ? Omit<T, "source">
+  : never;
 
 export const useMapLayer = ({
   data,

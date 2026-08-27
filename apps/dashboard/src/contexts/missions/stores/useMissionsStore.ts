@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { useViolationsStore } from "./useViolationsStore";
 import type { Mission } from "@uav/shared";
 
 type MissionsState = {
@@ -25,6 +26,7 @@ export const useMissionsStore = create<MissionsState>((set) => ({
   },
 
   selectMission: (id) => {
+    useViolationsStore.getState().clearViolations();
     set((s) => ({
       selectedMissionId: s.selectedMissionId === id ? null : id,
     }));

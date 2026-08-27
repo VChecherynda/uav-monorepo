@@ -22,11 +22,19 @@ export const MissionSchema = z.object({
 
 export type Mission = z.infer<typeof MissionSchema>;
 
-export type ZoneViolation = {
-  kind: "waypoint" | "segment";
-  index: number;
-  zoneId: string;
-};
+export const ZoneViolationSchema = z.object({
+  kind: z.enum(["waypoint", "segment"]),
+  index: z.number(),
+  zoneId: z.string(),
+});
+
+export type ZoneViolation = z.infer<typeof ZoneViolationSchema>;
+
+export const RouteViolatesZoneSchema = z.object({
+  code: z.literal("ROUTE_VIOLATES_ZONE"),
+  message: z.string(),
+  violations: z.array(ZoneViolationSchema),
+});
 
 export type MissionConflictReason =
   | { code: "DRONE_IS_NOT_READY"; message: string }
