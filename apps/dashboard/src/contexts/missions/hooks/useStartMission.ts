@@ -13,14 +13,19 @@ export const useStartMission = () => {
       store.updateMission(result.mission);
     },
     onError: (err, id: string) => {
-      if (err instanceof ResponseError) {
-        const result = RouteViolatesZoneSchema.safeParse(err.reason);
-        if (result.success) {
-          useViolationsStore
-            .getState()
-            .setViolations(id, result.data.violations);
-        }
-      }
+      if (!(err instanceof ResponseError)) return;
+
+      const result = RouteViolatesZoneSchema.safeParse(err.reason);
+      if (!result.success) return;
+
+      const mission = useMissionsStore
+        .getState()
+        .missions.find((m) => m.id === id);
+      if (!mission) return;
+
+      useViolationsStore
+        .getState()
+        .setViolations(id, result.data.violations, mission.waypoints);
     },
   });
 };

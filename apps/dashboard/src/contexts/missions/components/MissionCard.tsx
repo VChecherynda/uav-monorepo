@@ -14,13 +14,13 @@ import { useRestoreMission } from "../hooks/useRestoreMission";
 
 type MissionAction = "assign" | "start" | "abort" | "complete";
 
-const MISSION_ACTIONS: Record<MissionStatus, MissionAction[]> = {
+const MISSION_ACTIONS = {
   draft: [],
   assigned: ["start", "abort"],
   "in-progress": ["abort", "complete"],
   completed: [],
   aborted: [],
-};
+} as const satisfies Record<MissionStatus, readonly MissionAction[]>;
 
 const STATUS_COLOR: Record<MissionStatus, string> = {
   draft: "var(--text-muted)",
@@ -58,7 +58,25 @@ export const MissionCard = ({ mission }: { mission: Mission }) => {
   const idleDrones = serverDrones.filter((d) => d.status === "idle");
   const [selectedDroneId, setSelectedDroneId] = useState<string>("");
 
+  const getActionMutations = (status: MissionStatus) => {
+    const statusActions = MISSION_ACTIONS[status] ?? [];
+
+    return statusActions.map((a) => {
+      switch (a) {
+        case "start":
+          return start;
+        case "abort":
+          return abort;
+        case "complete":
+          return complete;
+        default:
+          return null;
+      }
+    });
+  };
+
   let actions;
+  const rejection = start.error ?? abort.error;
   switch (mission.status) {
     case "draft":
       actions = (
@@ -134,20 +152,17 @@ export const MissionCard = ({ mission }: { mission: Mission }) => {
     case "in-progress": {
       const statusActions = MISSION_ACTIONS[mission.status] ?? [];
       actions = statusActions.map((a) => {
-        let mutation;
+        const mutation = getActionMutations(mission.status);
         let label;
 
         switch (a) {
           case "start":
-            mutation = start;
             label = "START";
             break;
           case "abort":
-            mutation = abort;
             label = "ABORT";
             break;
           case "complete":
-            mutation = complete;
             label = "COMPLETE";
             break;
           default:
@@ -166,14 +181,6 @@ export const MissionCard = ({ mission }: { mission: Mission }) => {
             >
               {label}
             </button>
-            {mutation.error && (
-              <span
-                className="error-message truncate"
-                title={mutation.error.message}
-              >
-                {mutation.error.message}
-              </span>
-            )}
           </div>
         );
       });
@@ -192,14 +199,6 @@ export const MissionCard = ({ mission }: { mission: Mission }) => {
           >
             RESTORE
           </button>
-          {restore.error && (
-            <span
-              className="error-message truncate"
-              title={restore.error.message}
-            >
-              {restore.error.message}
-            </span>
-          )}
         </div>
       );
       break;
@@ -238,6 +237,13 @@ export const MissionCard = ({ mission }: { mission: Mission }) => {
       </div>
 
       <div className="flex gap-2">{actions}</div>
+      <div className="flex">
+        {rejection && (
+          <span className="error-message truncate" title={rejection.message}>
+            {rejection.message}
+          </span>
+        )}
+      </div>
     </div>
   );
 };

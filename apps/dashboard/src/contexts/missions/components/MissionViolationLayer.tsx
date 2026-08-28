@@ -20,8 +20,9 @@ const POLYGON_LAYER_ID = "mission-violation-polygon";
 const OUTLINE_LAYER_ID = "mission-violation-outline";
 
 export function MissionViolationLayer() {
-  const { missionId, violations } = useViolationsStore();
+  const { missionId, violations, validatedWaypoints } = useViolationsStore();
 
+  const selectedMissionId = useMissionsStore((s) => s.selectedMissionId);
   const mission = useMissionsStore((s) =>
     s.missions.find((m) => m.id === missionId),
   );
@@ -33,9 +34,12 @@ export function MissionViolationLayer() {
 
   const zones = useGeofences();
 
-  const data = drone
-    ? violationsToGeoJSON({ violations, waypoints, zones, drone })
-    : EMPTY_DATA;
+  const data =
+    drone &&
+    missionId === selectedMissionId &&
+    mission?.waypoints === validatedWaypoints
+      ? violationsToGeoJSON({ violations, waypoints, zones, drone })
+      : EMPTY_DATA;
 
   useMapLayer({
     data,
