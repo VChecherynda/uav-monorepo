@@ -1,6 +1,5 @@
 "use client";
 
-import type { Drone, Mission, MissionStatus } from "@uav/shared";
 import { useDronesStore } from "@/contexts/drones";
 import { PlanRouteButton, useRouteDraftStore } from "@/contexts/routes";
 import { useAssignMission } from "../hooks/useAssignMission";
@@ -11,8 +10,16 @@ import { useCompleteMission } from "../hooks/useCompleteMission";
 import { useReplaceWaypoints } from "../hooks/useReplaceWaypoints";
 import { useMissionsStore } from "../stores/useMissionsStore";
 import { useRestoreMission } from "../hooks/useRestoreMission";
+import type { UseMutationResult } from "@tanstack/react-query";
+import type { Drone, Mission, MissionStatus } from "@uav/shared";
 
 type MissionAction = "assign" | "start" | "abort" | "complete";
+type ButtonAction = (typeof MISSION_ACTIONS)[MissionStatus][number];
+type MissionMutation = UseMutationResult<
+  { status: "success"; mission: Mission; drone: Drone },
+  Error,
+  string
+>;
 
 const MISSION_ACTIONS = {
   draft: [],
@@ -47,6 +54,16 @@ export const MissionCard = ({ mission }: { mission: Mission }) => {
   const complete = useCompleteMission();
   const abort = useAbortMission();
   const restore = useRestoreMission();
+
+  const ACTION_ENTRY: Record<
+    ButtonAction,
+    { label: string; mutation: MissionMutation }
+  > = {
+    start: { label: "START", mutation: start },
+    abort: { label: "ABORT", mutation: abort },
+    complete: { label: "COMPLETE", mutation: complete },
+  };
+
   const selectMission = useMissionsStore((s) => s.selectMission);
   const isSelected = useMissionsStore(
     (s) => s.selectedMissionId === mission.id,
@@ -57,23 +74,6 @@ export const MissionCard = ({ mission }: { mission: Mission }) => {
 
   const idleDrones = serverDrones.filter((d) => d.status === "idle");
   const [selectedDroneId, setSelectedDroneId] = useState<string>("");
-
-  const getActionMutations = (status: MissionStatus) => {
-    const statusActions = MISSION_ACTIONS[status] ?? [];
-
-    return statusActions.map((a) => {
-      switch (a) {
-        case "start":
-          return start;
-        case "abort":
-          return abort;
-        case "complete":
-          return complete;
-        default:
-          return null;
-      }
-    });
-  };
 
   let actions;
   const rejection = start.error ?? abort.error;
@@ -152,22 +152,7 @@ export const MissionCard = ({ mission }: { mission: Mission }) => {
     case "in-progress": {
       const statusActions = MISSION_ACTIONS[mission.status] ?? [];
       actions = statusActions.map((a) => {
-        const mutation = getActionMutations(mission.status);
-        let label;
-
-        switch (a) {
-          case "start":
-            label = "START";
-            break;
-          case "abort":
-            label = "ABORT";
-            break;
-          case "complete":
-            label = "COMPLETE";
-            break;
-          default:
-            return null;
-        }
+        const { label, mutation } = ACTION_ENTRY[a];
 
         return (
           <div key={a} className="flex flex-col gap-1 min-w-0">
