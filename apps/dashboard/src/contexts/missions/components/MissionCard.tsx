@@ -13,8 +13,15 @@ import { useRestoreMission } from "../hooks/useRestoreMission";
 import type { UseMutationResult } from "@tanstack/react-query";
 import type { Drone, Mission, MissionStatus } from "@uav/shared";
 
-type MissionAction = "assign" | "start" | "abort" | "complete";
+type MissionAction =
+  | "assign"
+  | "start"
+  | "abort"
+  | "complete"
+  | "save"
+  | "restore";
 type ButtonAction = (typeof MISSION_ACTIONS)[MissionStatus][number];
+type ActionRejection = { error: Error | null; submittedAt: number };
 type MissionMutation = UseMutationResult<
   { status: "success"; mission: Mission; drone: Drone },
   Error,
@@ -28,6 +35,15 @@ const MISSION_ACTIONS = {
   completed: [],
   aborted: [],
 } as const satisfies Record<MissionStatus, readonly MissionAction[]>;
+
+const ACTION_LABEL: Record<MissionAction, string> = {
+  assign: "ASSIGN",
+  start: "START",
+  abort: "ABORT",
+  complete: "COMPLETE",
+  save: "SAVE",
+  restore: "RESTORE",
+};
 
 const STATUS_COLOR: Record<MissionStatus, string> = {
   draft: "var(--text-muted)",
@@ -59,9 +75,29 @@ export const MissionCard = ({ mission }: { mission: Mission }) => {
     ButtonAction,
     { label: string; mutation: MissionMutation }
   > = {
-    start: { label: "START", mutation: start },
-    abort: { label: "ABORT", mutation: abort },
-    complete: { label: "COMPLETE", mutation: complete },
+    start: { label: ACTION_LABEL.start, mutation: start },
+    abort: { label: ACTION_LABEL.abort, mutation: abort },
+    complete: { label: ACTION_LABEL.complete, mutation: complete },
+  };
+
+  const STATUS_ENTRIES: Record<
+    MissionStatus,
+    readonly { action: MissionAction; mutation: ActionRejection }[]
+  > = {
+    draft: [
+      { action: "assign", mutation: assign },
+      { action: "save", mutation: replace },
+    ],
+    assigned: [
+      { action: "start", mutation: start },
+      { action: "abort", mutation: abort },
+    ],
+    "in-progress": [
+      { action: "abort", mutation: abort },
+      { action: "complete", mutation: complete },
+    ],
+    aborted: [{ action: "restore", mutation: restore }],
+    completed: [],
   };
 
   const selectMission = useMissionsStore((s) => s.selectMission);
@@ -76,7 +112,22 @@ export const MissionCard = ({ mission }: { mission: Mission }) => {
   const [selectedDroneId, setSelectedDroneId] = useState<string>("");
 
   let actions;
-  const rejection = start.error ?? abort.error;
+  const latest = STATUS_ENTRIES[mission.status].reduce<{
+    action: MissionAction;
+    mutation: ActionRejection;
+  } | null>(
+    (freshest, entry) =>
+      freshest === null ||
+      entry.mutation.submittedAt > freshest.mutation.submittedAt
+        ? entry
+        : freshest,
+    null,
+  );
+
+  const rejection = latest?.mutation.error
+    ? `${ACTION_LABEL[latest.action].toLowerCase()}: ${latest.mutation.error.message}`
+    : null;
+
   switch (mission.status) {
     case "draft":
       actions = (
@@ -112,15 +163,6 @@ export const MissionCard = ({ mission }: { mission: Mission }) => {
               >
                 ASSIGN
               </button>
-
-              {assign.error && (
-                <span
-                  className="error-message truncate"
-                  title={assign.error.message}
-                >
-                  {assign.error.message}
-                </span>
-              )}
             </div>
             {canSave && (
               <div className="flex flex-col gap-1 min-w-0">
@@ -134,14 +176,6 @@ export const MissionCard = ({ mission }: { mission: Mission }) => {
                 >
                   SAVE
                 </button>
-                {replace.error && (
-                  <span
-                    className="error-message truncate"
-                    title={replace.error.message}
-                  >
-                    {replace.error.message}
-                  </span>
-                )}
               </div>
             )}
           </div>
@@ -224,8 +258,8 @@ export const MissionCard = ({ mission }: { mission: Mission }) => {
       <div className="flex gap-2">{actions}</div>
       <div className="flex">
         {rejection && (
-          <span className="error-message truncate" title={rejection.message}>
-            {rejection.message}
+          <span className="error-message truncate" title={rejection}>
+            {rejection}
           </span>
         )}
       </div>
