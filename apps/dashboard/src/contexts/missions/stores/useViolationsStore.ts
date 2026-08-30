@@ -11,7 +11,6 @@ type ViolationsState = {
     violations: ZoneViolation[],
     validatedWaypoints: Coordinate[],
   ) => void;
-  clearViolations: () => void;
 };
 
 export const useViolationsStore = create<ViolationsState>((set) => ({
@@ -22,11 +21,4 @@ export const useViolationsStore = create<ViolationsState>((set) => ({
   setViolations: (missionId, violations, validatedWaypoints) => {
     set({ missionId, violations, validatedWaypoints });
   },
-
-  clearViolations: () =>
-    set({
-      missionId: null,
-      violations: [],
-      validatedWaypoints: null,
-    }),
 }));
