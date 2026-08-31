@@ -80,7 +80,7 @@ export const MissionCard = ({ mission }: { mission: Mission }) => {
     complete: { label: ACTION_LABEL.complete, mutation: complete },
   };
 
-  const STATUS_ENTRIES: Record<
+  const STATUS_MUTATIONS: Record<
     MissionStatus,
     readonly { action: MissionAction; mutation: ActionRejection }[]
   > = {
@@ -112,7 +112,7 @@ export const MissionCard = ({ mission }: { mission: Mission }) => {
   const [selectedDroneId, setSelectedDroneId] = useState<string>("");
 
   let actions;
-  const latest = STATUS_ENTRIES[mission.status].reduce<{
+  const latest = STATUS_MUTATIONS[mission.status].reduce<{
     action: MissionAction;
     mutation: ActionRejection;
   } | null>(
