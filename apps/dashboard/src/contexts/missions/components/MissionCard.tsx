@@ -20,7 +20,7 @@ type MissionAction =
   | "complete"
   | "save"
   | "restore";
-type ButtonAction = (typeof MISSION_ACTIONS)[MissionStatus][number];
+type ButtonAction = (typeof STATUS_ACTIONS)[MissionStatus][number];
 type ActionRejection = { error: Error | null; submittedAt: number };
 type MissionMutation = UseMutationResult<
   { status: "success"; mission: Mission; drone: Drone },
@@ -28,7 +28,7 @@ type MissionMutation = UseMutationResult<
   string
 >;
 
-const MISSION_ACTIONS = {
+const STATUS_ACTIONS = {
   draft: [],
   assigned: ["start", "abort"],
   "in-progress": ["abort", "complete"],
@@ -184,7 +184,7 @@ export const MissionCard = ({ mission }: { mission: Mission }) => {
       break;
     case "assigned":
     case "in-progress": {
-      const statusActions = MISSION_ACTIONS[mission.status] ?? [];
+      const statusActions = STATUS_ACTIONS[mission.status] ?? [];
       actions = statusActions.map((a) => {
         const { label, mutation } = ACTION_ENTRY[a];
 
