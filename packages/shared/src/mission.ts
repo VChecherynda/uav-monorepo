@@ -36,18 +36,24 @@ export const RouteViolatesZoneSchema = z.object({
   violations: z.array(ZoneViolationSchema),
 });
 
-export type MissionConflictReason =
-  | { code: "DRONE_IS_NOT_READY"; message: string }
-  | { code: "MISSION_IS_NOT_DRAFT"; message: string }
-  | { code: "MISSION_IS_NOT_ASSIGNED"; message: string }
-  | { code: "MISSION_HAS_NO_WAYPOINTS"; message: string }
-  | { code: "MISSION_HAS_NO_DRONE"; message: string }
-  | { code: "MISSION_CANNOT_BE_ABORTED"; message: string }
-  | { code: "MISSION_IS_NOT_IN_PROGRESS"; message: string }
-  | { code: "MISSION_CANNOT_BE_RESTORED"; message: string }
-  | { code: "WAYPOINTS_CANNOT_BE_REPLACED"; message: string }
-  | {
-      code: "ROUTE_VIOLATES_ZONE";
-      message: string;
-      violations: ZoneViolation[];
-    };
+const buildReason = <C extends string>(code: C) => {
+  return z.object({
+    code: z.literal(code),
+    message: z.string(),
+  });
+};
+
+export const MissionConflictReasonSchema = z.discriminatedUnion("code", [
+  buildReason("DRONE_IS_NOT_READY"),
+  buildReason("MISSION_IS_NOT_DRAFT"),
+  buildReason("MISSION_IS_NOT_ASSIGNED"),
+  buildReason("MISSION_HAS_NO_WAYPOINTS"),
+  buildReason("MISSION_HAS_NO_DRONE"),
+  buildReason("MISSION_CANNOT_BE_ABORTED"),
+  buildReason("MISSION_IS_NOT_IN_PROGRESS"),
+  buildReason("MISSION_CANNOT_BE_RESTORED"),
+  buildReason("WAYPOINTS_CANNOT_BE_REPLACED"),
+  RouteViolatesZoneSchema,
+]);
+
+export type MissionConflictReason = z.infer<typeof MissionConflictReasonSchema>;
