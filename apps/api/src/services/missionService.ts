@@ -91,7 +91,7 @@ export async function replaceWaypointsService(
   waypoints: Coordinate[],
 ): Promise<ReplaceWaypointsResult> {
   try {
-    const savedWaypoints = await prisma.$transaction(async (tx) => {
+    const { mission, savedWaypoints } = await prisma.$transaction(async (tx) => {
       const missionRow = await tx.mission.findUnique({
         where: { id: missionId },
         include: { waypoints: { orderBy: { order: "asc" } } },
@@ -109,14 +109,16 @@ export async function replaceWaypointsService(
       }
 
       await tx.waypoint.deleteMany({ where: { missionId } });
-      return tx.waypoint.createManyAndReturn({
+      const savedWaypoints = await tx.waypoint.createManyAndReturn({
         data: waypoints.map((w, idx) => ({ missionId, order: idx, ...w })),
       });
+
+      return { mission: mapMission(missionRow), savedWaypoints };
     });
 
     return {
       status: "success",
-      waypoints: mapWaypoints(savedWaypoints),
+      mission: { ...mission, waypoints: mapWaypoints(savedWaypoints) },
     };
   } catch (e) {
     if (e instanceof MissionRejectedError) {
