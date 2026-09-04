@@ -1,8 +1,9 @@
 import { apiFetch } from "@/lib/apiFetch";
-import { Drone } from "@uav/shared";
+import { DroneSchema, type Drone } from "@uav/shared";
 
 export async function resetFleet(): Promise<Drone[]> {
-  return apiFetch<Drone[]>("/fleet/reset", {
+  const data = await apiFetch<unknown>("/fleet/reset", {
     method: "POST",
   });
+  return DroneSchema.array().parse(data);
 }
