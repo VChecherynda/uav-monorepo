@@ -181,7 +181,7 @@ export const startSimulation = (
       const now = Date.now();
       if (now - lastSkipLog >= SKIP_LOG_THROTTLE_MS) {
         log.info(
-          { skipCount, seconds: Math.round((now - lastSkipLog) / 1000) },
+          { skipCount, spanSeconds: Math.round((now - lastSkipLog) / 1000) },
           "Skipped ticks (no WS clients)",
         );
 
