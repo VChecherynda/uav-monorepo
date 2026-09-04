@@ -60,7 +60,7 @@ describe("buildVisibilityGraph", () => {
 
   it("weight of the euclidian distance between endpoints", () => {
     const graph = buildVisibilityGraph(S, G, [ZONE]);
-    const edge = graph["S"].find((e) => e.id === "corner-z1-0");
+    const edge = graph["S"]?.find((e) => e.id === "corner-z1-0");
 
     expect(edge).toBeDefined();
     expect(edge?.weight).toBe(Math.sqrt(50));
