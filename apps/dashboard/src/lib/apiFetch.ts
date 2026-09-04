@@ -2,7 +2,14 @@ import { useAuthStore } from "@/contexts/auth";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
-export class ResponseError extends Error {
+export class ApiError extends Error {
+  constructor(message: string, options?: ErrorOptions) {
+    super(message, options);
+    this.name = new.target.name;
+  }
+}
+
+export class ResponseError extends ApiError {
   reason: unknown;
 
   constructor(message: string, reason: unknown) {
@@ -10,6 +17,9 @@ export class ResponseError extends Error {
     this.reason = reason;
   }
 }
+
+export class TransportError extends ApiError {}
+export class MalformedResponseError extends ApiError {}
 
 export async function apiFetch<T>(
   path: string,
@@ -24,6 +34,8 @@ export async function apiFetch<T>(
       ...options?.headers,
       ...(token && { Authorization: `Bearer ${token}` }),
     },
+  }).catch((cause) => {
+    throw new TransportError("Could not reach the server", { cause });
   });
 
   if (!response.ok) {
@@ -40,5 +52,9 @@ export async function apiFetch<T>(
     );
   }
 
-  return response.json();
+  return response.json().catch((cause) => {
+    throw new MalformedResponseError("Server sent a malformed response", {
+      cause,
+    });
+  });
 }
