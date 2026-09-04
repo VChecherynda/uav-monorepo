@@ -1,5 +1,14 @@
-import type { User } from "@uav/shared";
+import { z } from "zod";
+
+import { UserSchema } from "@uav/shared";
 import { apiFetch } from "@/lib/apiFetch";
+
+const AuthSchema = z.object({
+  token: z.string(),
+  user: UserSchema,
+});
+
+type Auth = z.infer<typeof AuthSchema>;
 
 export async function login({
   email,
@@ -7,9 +16,10 @@ export async function login({
 }: {
   email: string;
   password: string;
-}): Promise<{ token: string; user: User }> {
-  return apiFetch<{ token: string; user: User }>("/auth/login", {
+}): Promise<Auth> {
+  const data = await apiFetch<unknown>("/auth/login", {
     method: "POST",
     body: JSON.stringify({ email, password }),
   });
+  return AuthSchema.parse(data);
 }
