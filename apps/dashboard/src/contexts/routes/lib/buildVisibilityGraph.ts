@@ -7,8 +7,8 @@ function intersectsAnyZone(
   v: Coordinate,
   zones: Geofence[],
 ): boolean {
-  for (let i = 0; i < zones.length; i++) {
-    if (segmentIntersectsPolygon(u, v, zones[i].area)) {
+  for (const zone of zones) {
+    if (segmentIntersectsPolygon(u, v, zone.area)) {
       return true;
     }
   }
@@ -21,8 +21,7 @@ function isInsideAnyZone(
   zoneId: string,
   zones: Geofence[],
 ): boolean {
-  for (let i = 0; i < zones.length; i++) {
-    const zone = zones[i];
+  for (const zone of zones) {
     if (zoneId === zone.id) {
       continue;
     }
@@ -46,14 +45,10 @@ export function buildVisibilityGraph(
   coords.set("S", s);
   coords.set("G", g);
 
-  for (let i = 0; i < zones.length; i++) {
-    const zone = zones[i];
-    if (!zone) {
-      continue;
-    }
-
+  for (const zone of zones) {
     for (let j = 0; j < zone.area.length; j++) {
       const c = zone.area[j];
+      if (!c) continue;
       if (isInsideAnyZone(c, zone.id, zones)) {
         continue;
       }
@@ -66,6 +61,8 @@ export function buildVisibilityGraph(
     for (let j = i + 1; j < names.length; j++) {
       const fromName = names[i];
       const toName = names[j];
+      if (!fromName || !toName) continue;
+
       const coordU = coords.get(fromName);
       const coordV = coords.get(toName);
 
