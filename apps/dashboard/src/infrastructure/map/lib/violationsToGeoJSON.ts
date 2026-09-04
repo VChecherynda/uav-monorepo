@@ -24,35 +24,55 @@ export const violationsToGeoJSON = ({
   return {
     type: "FeatureCollection",
     features: [
-      ...violations.map((v): Feature => {
+      ...violations.flatMap((v): Feature[] => {
+        const currentWP = waypoints[v.index];
+        if (!currentWP) return [];
+
         if (v.kind === "segment") {
-          return {
-            type: "Feature",
-            geometry: {
-              type: "LineString",
-              coordinates:
-                v.index > 0
-                  ? [
-                      getMapCoordinate(waypoints[v.index - 1]),
-                      getMapCoordinate(waypoints[v.index]),
-                    ]
-                  : [
-                      [drone.lng, drone.lat],
-                      getMapCoordinate(waypoints[v.index]),
-                    ],
+          if (v.index > 0) {
+            const prevWP = waypoints[v.index - 1];
+            if (!prevWP) return [];
+
+            return [
+              {
+                type: "Feature",
+                geometry: {
+                  type: "LineString",
+                  coordinates: [
+                    getMapCoordinate(prevWP),
+                    getMapCoordinate(currentWP),
+                  ],
+                },
+                properties: {},
+              },
+            ];
+          }
+
+          return [
+            {
+              type: "Feature",
+              geometry: {
+                type: "LineString",
+                coordinates: [
+                  [drone.lng, drone.lat],
+                  getMapCoordinate(currentWP),
+                ],
+              },
+              properties: {},
             },
-            properties: {},
-          };
+          ];
         }
 
-        return {
-          type: "Feature",
-          geometry: {
-            type: "Point",
-            coordinates: getMapCoordinate(waypoints[v.index]),
+        return [
+          {
+            type: "Feature",
+            geometry: {
+              type: "Point",
+              coordinates: getMapCoordinate(currentWP),
+            },
+            properties: {},
           },
-          properties: {},
-        };
+        ];
       }),
       ...zonesWithViolations.map(
         (z): Feature => ({
