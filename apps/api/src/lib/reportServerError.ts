@@ -6,12 +6,14 @@ export async function reportServerError(
   req: FastifyRequest,
   reply: FastifyReply,
 ) {
-  const message =
-    error instanceof ZodError
-      ? "Row failed schema validation"
-      : "Unhandled server error";
-
-  req.log.error({ err: error }, message);
+  if (error instanceof ZodError) {
+    req.log.error(
+      { err: error, paths: error.issues.map((i) => i.path.join(".")) },
+      "Row failed schema validation",
+    );
+  } else {
+    req.log.error({ err: error }, "Unhandled server error");
+  }
 
   return reply.status(500).send({
     error: "Internal server error",
