@@ -1,17 +1,13 @@
-import type { Coordinate, ReplaceWaypointsResult } from "@uav/shared";
-import { apiFetch } from "@/lib/apiFetch";
+import { type Coordinate, ReplaceWaypointsResultSchema } from "@uav/shared";
+import { fetchOutcome } from "@/lib/apiFetch";
 
-type ReplaceWaypointsSuccess = Extract<
-  ReplaceWaypointsResult,
-  { status: "success" }
->;
-
-export async function replaceWaypoints(
-  id: string,
-  waypoints: Coordinate[],
-): Promise<ReplaceWaypointsSuccess> {
-  return apiFetch<ReplaceWaypointsSuccess>(`/missions/${id}/waypoints`, {
-    method: "PUT",
-    body: JSON.stringify(waypoints),
-  });
+export async function replaceWaypoints(id: string, waypoints: Coordinate[]) {
+  return fetchOutcome(
+    `/missions/${id}/waypoints`,
+    ReplaceWaypointsResultSchema,
+    {
+      method: "PUT",
+      body: JSON.stringify(waypoints),
+    },
+  );
 }

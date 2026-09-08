@@ -1,3 +1,4 @@
+import { z } from "zod";
 import { useAuthStore } from "@/contexts/auth";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
@@ -21,10 +22,7 @@ export class ResponseError extends ApiError {
 export class TransportError extends ApiError {}
 export class MalformedResponseError extends ApiError {}
 
-export async function apiFetch<T>(
-  path: string,
-  options?: RequestInit,
-): Promise<T> {
+export async function authorizedFetch(path: string, options?: RequestInit) {
   const token = useAuthStore.getState().token;
 
   const response = await fetch(`${API_URL}${path}`, {
@@ -38,11 +36,37 @@ export async function apiFetch<T>(
     throw new TransportError("Could not reach the server", { cause });
   });
 
-  if (!response.ok) {
-    if (response.status === 401) {
-      useAuthStore.getState().logout();
-    }
+  if (response.status === 401) {
+    useAuthStore.getState().logout();
+  }
 
+  return response;
+}
+
+export async function fetchOutcome<T>(
+  path: string,
+  scheme: z.ZodType<T>,
+  options?: RequestInit,
+) {
+  const response = await authorizedFetch(path, options);
+
+  try {
+    const data = await response.json();
+    return scheme.parse(data);
+  } catch (cause) {
+    throw new MalformedResponseError("Server sent a malformed response", {
+      cause,
+    });
+  }
+}
+
+export async function apiFetch<T>(
+  path: string,
+  options?: RequestInit,
+): Promise<T> {
+  const response = await authorizedFetch(path, options);
+
+  if (!response.ok) {
     const error = await response
       .json()
       .catch(() => ({ error: "Request failed" }));

@@ -7,6 +7,10 @@ export const useCompleteMission = () => {
     mutationFn: (id: string) => completeMission(id),
     onSuccess: (result) => {
       const store = useMissionsStore.getState();
+
+      if (result.status !== "success") {
+        return;
+      }
       store.updateMission(result.mission);
     },
   });

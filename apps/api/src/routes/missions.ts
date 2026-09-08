@@ -61,7 +61,7 @@ export async function missionRoutes(app: FastifyInstance) {
       const { droneId } = parsed.data;
       const result = await assignMission(id, droneId);
       if (result.status === "rejected") {
-        return reply.code(statusFor(result.reason)).send(result.reason);
+        return reply.code(statusFor(result.reason)).send(result);
       }
 
       return reply.send(result);
@@ -81,7 +81,7 @@ export async function missionRoutes(app: FastifyInstance) {
 
       const result = await replaceWaypointsService(id, parsed.data);
       if (result.status === "rejected") {
-        return reply.code(statusFor(result.reason)).send(result.reason);
+        return reply.code(statusFor(result.reason)).send(result);
       }
 
       return reply.send(result);
@@ -96,7 +96,7 @@ export async function missionRoutes(app: FastifyInstance) {
 
       const result = await startMissionService(id);
       if (result.status === "rejected") {
-        return reply.code(statusFor(result.reason)).send(result.reason);
+        return reply.code(statusFor(result.reason)).send(result);
       }
 
       return reply.send(result);
@@ -111,7 +111,7 @@ export async function missionRoutes(app: FastifyInstance) {
 
       const result = await abortMissionService(id);
       if (result.status === "rejected") {
-        return reply.code(statusFor(result.reason)).send(result.reason);
+        return reply.code(statusFor(result.reason)).send(result);
       }
 
       return reply.send(result);
@@ -126,7 +126,7 @@ export async function missionRoutes(app: FastifyInstance) {
 
       const result = await restoreMissionService(id);
       if (result.status === "rejected") {
-        return reply.code(statusFor(result.reason)).send(result.reason);
+        return reply.code(statusFor(result.reason)).send(result);
       }
 
       return reply.send(result);
@@ -141,7 +141,7 @@ export async function missionRoutes(app: FastifyInstance) {
 
       const result = await completeMissionService(id);
       if (result.status === "rejected") {
-        return reply.code(statusFor(result.reason)).send(result.reason);
+        return reply.code(statusFor(result.reason)).send(result);
       }
 
       return reply.send(result);

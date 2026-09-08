@@ -10,7 +10,7 @@ import { useCompleteMission } from "../hooks/useCompleteMission";
 import { useReplaceWaypoints } from "../hooks/useReplaceWaypoints";
 import { useMissionsStore } from "../stores/useMissionsStore";
 import { useRestoreMission } from "../hooks/useRestoreMission";
-import type { UseMutationResult } from "@tanstack/react-query";
+
 import type { Drone, Mission, MissionStatus } from "@uav/shared";
 
 type MissionAction =
@@ -21,12 +21,15 @@ type MissionAction =
   | "save"
   | "restore";
 type ButtonAction = (typeof STATUS_ACTIONS)[MissionStatus][number];
-type ActionRejection = { error: Error | null; submittedAt: number };
-type MissionMutation = UseMutationResult<
-  { status: "success"; mission: Mission; drone: Drone },
-  Error,
-  string
->;
+type ActionRejection = {
+  error: Error | null;
+  submittedAt: number;
+  data:
+    | { status: "rejected"; reason: { message: string } }
+    | { status: "success" }
+    | undefined;
+};
+type MissionMutation = { mutate: (id: string) => void; isPending: boolean };
 
 const STATUS_ACTIONS = {
   draft: [],
@@ -124,9 +127,16 @@ export const MissionCard = ({ mission }: { mission: Mission }) => {
     null,
   );
 
-  const rejection = latest?.mutation.error
-    ? `${ACTION_LABEL[latest.action].toLowerCase()}: ${latest.mutation.error.message}`
-    : null;
+  const rejectionMessage =
+    latest == null
+      ? null
+      : latest.mutation.data?.status === "rejected"
+        ? latest.mutation.data.reason.message
+        : latest.mutation.error?.message;
+  const rejection =
+    latest != null && rejectionMessage
+      ? `${ACTION_LABEL[latest.action].toLowerCase()}: ${rejectionMessage}`
+      : null;
 
   switch (mission.status) {
     case "draft":

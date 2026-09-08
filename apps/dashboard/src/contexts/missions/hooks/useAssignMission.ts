@@ -1,17 +1,17 @@
 import { useMutation } from "@tanstack/react-query";
-import type { Mission } from "@uav/shared";
 import { assignMission } from "../api/assignMission";
 import { useMissionsStore } from "../stores/useMissionsStore";
 
 export const useAssignMission = () => {
-  return useMutation<
-    { status: "success"; mission: Mission },
-    Error,
-    { id: string; droneId: string }
-  >({
-    mutationFn: ({ id, droneId }) => assignMission(id, droneId),
+  return useMutation({
+    mutationFn: ({ id, droneId }: { id: string; droneId: string }) =>
+      assignMission(id, droneId),
     onSuccess: (result) => {
       const store = useMissionsStore.getState();
+
+      if (result.status !== "success") {
+        return;
+      }
       store.updateMission(result.mission);
     },
   });

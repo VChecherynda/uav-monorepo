@@ -1,13 +1,10 @@
-import type { Drone, Mission } from "@uav/shared";
-import { apiFetch } from "@/lib/apiFetch";
+import { AbortMissionServiceResultSchema } from "@uav/shared";
+import { fetchOutcome } from "@/lib/apiFetch";
 
-export async function abortMission(id: string): Promise<{
-  status: "success";
-  mission: Mission;
-  drone: Drone;
-}> {
-  return apiFetch<{ status: "success"; mission: Mission; drone: Drone }>(
+export async function abortMission(id: string) {
+  return fetchOutcome(
     `/missions/${id}/abort`,
+    AbortMissionServiceResultSchema,
     {
       method: "POST",
     },

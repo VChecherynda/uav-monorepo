@@ -8,6 +8,9 @@ export const useReplaceWaypoints = () => {
     mutationFn: (id: string) =>
       replaceWaypoints(id, useRouteDraftStore.getState().waypoints),
     onSuccess: (result) => {
+      if (result.status !== "success") {
+        return;
+      }
       useMissionsStore.getState().updateMission(result.mission);
       useRouteDraftStore.getState().cancelPlanning();
     },
