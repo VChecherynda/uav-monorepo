@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { FlightMode, FlightPhase, PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
 
 const prisma = new PrismaClient();
@@ -6,7 +6,9 @@ const prisma = new PrismaClient();
 const drones = [
   {
     name: "Falcon-1",
-    status: "active",
+    missionId: "m1",
+    flightMode: "AUTO" as FlightMode,
+    flightPhase: "IN_AIR" as FlightPhase,
     battery: 87,
     altitude: 120,
     homeLat: -23.7,
@@ -16,7 +18,9 @@ const drones = [
   },
   {
     name: "Hawk-2",
-    status: "idle",
+    missionId: "m2",
+    flightMode: "AUTO" as FlightMode,
+    flightPhase: "IN_AIR" as FlightPhase,
     battery: 64,
     altitude: 80,
     homeLat: -23.685,
@@ -26,7 +30,9 @@ const drones = [
   },
   {
     name: "Owl-3",
-    status: "idle",
+    missionId: null,
+    flightMode: "AUTO" as FlightMode,
+    flightPhase: "IN_AIR" as FlightPhase,
     battery: 21,
     altitude: 0,
     homeLat: -23.73,
@@ -64,6 +70,32 @@ async function main() {
   await prisma.drone.deleteMany();
   await prisma.geofence.deleteMany();
 
+  await prisma.mission.createMany({
+    data: [
+      { status: "draft", name: "Recon sector 1" },
+      {
+        id: "m1",
+        status: "assigned",
+        name: "Destroy infantry sector 2",
+      },
+      {
+        id: "m2",
+        status: "in-progress",
+        name: "Destroy infantry sector 3",
+      },
+      {
+        id: "m3",
+        status: "completed",
+        name: "Recon sector 2",
+      },
+      {
+        id: "m4",
+        status: "aborted",
+        name: "Destroy warehouse sector 2",
+      },
+    ],
+  });
+
   await prisma.drone.createMany({ data: drones });
   await prisma.geofence.createMany({ data: zones });
 
@@ -87,28 +119,6 @@ async function main() {
 
   const owl = createdDrones.find((d) => d.name === "Owl-3");
   if (!owl) throw new Error("Seed: Owl-3 not found");
-
-  await prisma.mission.createMany({
-    data: [
-      { status: "draft", name: "Recon sector 1", droneId: null },
-      {
-        status: "assigned",
-        name: "Destroy infantry sector 2",
-        droneId: hawk.id,
-      },
-      {
-        status: "in-progress",
-        name: "Destroy infantry sector 3",
-        droneId: falcon.id,
-      },
-      { status: "completed", name: "Recon sector 2", droneId: owl.id },
-      {
-        status: "aborted",
-        name: "Destroy warehouse sector 2",
-        droneId: owl.id,
-      },
-    ],
-  });
 
   for (const drone of createdDrones) {
     const now = Date.now();

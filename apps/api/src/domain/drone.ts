@@ -2,48 +2,41 @@ import type {
   Drone,
   DroneAction,
   DroneCommandConflictReason,
-} from "@uav/shared";
-import { predictDroneChange } from "@uav/shared";
+} from '@uav/shared';
+import { resolveRejection, nextPhaseAndMode } from '@uav/shared';
 
 export const executeCommand = (
   drone: Drone,
   action: DroneAction,
 ):
-  | { status: "success"; drone: Partial<Drone> }
-  | { status: "rejected"; reason: DroneCommandConflictReason } => {
-  if (drone.status === "offline") {
-    return {
-      status: "rejected",
-      reason: {
-        code: "DRONE_OFFLINE",
-        message: `Drone ${drone.name} is offline`,
-      },
-    };
-  }
+  | { status: 'success'; drone: Partial<Drone> }
+  | { status: 'rejected'; reason: DroneCommandConflictReason } => {
+  const reason = resolveRejection(drone, action);
 
-  const prediction = predictDroneChange(action, drone.status);
-  if (!prediction) {
+  if (reason) {
     return {
-      status: "rejected",
-      reason: {
-        code: "INVALID_TRANSITION",
-        message: `Cannot ${action} drone in status "${drone.status}"`,
-      },
+      status: 'rejected',
+      reason,
     };
   }
 
   if (drone.battery < 20) {
     return {
-      status: "rejected",
+      status: 'rejected',
       reason: {
-        code: "INSUFFICIENT_BATTERY",
+        code: 'INSUFFICIENT_BATTERY',
         message: `Insufficient battery: ${drone.battery}%`,
       },
     };
   }
 
+  const { flightPhase, flightMode } = nextPhaseAndMode(drone, action);
+
   return {
-    status: "success",
-    drone: prediction,
+    status: 'success',
+    drone: {
+      flightPhase,
+      flightMode,
+    },
   };
 };

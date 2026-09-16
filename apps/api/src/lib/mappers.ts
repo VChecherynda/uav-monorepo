@@ -1,13 +1,17 @@
-import { Prisma } from "@prisma/client";
-import type { Drone as PrismaDrone } from "@prisma/client";
-import type { Waypoint as PrismaWaypoint } from "@prisma/client";
+import { Prisma } from '@prisma/client';
+import type { Drone as PrismaDrone } from '@prisma/client';
+import type { Waypoint as PrismaWaypoint } from '@prisma/client';
 import {
   type Drone,
   type Mission,
   type Coordinate,
-  DroneStatusSchema,
+  FlightModeSchema,
   MissionStatusSchema,
-} from "@uav/shared";
+  FlightPhaseSchema,
+  DispositionSchema,
+} from '@uav/shared';
+
+const DRONE_LINK_TIMEOUT_MS = 6000;
 
 export type MissionWithWaypoints = Prisma.MissionGetPayload<{
   include: { waypoints: true };
@@ -17,7 +21,14 @@ export function mapDrone(d: PrismaDrone): Drone {
   return {
     id: d.id,
     name: d.name,
-    status: DroneStatusSchema.parse(d.status),
+    missionId: d.missionId,
+    flightPhase: FlightPhaseSchema.parse(d.flightPhase),
+    flightMode: FlightModeSchema.parse(d.flightMode),
+    disposition: DispositionSchema.parse(d.disposition),
+    link:
+      Date.now() - d.updatedAt.getTime() > DRONE_LINK_TIMEOUT_MS
+        ? 'OFFLINE'
+        : 'ONLINE',
     battery: d.battery,
     altitude: d.altitude,
     lng: d.lng,
@@ -29,7 +40,6 @@ export function mapMission(m: MissionWithWaypoints): Mission {
   return {
     id: m.id,
     name: m.name,
-    droneId: m.droneId,
     waypoints: mapWaypoints(m.waypoints),
     status: MissionStatusSchema.parse(m.status),
     reason: m.reason,

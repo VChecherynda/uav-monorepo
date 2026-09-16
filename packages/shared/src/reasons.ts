@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { DroneCommandConflictReason } from "./drone.js";
+import { DroneCommandConflictReasonSchema } from "./drone.js";
 import { MissionConflictReasonSchema } from "./mission.js";
 
 export const DroneNotFoundReasonSchema = z.object({
@@ -16,9 +16,14 @@ export const MissionNotFoundReasonSchema = z.object({
 
 export type MissionNotFoundReason = z.infer<typeof MissionNotFoundReasonSchema>;
 
-export type CommandRejectionReason =
-  | DroneNotFoundReason
-  | DroneCommandConflictReason;
+export const CommandRejectionReasonSchema = z.discriminatedUnion("code", [
+  DroneNotFoundReasonSchema,
+  DroneCommandConflictReasonSchema,
+]);
+
+export type CommandRejectionReason = z.infer<
+  typeof CommandRejectionReasonSchema
+>;
 
 export const MissionRejectionReasonSchema = z.discriminatedUnion("code", [
   DroneNotFoundReasonSchema,

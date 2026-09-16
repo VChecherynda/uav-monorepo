@@ -13,10 +13,32 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum FlightPhase {
+  ON_GROUND
+  TAKEOFF
+  IN_AIR
+  LANDING
+}
+
+enum FlightMode {
+  AUTO
+  RTL
+  LAND
+  LOITER
+}
+
+enum Disposition {
+  ACTIVE
+  EXPENDED
+}
+
 model Drone {
   id          String      @id @default(cuid())
+  missionId   String?
   name        String
-  status      String // "active" | "idle" | "offline"
+  flightPhase FlightPhase @default(ON_GROUND)
+  flightMode  FlightMode  @default(LOITER)
+  disposition Disposition @default(ACTIVE)
   battery     Int
   altitude    Int
   lng         Float
@@ -26,7 +48,7 @@ model Drone {
   updatedAt   DateTime    @updatedAt
   createdAt   DateTime    @default(now())
   telemetries Telemetry[]
-  missions    Mission[]
+  missions    Mission?    @relation(fields: [missionId], references: [id], onDelete: Restrict)
 }
 
 model Telemetry {
@@ -45,12 +67,11 @@ model Telemetry {
 model Mission {
   id        String     @id @default(cuid())
   name      String     @db.VarChar(120)
-  droneId   String?
   status    String     @default("draft") // "draft" | "assigned" | "in-progress | "completed" | "aborted"
   reason    String?
   createdAt DateTime   @default(now())
-  drone     Drone?     @relation(fields: [droneId], references: [id], onDelete: Restrict)
   waypoints Waypoint[]
+  drones    Drone[]
 }
 
 model Waypoint {

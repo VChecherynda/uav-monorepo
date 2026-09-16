@@ -9,11 +9,16 @@ import {
   abortMissionService,
   startMissionService,
   restoreMissionService,
+  unassignMission,
 } from "../services/missionService.js";
 import type { MissionRejectionReason } from "@uav/shared";
 import { mapMissions } from "../lib/mappers.js";
 
 const AssignSchema = z.object({
+  droneId: z.string(),
+});
+
+const UnassignSchema = z.object({
   droneId: z.string(),
 });
 
@@ -60,6 +65,27 @@ export async function missionRoutes(app: FastifyInstance) {
 
       const { droneId } = parsed.data;
       const result = await assignMission(id, droneId);
+      if (result.status === "rejected") {
+        return reply.code(statusFor(result.reason)).send(result);
+      }
+
+      return reply.send(result);
+    },
+  );
+
+  app.post(
+    "/missions/:id/unassign",
+    { preHandler: authenticate },
+    async (req, reply) => {
+      const { id } = req.params as { id: string };
+
+      const parsed = UnassignSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return reply.code(400).send(z.flattenError(parsed.error));
+      }
+
+      const { droneId } = parsed.data;
+      const result = await unassignMission(id, droneId);
       if (result.status === "rejected") {
         return reply.code(statusFor(result.reason)).send(result);
       }

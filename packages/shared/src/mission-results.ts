@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { DroneSchema } from "./drone.js";
+import { DroneCommandConflictReasonSchema, DroneSchema } from "./drone.js";
 import { MissionSchema } from "./mission.js";
 import { MissionRejectionReasonSchema } from "./reasons.js";
 
@@ -11,12 +11,19 @@ export const RejectedResultSchema = z.object({
 export const AssignResultSchema = z.discriminatedUnion("status", [
   z.object({
     status: z.literal("success"),
-    mission: MissionSchema,
+    drone: DroneSchema,
   }),
   RejectedResultSchema,
 ]);
 
 export type AssignResult = z.infer<typeof AssignResultSchema>;
+
+export const UnassignResultSchema = z.discriminatedUnion("status", [
+  z.object({ status: z.literal("success"), drone: DroneSchema }),
+  RejectedResultSchema,
+]);
+
+export type UnassignResult = z.infer<typeof UnassignResultSchema>;
 
 export const ReplaceWaypointsResultSchema = z.discriminatedUnion("status", [
   z.object({
@@ -30,11 +37,18 @@ export type ReplaceWaypointsResult = z.infer<
   typeof ReplaceWaypointsResultSchema
 >;
 
+const RejectedDroneSchema = z.object({
+  droneId: z.string(),
+  reason: DroneCommandConflictReasonSchema,
+});
+
+export type RejectedDrone = z.infer<typeof RejectedDroneSchema>;
+
 export const StartMissionServiceResultSchema = z.discriminatedUnion("status", [
   z.object({
     status: z.literal("success"),
     mission: MissionSchema,
-    drone: DroneSchema,
+    rejected: z.array(RejectedDroneSchema),
   }),
   RejectedResultSchema,
 ]);
@@ -47,7 +61,7 @@ export const AbortMissionServiceResultSchema = z.discriminatedUnion("status", [
   z.object({
     status: z.literal("success"),
     mission: MissionSchema,
-    drone: DroneSchema,
+    rejected: z.array(RejectedDroneSchema),
   }),
   RejectedResultSchema,
 ]);
@@ -77,7 +91,6 @@ export const CompleteMissionServiceResultSchema = z.discriminatedUnion(
     z.object({
       status: z.literal("success"),
       mission: MissionSchema,
-      drone: DroneSchema,
     }),
     RejectedResultSchema,
   ],

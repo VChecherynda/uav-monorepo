@@ -4,155 +4,186 @@ import type {
   Drone,
   MissionConflictReason,
   ZoneViolation,
-} from "@uav/shared";
-import { isPointInPolygon, segmentIntersectsPolygon } from "@uav/shared";
+} from '@uav/shared';
+import { isPointInPolygon, segmentIntersectsPolygon } from '@uav/shared';
 
 export const assignDrone = (
-  mission: Mission,
+  mission: Pick<Mission, 'status'>,
   drone: Drone,
 ):
   | {
-      status: "success";
-      mission: Pick<Mission, "status"> & { droneId: string };
+      status: 'success';
     }
-  | { status: "rejected"; reason: MissionConflictReason } => {
-  if (drone.status !== "idle") {
+  | { status: 'rejected'; reason: MissionConflictReason } => {
+  if (mission.status !== 'draft') {
     return {
-      status: "rejected",
+      status: 'rejected',
       reason: {
-        code: "DRONE_IS_NOT_READY",
-        message: "Drone is not ready for mission",
+        code: 'MISSION_IS_NOT_DRAFT',
+        message: 'Only draft missions can be assigned',
       },
     };
   }
 
-  if (mission.status !== "draft") {
+  if (drone.missionId !== null) {
     return {
-      status: "rejected",
+      status: 'rejected',
       reason: {
-        code: "MISSION_IS_NOT_DRAFT",
-        message: "Only draft missions can be assigned",
+        code: 'DRONE_IS_NOT_READY',
+        message: 'Drone is on another mission',
+      },
+    };
+  }
+
+  if (drone.disposition === 'EXPENDED') {
+    return {
+      status: 'rejected',
+      reason: {
+        code: 'DRONE_IS_NOT_READY',
+        message: 'Drone is expended',
       },
     };
   }
 
   return {
-    status: "success",
-    mission: {
-      droneId: drone.id,
-      status: "assigned",
-    },
+    status: 'success',
+  };
+};
+
+export const unassignDrone = (
+  mission: Pick<Mission, 'status' | 'id'>,
+  drone: Drone,
+):
+  | {
+      status: 'success';
+    }
+  | { status: 'rejected'; reason: MissionConflictReason } => {
+  if (drone.disposition === 'EXPENDED') {
+    return {
+      status: 'rejected',
+      reason: {
+        code: 'DRONE_IS_NOT_READY',
+        message: 'Drone is expended',
+      },
+    };
+  }
+
+  if (mission.status !== 'draft') {
+    return {
+      status: 'rejected',
+      reason: {
+        code: 'MISSION_IS_NOT_DRAFT',
+        message: 'Only draft missions can be unassigned',
+      },
+    };
+  }
+
+  if (drone.missionId !== mission.id) {
+    return {
+      status: 'rejected',
+      reason: {
+        code: 'DRONE_IS_NOT_ON_MISSION',
+        message: 'Drone is not on this mission',
+      },
+    };
+  }
+
+  return {
+    status: 'success',
   };
 };
 
 export type StartMissionPatch = {
-  status: "success";
-  mission: Pick<Mission, "status">;
-  drone: Pick<Drone, "status">;
+  status: 'success';
+  mission: Pick<Mission, 'status'>;
 };
 
 export type AbortMissionPatch = {
-  status: "success";
-  mission: Pick<Mission, "status">;
-  drone: Pick<Drone, "status">;
+  status: 'success';
+  mission: Pick<Mission, 'status'>;
 };
 
-export type RestoreMissionPatch =
-  | {
-      status: "success";
-      outcome: "reassigned";
-      mission: Pick<Mission, "status">;
-      drone: Pick<Drone, "status">;
-    }
-  | {
-      status: "success";
-      outcome: "unassigned";
-      mission: Pick<Mission, "status"> & { droneId: null };
-    };
+export type RestoreMissionPatch = {
+  status: 'success';
+  mission: Pick<Mission, 'status'>;
+};
+
+export type TerminateMissionPatch = {
+  status: 'success';
+  mission: Pick<Mission, 'status'>;
+};
 
 export type CompleteMissionPatch = {
-  status: "success";
-  mission: Pick<Mission, "status">;
-  drone: Pick<Drone, "status">;
-};
-
-export const canAssignMission = (
-  mission: Mission,
-):
-  | { status: "success" }
-  | { status: "rejected"; reason: MissionConflictReason } => {
-  if (!mission.waypoints.length) {
-    return {
-      status: "rejected",
-      reason: {
-        code: "MISSION_HAS_NO_WAYPOINTS",
-        message: "Mission should have waypoints",
-      },
-    };
-  }
-
-  return {
-    status: "success",
-  };
+  status: 'success';
+  mission: Pick<Mission, 'status'>;
 };
 
 export const canReplaceWaypoints = (
   mission: Mission,
 ):
-  | { status: "success" }
-  | { status: "rejected"; reason: MissionConflictReason } => {
-  if (mission.status !== "draft" && mission.status !== "assigned") {
+  | { status: 'success' }
+  | { status: 'rejected'; reason: MissionConflictReason } => {
+  if (mission.status !== 'draft') {
     return {
-      status: "rejected",
+      status: 'rejected',
       reason: {
-        code: "WAYPOINTS_CANNOT_BE_REPLACED",
-        message:
-          "Waypoints can only be replaced while mission is draft or assigned",
+        code: 'WAYPOINTS_CANNOT_BE_REPLACED',
+        message: 'Waypoints can only be replaced while mission is draft',
       },
     };
   }
 
   return {
-    status: "success",
+    status: 'success',
   };
 };
 
 export const startMission = (
   mission: Mission,
-  drone: Drone,
+  drones: Drone[],
   zones: Geofence[],
 ):
-  | StartMissionPatch
-  | { status: "rejected"; reason: MissionConflictReason } => {
-  if (mission.status !== "assigned") {
+  StartMissionPatch | { status: 'rejected'; reason: MissionConflictReason } => {
+  if (mission.status !== 'draft') {
     return {
-      status: "rejected",
+      status: 'rejected',
       reason: {
-        code: "MISSION_IS_NOT_ASSIGNED",
-        message: "Only assigned missions can start",
+        code: 'MISSION_IS_NOT_DRAFT',
+        message: 'Only draft missions can start',
       },
-    };
-  }
-
-  if (drone.status !== "idle") {
-    return {
-      status: "rejected",
-      reason: { code: "DRONE_IS_NOT_READY", message: "Drone is not idle" },
     };
   }
 
   if (!mission.waypoints.length) {
     return {
-      status: "rejected",
+      status: 'rejected',
       reason: {
-        code: "MISSION_HAS_NO_WAYPOINTS",
-        message: "Mission should have waypoints",
+        code: 'MISSION_HAS_NO_WAYPOINTS',
+        message: 'Mission should have waypoints',
+      },
+    };
+  }
+
+  if (drones.length === 0) {
+    return {
+      status: 'rejected',
+      reason: {
+        code: 'MISSION_HAS_NO_DRONE',
+        message: 'Mission has no assigned drone',
       },
     };
   }
 
   const violations: ZoneViolation[] = [];
-  const route = [{ lng: drone.lng, lat: drone.lat }, ...mission.waypoints];
+
+  if (!drones[0]) {
+    throw new Error("drone doesn't exist");
+  }
+
+  const route = [
+    { lng: drones[0].lng, lat: drones[0].lat },
+    ...mission.waypoints,
+  ];
 
   for (let i = 0; i < zones.length; i++) {
     const zone = zones[i];
@@ -168,7 +199,7 @@ export const startMission = (
 
       const result = isPointInPolygon(w, zone.area);
       if (result) {
-        violations.push({ kind: "waypoint", index: j, zoneId: zone.id });
+        violations.push({ kind: 'waypoint', index: j, zoneId: zone.id });
       }
     }
 
@@ -182,130 +213,122 @@ export const startMission = (
 
       const result = segmentIntersectsPolygon(s, g, zone.area);
       if (result) {
-        violations.push({ kind: "segment", index: j, zoneId: zone.id });
+        violations.push({ kind: 'segment', index: j, zoneId: zone.id });
       }
     }
   }
 
   if (violations.length) {
     return {
-      status: "rejected",
+      status: 'rejected',
       reason: {
-        code: "ROUTE_VIOLATES_ZONE",
+        code: 'ROUTE_VIOLATES_ZONE',
         message: violations
           .map((v) => {
             const zoneName =
               zones.find((z) => z.id === v.zoneId)?.name ?? v.zoneId;
 
-            if (v.kind === "waypoint") {
+            if (v.kind === 'waypoint') {
               return `Waypoint ${v.index + 1} is inside zone ${zoneName}`;
             }
 
             return `Segment ${v.index + 1} crosses zone ${zoneName}`;
           })
-          .join("; "),
+          .join('; '),
         violations,
       },
     };
   }
 
   return {
-    status: "success",
-    mission: { status: "in-progress" },
-    drone: { status: "active" },
+    status: 'success',
+    mission: { status: 'in-progress' },
   };
 };
 
 export const abortMission = (
   mission: Mission,
 ):
-  | AbortMissionPatch
-  | { status: "rejected"; reason: MissionConflictReason } => {
-  if (mission.status !== "assigned" && mission.status !== "in-progress") {
+  AbortMissionPatch | { status: 'rejected'; reason: MissionConflictReason } => {
+  if (mission.status !== 'in-progress') {
     return {
-      status: "rejected",
+      status: 'rejected',
       reason: {
-        code: "MISSION_CANNOT_BE_ABORTED",
+        code: 'MISSION_CANNOT_BE_ABORTED',
         message: `Cannot abort mission in status "${mission.status}"`,
       },
     };
   }
 
-  if (mission.status === "assigned") {
-    return {
-      status: "success",
-      mission: { status: "aborted" },
-      drone: { status: "idle" },
-    };
-  } else {
-    return {
-      status: "success",
-      mission: { status: "aborted" },
-      drone: { status: "returning" },
-    };
-  }
+  return {
+    status: 'success',
+    mission: { status: 'aborted' },
+  };
 };
 
 export const completeMission = (
   mission: Mission,
 ):
   | CompleteMissionPatch
-  | { status: "rejected"; reason: MissionConflictReason } => {
-  if (mission.status !== "in-progress") {
+  | { status: 'rejected'; reason: MissionConflictReason } => {
+  if (mission.status !== 'in-progress') {
     return {
-      status: "rejected",
+      status: 'rejected',
       reason: {
-        code: "MISSION_IS_NOT_IN_PROGRESS",
-        message: "Only in-progress missions can be completed",
+        code: 'MISSION_IS_NOT_IN_PROGRESS',
+        message: 'Only in-progress missions can be completed',
       },
     };
   }
 
   return {
-    status: "success",
-    mission: { status: "completed" },
-    drone: { status: "idle" },
+    status: 'success',
+    mission: { status: 'completed' },
   };
 };
 
 export const restoreMission = (
   mission: Mission,
-  drone: Drone,
 ):
   | RestoreMissionPatch
-  | { status: "rejected"; reason: MissionConflictReason } => {
-  if (mission.status !== "aborted") {
+  | { status: 'rejected'; reason: MissionConflictReason } => {
+  if (mission.status !== 'aborted') {
     return {
-      status: "rejected",
+      status: 'rejected',
       reason: {
-        code: "MISSION_CANNOT_BE_RESTORED",
-        message: "Only aborted missions can be restored",
+        code: 'MISSION_CANNOT_BE_RESTORED',
+        message: 'Only aborted missions can be restored',
       },
     };
   }
 
-  if (
-    drone.status === "idle" &&
-    canAssignMission(mission).status === "success"
-  ) {
+  return {
+    status: 'success',
+    mission: {
+      status: 'draft',
+    },
+  };
+};
+
+export const terminateMission = (
+  mission: Mission,
+):
+  | TerminateMissionPatch
+  | { status: 'rejected'; reason: MissionConflictReason } => {
+  if (mission.status !== 'aborted') {
     return {
-      status: "success",
-      outcome: "reassigned",
-      mission: {
-        status: "assigned",
-      },
-      drone: {
-        status: "assigned",
-      },
-    };
-  } else {
-    return {
-      status: "success",
-      outcome: "unassigned",
-      mission: {
-        status: "draft",
-        droneId: null,
+      status: 'rejected',
+      reason: {
+        code: 'MISSION_CANNOT_BE_TERMINATED',
+        message: 'Only aborted missions can be terminated',
       },
     };
   }
+
+  return {
+    status: 'success',
+    mission: {
+      status: 'terminated',
+    },
+  };
 };

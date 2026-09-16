@@ -2,7 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 import { sendCommand } from "@/contexts/fleet-commands";
 import { useDronesStore } from "@/contexts/drones";
 import type { CommandResult, DroneAction, Drone } from "@uav/shared";
-import { predictDroneChange } from "@uav/shared";
+import { nextPhaseAndMode, resolveRejection } from "@uav/shared";
 import { useEffect, useRef } from "react";
 
 type Vars = { id: string; action: DroneAction };
@@ -33,13 +33,15 @@ export const useSendCommand = () => {
       const drone = store.serverDrones.find((d) => d.id === id);
       if (!drone) throw new Error("Drone not found in store");
 
-      const prediction = predictDroneChange(action, drone.status);
-      if (!prediction) {
-        throw new Error(`Cannot ${action} drone in status "${drone.status}"`);
+      const reason = resolveRejection(drone, action);
+      if (reason) {
+        throw new Error(reason.message);
       }
 
+      const { flightPhase, flightMode } = nextPhaseAndMode(drone, action);
+
       const snapshot = store.optimisticOverrides.get(id);
-      store.applyOptimistic(id, prediction);
+      store.applyOptimistic(id, { flightPhase, flightMode });
       return { snapshot };
     },
 

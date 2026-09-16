@@ -3,10 +3,10 @@ import { CoordinateSchema } from "./geometry.js";
 
 export const MissionStatusSchema = z.enum([
   "draft",
-  "assigned",
   "in-progress",
   "completed",
   "aborted",
+  "terminated",
 ]);
 
 export type MissionStatus = z.infer<typeof MissionStatusSchema>;
@@ -14,7 +14,6 @@ export type MissionStatus = z.infer<typeof MissionStatusSchema>;
 export const MissionSchema = z.object({
   id: z.string(),
   name: z.string(),
-  droneId: z.string().nullable(),
   waypoints: z.array(CoordinateSchema),
   status: MissionStatusSchema,
   reason: z.string().nullable(),
@@ -45,11 +44,12 @@ const buildReason = <C extends string>(code: C) => {
 
 export const MissionConflictReasonSchema = z.discriminatedUnion("code", [
   buildReason("DRONE_IS_NOT_READY"),
+  buildReason("DRONE_IS_NOT_ON_MISSION"),
   buildReason("MISSION_IS_NOT_DRAFT"),
-  buildReason("MISSION_IS_NOT_ASSIGNED"),
   buildReason("MISSION_HAS_NO_WAYPOINTS"),
   buildReason("MISSION_HAS_NO_DRONE"),
   buildReason("MISSION_CANNOT_BE_ABORTED"),
+  buildReason("MISSION_CANNOT_BE_TERMINATED"),
   buildReason("MISSION_IS_NOT_IN_PROGRESS"),
   buildReason("MISSION_CANNOT_BE_RESTORED"),
   buildReason("WAYPOINTS_CANNOT_BE_REPLACED"),
