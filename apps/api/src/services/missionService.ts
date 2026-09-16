@@ -11,6 +11,7 @@ import {
   GeofenceSchema,
   MissionStatusSchema,
   type RejectedDrone,
+  type TerminateMissionServiceResult,
 } from '@uav/shared';
 import {
   assignDrone,
@@ -20,6 +21,7 @@ import {
   canReplaceWaypoints,
   restoreMission,
   unassignDrone,
+  terminateMission,
 } from '../domain/mission.js';
 import {
   mapMission,
@@ -385,6 +387,47 @@ export async function completeMissionService(
   }
 
   const next = completeMission(mapMission(missionRow));
+  if (next.status === 'rejected') {
+    return next;
+  }
+
+  const [updatedMission] = await prisma.$transaction([
+    prisma.mission.update({
+      where: { id: missionId },
+      include: { waypoints: { orderBy: { order: 'asc' } } },
+      data: next.mission,
+    }),
+    prisma.drone.updateMany({
+      where: { missionId },
+      data: { missionId: null },
+    }),
+  ]);
+
+  return {
+    status: 'success',
+    mission: mapMission(updatedMission),
+  };
+}
+
+export async function terminateMissionService(
+  missionId: string,
+): Promise<TerminateMissionServiceResult> {
+  const missionRow = await prisma.mission.findUnique({
+    where: { id: missionId },
+    include: { waypoints: { orderBy: { order: 'asc' } } },
+  });
+
+  if (!missionRow) {
+    return {
+      status: 'rejected',
+      reason: {
+        code: 'MISSION_NOT_FOUND',
+        message: 'Mission not found',
+      },
+    };
+  }
+
+  const next = terminateMission(mapMission(missionRow));
   if (next.status === 'rejected') {
     return next;
   }

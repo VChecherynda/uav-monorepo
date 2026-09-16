@@ -99,3 +99,18 @@ export const CompleteMissionServiceResultSchema = z.discriminatedUnion(
 export type CompleteMissionServiceResult = z.infer<
   typeof CompleteMissionServiceResultSchema
 >;
+
+export const TerminateMissionServiceResultSchema = z.discriminatedUnion(
+  'status',
+  [
+    z.object({
+      status: z.literal('success'),
+      mission: MissionSchema,
+    }),
+    RejectedResultSchema,
+  ],
+);
+
+export type TerminateMissionServiceResult = z.infer<
+  typeof TerminateMissionServiceResultSchema
+>;
