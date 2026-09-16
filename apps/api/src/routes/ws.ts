@@ -1,7 +1,7 @@
-import jwt from "jsonwebtoken";
+import jwt from 'jsonwebtoken';
 
-import type { FastifyInstance } from "fastify";
-import type { WSMessage, Drone, DomainEvent } from "@uav/shared";
+import type { FastifyInstance } from 'fastify';
+import type { WSMessage, Drone, DomainEvent } from '@uav/shared';
 
 const clients = new Set<WebSocket>();
 
@@ -10,34 +10,34 @@ export const hasClients = () => {
 };
 
 export async function wsRoutes(app: FastifyInstance) {
-  app.get("/ws/drones", { websocket: true }, (socket, req) => {
+  app.get('/ws/drones', { websocket: true }, (socket, req) => {
     const url = new URL(req.url, `http://${req.headers.host}`);
-    const token = url.searchParams.get("token");
+    const token = url.searchParams.get('token');
 
     if (!token) {
-      socket.close(4001, "Unauthorized: no token");
+      socket.close(4001, 'Unauthorized: no token');
       return;
     }
 
     try {
       jwt.verify(
         token,
-        process.env.JWT_SECRET ?? "dev-secret-change-in-production",
+        process.env.JWT_SECRET ?? 'dev-secret-change-in-production',
       );
     } catch {
-      socket.close(4001, "Unauthorized: invalid token");
+      socket.close(4001, 'Unauthorized: invalid token');
       return;
     }
 
     clients.add(socket);
 
-    socket.on("close", () => {
-      app.log.info("WS client disconnected");
+    socket.on('close', () => {
+      app.log.info('WS client disconnected');
       clients.delete(socket);
     });
 
-    socket.on("error", (err: Error) => {
-      app.log.error({ err }, "WS error");
+    socket.on('error', (err: Error) => {
+      app.log.error({ err }, 'WS error');
       clients.delete(socket);
     });
   });
@@ -47,7 +47,7 @@ export function broadcastDrones(drones: Drone[]) {
   if (clients.size === 0) return;
 
   const payload: WSMessage = {
-    type: "drones:snapshot",
+    type: 'drones:snapshot',
     data: drones,
   };
   const serialized = JSON.stringify(payload);

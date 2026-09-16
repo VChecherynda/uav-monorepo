@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { useMissions } from "../hooks/useMissions";
-import { useMissionsStore } from "../stores/useMissionsStore";
+import { useMissions } from '../hooks/useMissions';
+import { useMissionsStore } from '../stores/useMissionsStore';
 
-import { MissionCard } from "./MissionCard";
+import { MissionCard } from './MissionCard';
 
 export const MissionPanel = () => {
   const { isLoading, error } = useMissions();

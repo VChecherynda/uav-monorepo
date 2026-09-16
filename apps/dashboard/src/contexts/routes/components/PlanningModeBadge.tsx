@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useRouteDraftStore } from "../stores/useRouteDraftStore";
+import { useRouteDraftStore } from '../stores/useRouteDraftStore';
 
 export const PlanningModeBadge = () => {
   const cancelPlanning = useRouteDraftStore((s) => s.cancelPlanning);
@@ -14,12 +14,12 @@ export const PlanningModeBadge = () => {
     <div
       className="absolute top-3 right-3 z-10 tactical-badge font-mono"
       style={{
-        borderColor: "var(--accent-warn)",
+        borderColor: 'var(--accent-warn)',
       }}
     >
       <span
         className="text-xs tracking-widest"
-        style={{ color: "var(--accent-warn)" }}
+        style={{ color: 'var(--accent-warn)' }}
       >
         PLANNING MODE
       </span>

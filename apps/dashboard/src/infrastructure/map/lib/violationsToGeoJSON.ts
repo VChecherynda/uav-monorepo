@@ -1,6 +1,6 @@
-import type { Coordinate, Drone, Geofence, ZoneViolation } from "@uav/shared";
-import type { GeoJSONSourceSpecification } from "maplibre-gl";
-import type { Feature } from "geojson";
+import type { Coordinate, Drone, Geofence, ZoneViolation } from '@uav/shared';
+import type { GeoJSONSourceSpecification } from 'maplibre-gl';
+import type { Feature } from 'geojson';
 
 const getMapCoordinate = ({ lng, lat }: Coordinate): [number, number] => {
   return [lng, lat];
@@ -16,28 +16,28 @@ export const violationsToGeoJSON = ({
   waypoints: Coordinate[];
   zones: Geofence[];
   drone: Drone;
-}): GeoJSONSourceSpecification["data"] => {
+}): GeoJSONSourceSpecification['data'] => {
   const zonesWithViolations = zones.filter((z) =>
     violations.some((v) => v.zoneId === z.id),
   );
 
   return {
-    type: "FeatureCollection",
+    type: 'FeatureCollection',
     features: [
       ...violations.flatMap((v): Feature[] => {
         const currentWP = waypoints[v.index];
         if (!currentWP) return [];
 
-        if (v.kind === "segment") {
+        if (v.kind === 'segment') {
           if (v.index > 0) {
             const prevWP = waypoints[v.index - 1];
             if (!prevWP) return [];
 
             return [
               {
-                type: "Feature",
+                type: 'Feature',
                 geometry: {
-                  type: "LineString",
+                  type: 'LineString',
                   coordinates: [
                     getMapCoordinate(prevWP),
                     getMapCoordinate(currentWP),
@@ -50,9 +50,9 @@ export const violationsToGeoJSON = ({
 
           return [
             {
-              type: "Feature",
+              type: 'Feature',
               geometry: {
-                type: "LineString",
+                type: 'LineString',
                 coordinates: [
                   [drone.lng, drone.lat],
                   getMapCoordinate(currentWP),
@@ -65,28 +65,26 @@ export const violationsToGeoJSON = ({
 
         return [
           {
-            type: "Feature",
+            type: 'Feature',
             geometry: {
-              type: "Point",
+              type: 'Point',
               coordinates: getMapCoordinate(currentWP),
             },
             properties: {},
           },
         ];
       }),
-      ...zonesWithViolations.map(
-        (z): Feature => ({
-          type: "Feature",
-          geometry: {
-            type: "Polygon",
-            coordinates: [z.area.map((c): number[] => [c.lng, c.lat])],
-          },
-          properties: {
-            id: z.id,
-            name: z.name,
-          },
-        }),
-      ),
+      ...zonesWithViolations.map((z): Feature => ({
+        type: 'Feature',
+        geometry: {
+          type: 'Polygon',
+          coordinates: [z.area.map((c): number[] => [c.lng, c.lat])],
+        },
+        properties: {
+          id: z.id,
+          name: z.name,
+        },
+      })),
     ],
   };
 };

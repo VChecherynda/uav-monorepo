@@ -1,14 +1,14 @@
-import { FlightMode, FlightPhase, PrismaClient } from "@prisma/client";
-import bcrypt from "bcrypt";
+import { FlightMode, FlightPhase, PrismaClient } from '@prisma/client';
+import bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
 const drones = [
   {
-    name: "Falcon-1",
-    missionId: "m1",
-    flightMode: "AUTO" as FlightMode,
-    flightPhase: "IN_AIR" as FlightPhase,
+    name: 'Falcon-1',
+    missionId: 'm1',
+    flightMode: 'AUTO' as FlightMode,
+    flightPhase: 'IN_AIR' as FlightPhase,
     battery: 87,
     altitude: 120,
     homeLat: -23.7,
@@ -17,10 +17,10 @@ const drones = [
     lng: 133.88,
   },
   {
-    name: "Hawk-2",
-    missionId: "m2",
-    flightMode: "AUTO" as FlightMode,
-    flightPhase: "IN_AIR" as FlightPhase,
+    name: 'Hawk-2',
+    missionId: 'm2',
+    flightMode: 'AUTO' as FlightMode,
+    flightPhase: 'IN_AIR' as FlightPhase,
     battery: 64,
     altitude: 80,
     homeLat: -23.685,
@@ -29,10 +29,10 @@ const drones = [
     lng: 133.915,
   },
   {
-    name: "Owl-3",
+    name: 'Owl-3',
     missionId: null,
-    flightMode: "AUTO" as FlightMode,
-    flightPhase: "IN_AIR" as FlightPhase,
+    flightMode: 'AUTO' as FlightMode,
+    flightPhase: 'IN_AIR' as FlightPhase,
     battery: 21,
     altitude: 0,
     homeLat: -23.73,
@@ -44,7 +44,7 @@ const drones = [
 
 const zones = [
   {
-    name: "Alice Springs Airport",
+    name: 'Alice Springs Airport',
     area: [
       { lng: 133.892, lat: -23.812 },
       { lng: 133.912, lat: -23.812 },
@@ -53,7 +53,7 @@ const zones = [
     ],
   },
   {
-    name: "Restricted North",
+    name: 'Restricted North',
     area: [
       { lng: 133.86, lat: -23.66 },
       { lng: 133.89, lat: -23.66 },
@@ -72,26 +72,26 @@ async function main() {
 
   await prisma.mission.createMany({
     data: [
-      { status: "draft", name: "Recon sector 1" },
+      { status: 'draft', name: 'Recon sector 1' },
       {
-        id: "m1",
-        status: "assigned",
-        name: "Destroy infantry sector 2",
+        id: 'm1',
+        status: 'assigned',
+        name: 'Destroy infantry sector 2',
       },
       {
-        id: "m2",
-        status: "in-progress",
-        name: "Destroy infantry sector 3",
+        id: 'm2',
+        status: 'in-progress',
+        name: 'Destroy infantry sector 3',
       },
       {
-        id: "m3",
-        status: "completed",
-        name: "Recon sector 2",
+        id: 'm3',
+        status: 'completed',
+        name: 'Recon sector 2',
       },
       {
-        id: "m4",
-        status: "aborted",
-        name: "Destroy warehouse sector 2",
+        id: 'm4',
+        status: 'aborted',
+        name: 'Destroy warehouse sector 2',
       },
     ],
   });
@@ -102,23 +102,23 @@ async function main() {
   await prisma.user.deleteMany();
   await prisma.user.create({
     data: {
-      email: "demo@uav.test",
-      passwordHash: await bcrypt.hash("password123", 10),
+      email: 'demo@uav.test',
+      passwordHash: await bcrypt.hash('password123', 10),
     },
   });
 
   const createdDrones = await prisma.drone.findMany({
-    orderBy: { name: "asc" },
+    orderBy: { name: 'asc' },
   });
 
-  const falcon = createdDrones.find((d) => d.name === "Falcon-1");
-  if (!falcon) throw new Error("Seed: Falcon-1 not found");
+  const falcon = createdDrones.find((d) => d.name === 'Falcon-1');
+  if (!falcon) throw new Error('Seed: Falcon-1 not found');
 
-  const hawk = createdDrones.find((d) => d.name === "Hawk-2");
-  if (!hawk) throw new Error("Seed: Hawk-2 not found");
+  const hawk = createdDrones.find((d) => d.name === 'Hawk-2');
+  if (!hawk) throw new Error('Seed: Hawk-2 not found');
 
-  const owl = createdDrones.find((d) => d.name === "Owl-3");
-  if (!owl) throw new Error("Seed: Owl-3 not found");
+  const owl = createdDrones.find((d) => d.name === 'Owl-3');
+  if (!owl) throw new Error('Seed: Owl-3 not found');
 
   for (const drone of createdDrones) {
     const now = Date.now();

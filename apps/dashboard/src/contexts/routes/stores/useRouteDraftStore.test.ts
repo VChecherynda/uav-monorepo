@@ -7,10 +7,10 @@
 // 6. мутаційний: addWaypoint повертає НОВЕ посилання
 //    (old !== new) — тест, що вбиває push-версію
 
-import { describe, it, expect, beforeEach } from "vitest";
-import { useRouteDraftStore } from "./useRouteDraftStore";
+import { describe, it, expect, beforeEach } from 'vitest';
+import { useRouteDraftStore } from './useRouteDraftStore';
 
-describe("useRouteDraftStore", () => {
+describe('useRouteDraftStore', () => {
   beforeEach(() => {
     useRouteDraftStore.setState({
       planningMissionId: null,
@@ -18,15 +18,15 @@ describe("useRouteDraftStore", () => {
     });
   });
 
-  it("start planning resets waypoints and sets mission id", () => {
-    useRouteDraftStore.getState().startPlanning("m1");
+  it('start planning resets waypoints and sets mission id', () => {
+    useRouteDraftStore.getState().startPlanning('m1');
 
     const state = useRouteDraftStore.getState();
-    expect(state.planningMissionId).toBe("m1");
+    expect(state.planningMissionId).toBe('m1');
     expect(state.waypoints).toEqual([]);
   });
 
-  it("addWaypoint appends to the end preserving order", () => {
+  it('addWaypoint appends to the end preserving order', () => {
     const waypoint1 = { lng: 5, lat: 10 };
     const waypoint2 = { lng: 10, lat: 20 };
 
@@ -39,18 +39,18 @@ describe("useRouteDraftStore", () => {
     expect(state.waypoints[1]).toEqual(waypoint2);
   });
 
-  it("startPlanning clears waypoints from previous session", () => {
+  it('startPlanning clears waypoints from previous session', () => {
     useRouteDraftStore.getState().addWaypoint({ lng: 5, lat: 10 });
-    useRouteDraftStore.getState().startPlanning("m2");
+    useRouteDraftStore.getState().startPlanning('m2');
 
     const state = useRouteDraftStore.getState();
-    expect(state.planningMissionId).toBe("m2");
+    expect(state.planningMissionId).toBe('m2');
     expect(state.waypoints).toEqual([]);
   });
 
-  it("cancelPlanning resets mission id and waypoints", () => {
+  it('cancelPlanning resets mission id and waypoints', () => {
     useRouteDraftStore.getState().addWaypoint({ lng: 5, lat: 10 });
-    useRouteDraftStore.getState().startPlanning("m3");
+    useRouteDraftStore.getState().startPlanning('m3');
 
     useRouteDraftStore.getState().cancelPlanning();
     const state = useRouteDraftStore.getState();
@@ -59,7 +59,7 @@ describe("useRouteDraftStore", () => {
     expect(state.waypoints).toEqual([]);
   });
 
-  it("addWaypoint creates new array reference for subscribers", () => {
+  it('addWaypoint creates new array reference for subscribers', () => {
     useRouteDraftStore.getState().addWaypoint({ lng: 5, lat: 10 });
     const oldWaypoints = useRouteDraftStore.getState().waypoints;
 

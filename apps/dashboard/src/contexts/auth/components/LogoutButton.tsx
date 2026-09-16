@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { useRouter } from "next/navigation";
-import { useAuthStore } from "@/contexts/auth/stores/useAuthStore";
+import { useRouter } from 'next/navigation';
+import { useAuthStore } from '@/contexts/auth/stores/useAuthStore';
 
 export function LogoutButton() {
   const router = useRouter();
@@ -10,10 +10,10 @@ export function LogoutButton() {
 
   const handleLogout = () => {
     logout();
-    router.replace("/login");
+    router.replace('/login');
   };
 
-  const initials = user?.email?.slice(0, 2).toLocaleUpperCase() ?? "??";
+  const initials = user?.email?.slice(0, 2).toLocaleUpperCase() ?? '??';
 
   return (
     <div className="flex items-center gap-3">

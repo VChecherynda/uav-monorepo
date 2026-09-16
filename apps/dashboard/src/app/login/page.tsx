@@ -1,15 +1,15 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { login, useAuthStore } from "@/contexts/auth";
-import { CrosshairIcon } from "@/components/icons/CrosshairIcon";
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { login, useAuthStore } from '@/contexts/auth';
+import { CrosshairIcon } from '@/components/icons/CrosshairIcon';
 
 export default function LoginPage() {
   const router = useRouter();
   const setAuth = useAuthStore((s) => s.setAuth);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -21,9 +21,9 @@ export default function LoginPage() {
     try {
       const data = await login({ email, password });
       setAuth(data.token, data.user);
-      router.push("/");
+      router.push('/');
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Login failed");
+      setError(err instanceof Error ? err.message : 'Login failed');
       setIsLoading(false);
     }
   };
@@ -48,7 +48,7 @@ export default function LoginPage() {
         {/* Form card */}
         <form
           onSubmit={handleSubmit}
-          style={{ borderLeft: "3px solid var(--accent-warn)" }}
+          style={{ borderLeft: '3px solid var(--accent-warn)' }}
           className="flex flex-col gap-4 bg-surface border border-subtle rounded-lg px-6 py-6"
         >
           <div className="flex flex-col gap-1">
@@ -63,8 +63,8 @@ export default function LoginPage() {
               required
               className="input-tactical"
               style={{
-                fontFamily: "var(--font-mono)",
-                fontSize: "13px",
+                fontFamily: 'var(--font-mono)',
+                fontSize: '13px',
               }}
             />
           </div>
@@ -87,7 +87,7 @@ export default function LoginPage() {
           {error && <p className="error-message">{error}</p>}
 
           <button type="submit" disabled={isLoading} className="btn-primary">
-            {isLoading ? "AUTHENTICATING..." : "AUTHENTICATE"}
+            {isLoading ? 'AUTHENTICATING...' : 'AUTHENTICATE'}
           </button>
         </form>
 

@@ -1,13 +1,13 @@
-import { useQuery } from "@tanstack/react-query";
-import { fetchMissions } from "../api/fetchMissions";
-import { useEffect } from "react";
-import { useMissionsStore } from "../stores/useMissionsStore";
+import { useQuery } from '@tanstack/react-query';
+import { fetchMissions } from '../api/fetchMissions';
+import { useEffect } from 'react';
+import { useMissionsStore } from '../stores/useMissionsStore';
 
 export const useMissions = () => {
   const setMissions = useMissionsStore((s) => s.setMissions);
 
   const query = useQuery({
-    queryKey: ["missions"],
+    queryKey: ['missions'],
     queryFn: fetchMissions,
   });
 

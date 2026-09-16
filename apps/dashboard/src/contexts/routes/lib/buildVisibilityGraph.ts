@@ -1,6 +1,6 @@
-import type { Coordinate, Geofence } from "@uav/shared";
-import { isPointInPolygon, segmentIntersectsPolygon } from "@uav/shared";
-import { AdjacencyList } from "./findRoute";
+import type { Coordinate, Geofence } from '@uav/shared';
+import { isPointInPolygon, segmentIntersectsPolygon } from '@uav/shared';
+import { AdjacencyList } from './findRoute';
 
 function intersectsAnyZone(
   u: Coordinate,
@@ -42,8 +42,8 @@ export function buildVisibilityGraph(
   const coords = new Map<string, Coordinate>();
   const graph: AdjacencyList = {};
 
-  coords.set("S", s);
-  coords.set("G", g);
+  coords.set('S', s);
+  coords.set('G', g);
 
   for (const zone of zones) {
     for (let j = 0; j < zone.area.length; j++) {

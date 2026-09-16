@@ -1,23 +1,23 @@
-"use client";
+'use client';
 
-import { violationsToGeoJSON, useMapLayer } from "@/infrastructure/map";
-import { useMissionsStore } from "../stores/useMissionsStore";
-import { useViolationsStore } from "../stores/useViolationsStore";
-import { useGeofences } from "@/contexts/geofences";
-import { useDronesStore } from "@/contexts/drones";
-import type { FeatureCollection } from "geojson";
-import type { Coordinate } from "@uav/shared";
+import { violationsToGeoJSON, useMapLayer } from '@/infrastructure/map';
+import { useMissionsStore } from '../stores/useMissionsStore';
+import { useViolationsStore } from '../stores/useViolationsStore';
+import { useGeofences } from '@/contexts/geofences';
+import { useDronesStore } from '@/contexts/drones';
+import type { FeatureCollection } from 'geojson';
+import type { Coordinate } from '@uav/shared';
 
 const EMPTY_DATA: FeatureCollection = {
-  type: "FeatureCollection",
+  type: 'FeatureCollection',
   features: [],
 };
 const EMPTY_COORDINATES: Coordinate[] = [];
-const SOURCE_ID = "mission-violation";
-const LINE_LAYER_ID = "mission-violation-line";
-const POINT_LAYER_ID = "mission-violation-point";
-const POLYGON_LAYER_ID = "mission-violation-polygon";
-const OUTLINE_LAYER_ID = "mission-violation-outline";
+const SOURCE_ID = 'mission-violation';
+const LINE_LAYER_ID = 'mission-violation-line';
+const POINT_LAYER_ID = 'mission-violation-point';
+const POLYGON_LAYER_ID = 'mission-violation-polygon';
+const OUTLINE_LAYER_ID = 'mission-violation-outline';
 
 export function MissionViolationLayer() {
   const { missionId, violations, validatedWaypoints } = useViolationsStore();
@@ -47,35 +47,35 @@ export function MissionViolationLayer() {
     layers: [
       {
         id: POLYGON_LAYER_ID,
-        type: "fill",
+        type: 'fill',
         paint: {
-          "fill-color": "#e5534b",
-          "fill-opacity": 0.4,
+          'fill-color': '#e5534b',
+          'fill-opacity': 0.4,
         },
       },
       {
         id: LINE_LAYER_ID,
-        type: "line",
-        filter: ["==", ["geometry-type"], "LineString"],
+        type: 'line',
+        filter: ['==', ['geometry-type'], 'LineString'],
         paint: {
-          "line-color": "#e5534b",
-          "line-width": 2,
+          'line-color': '#e5534b',
+          'line-width': 2,
         },
       },
       {
         id: POINT_LAYER_ID,
-        type: "circle",
+        type: 'circle',
         paint: {
-          "circle-color": "#e5534b",
-          "circle-radius": 4,
+          'circle-color': '#e5534b',
+          'circle-radius': 4,
         },
       },
       {
         id: OUTLINE_LAYER_ID,
-        type: "line",
-        filter: ["==", ["geometry-type"], "Polygon"],
+        type: 'line',
+        filter: ['==', ['geometry-type'], 'Polygon'],
         paint: {
-          "line-color": "#e5534b",
+          'line-color': '#e5534b',
         },
       },
     ],

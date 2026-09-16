@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useResetFleet } from "../hooks/useResetFleet";
+import { useResetFleet } from '../hooks/useResetFleet';
 
 export function ResetFleetButton() {
   const { isPending, isError, error, mutate } = useResetFleet();
@@ -8,7 +8,7 @@ export function ResetFleetButton() {
   const handleClick = () => {
     if (
       !confirm(
-        "Reset entire fleet to home positions? This will clear all telemetry.",
+        'Reset entire fleet to home positions? This will clear all telemetry.',
       )
     ) {
       return;

@@ -1,5 +1,5 @@
-import { Coordinate } from "@uav/shared";
-import { create } from "zustand";
+import { Coordinate } from '@uav/shared';
+import { create } from 'zustand';
 
 type RouteDraftState = {
   planningMissionId: string | null;

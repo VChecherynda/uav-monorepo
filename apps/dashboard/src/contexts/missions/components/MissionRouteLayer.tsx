@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import { toGeoJSON, useMapLayer } from "@/infrastructure/map";
-import { useMissionsStore } from "../stores/useMissionsStore";
-import type { Coordinate } from "@uav/shared";
+import { toGeoJSON, useMapLayer } from '@/infrastructure/map';
+import { useMissionsStore } from '../stores/useMissionsStore';
+import type { Coordinate } from '@uav/shared';
 
 const EMPTY: Coordinate[] = [];
-const SOURCE_ID = "mission-route";
-const LINE_LAYER_ID = "mission-route-line";
-const POINT_LAYER_ID = "mission-route-point";
+const SOURCE_ID = 'mission-route';
+const LINE_LAYER_ID = 'mission-route-line';
+const POINT_LAYER_ID = 'mission-route-point';
 
 export function MissionRouteLayer() {
   const waypoints = useMissionsStore(
@@ -23,18 +23,18 @@ export function MissionRouteLayer() {
     layers: [
       {
         id: LINE_LAYER_ID,
-        type: "line",
+        type: 'line',
         paint: {
-          "line-color": "#58a6ff",
-          "line-width": 2,
+          'line-color': '#58a6ff',
+          'line-width': 2,
         },
       },
       {
         id: POINT_LAYER_ID,
-        type: "circle",
+        type: 'circle',
         paint: {
-          "circle-color": "#58a6ff",
-          "circle-radius": 4,
+          'circle-color': '#58a6ff',
+          'circle-radius': 4,
         },
       },
     ],

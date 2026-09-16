@@ -1,9 +1,9 @@
-import { useMutation } from "@tanstack/react-query";
-import { sendCommand } from "@/contexts/fleet-commands";
-import { useDronesStore } from "@/contexts/drones";
-import type { CommandResult, DroneAction, Drone } from "@uav/shared";
-import { nextPhaseAndMode, resolveRejection } from "@uav/shared";
-import { useEffect, useRef } from "react";
+import { useMutation } from '@tanstack/react-query';
+import { sendCommand } from '@/contexts/fleet-commands';
+import { useDronesStore } from '@/contexts/drones';
+import type { CommandResult, DroneAction, Drone } from '@uav/shared';
+import { nextPhaseAndMode, resolveRejection } from '@uav/shared';
+import { useEffect, useRef } from 'react';
 
 type Vars = { id: string; action: DroneAction };
 
@@ -31,7 +31,7 @@ export const useSendCommand = () => {
       const store = useDronesStore.getState();
 
       const drone = store.serverDrones.find((d) => d.id === id);
-      if (!drone) throw new Error("Drone not found in store");
+      if (!drone) throw new Error('Drone not found in store');
 
       const reason = resolveRejection(drone, action);
       if (reason) {
@@ -56,7 +56,7 @@ export const useSendCommand = () => {
     },
 
     onSuccess: (result, vars) => {
-      if (result.status === "rejected") {
+      if (result.status === 'rejected') {
         const store = useDronesStore.getState();
         store.clearOptimistic(vars.id);
         return;
@@ -71,7 +71,7 @@ export const useSendCommand = () => {
 
         if (optimistic) {
           console.warn(
-            "[saga] Confirmation timeout (force clearing optimistic)",
+            '[saga] Confirmation timeout (force clearing optimistic)',
           );
           store.clearOptimistic(vars.id);
         }

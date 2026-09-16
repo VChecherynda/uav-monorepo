@@ -1,8 +1,8 @@
-import type { CommandResult, DomainEvent, DroneAction } from "@uav/shared";
-import { executeCommand } from "../domain/drone.js";
-import { mapDrone } from "../lib/mappers.js";
-import { prisma } from "../lib/prisma.js";
-import { broadcastEvent } from "../routes/ws.js";
+import type { CommandResult, DomainEvent, DroneAction } from '@uav/shared';
+import { executeCommand } from '../domain/drone.js';
+import { mapDrone } from '../lib/mappers.js';
+import { prisma } from '../lib/prisma.js';
+import { broadcastEvent } from '../routes/ws.js';
 
 export async function sendCommandService(
   droneId: string,
@@ -12,16 +12,16 @@ export async function sendCommandService(
 
   if (!drone) {
     return {
-      status: "rejected",
-      reason: { code: "DRONE_NOT_FOUND", message: "Drone not found" },
+      status: 'rejected',
+      reason: { code: 'DRONE_NOT_FOUND', message: 'Drone not found' },
     };
   }
 
   const next = executeCommand(mapDrone(drone), action);
 
-  if (next.status === "rejected") {
+  if (next.status === 'rejected') {
     const event: DomainEvent = {
-      type: "DroneCommandRejected",
+      type: 'DroneCommandRejected',
       droneId,
       action,
       reason: next.reason,
@@ -37,7 +37,7 @@ export async function sendCommandService(
   });
 
   return {
-    status: "success",
+    status: 'success',
     drone: mapDrone(updated),
   };
 }

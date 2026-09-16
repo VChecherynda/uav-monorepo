@@ -1,29 +1,29 @@
-"use client";
+'use client';
 
-import { WSConnectionStatus } from "@uav/shared";
+import { WSConnectionStatus } from '@uav/shared';
 
 const STATUS_CONFIG: Record<
   WSConnectionStatus,
   { label: string; color: string; pulse: boolean }
 > = {
   connecting: {
-    label: "CONNECTING",
-    color: "var(--accent-warn)",
+    label: 'CONNECTING',
+    color: 'var(--accent-warn)',
     pulse: false,
   },
   open: {
-    label: "LIVE",
-    color: "var(--accent-ok)",
+    label: 'LIVE',
+    color: 'var(--accent-ok)',
     pulse: true,
   },
   reconnecting: {
-    label: "RECONNECTING",
-    color: "var(--accent-warn)",
+    label: 'RECONNECTING',
+    color: 'var(--accent-warn)',
     pulse: false,
   },
   lost: {
-    label: "LOST",
-    color: "var(--accent-critical)",
+    label: 'LOST',
+    color: 'var(--accent-critical)',
     pulse: false,
   },
 };

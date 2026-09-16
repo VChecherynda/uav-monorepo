@@ -1,27 +1,27 @@
-import type { Drone, DroneAction } from "./drone.js";
-import type { CommandRejectionReason } from "./reasons.js";
+import type { Drone, DroneAction } from './drone.js';
+import type { CommandRejectionReason } from './reasons.js';
 
 export type SnapshotMessage = {
-  type: "drones:snapshot";
+  type: 'drones:snapshot';
   data: Drone[];
 };
 
 export type DomainEvent =
   | {
-      type: "DroneCommandRejected";
+      type: 'DroneCommandRejected';
       droneId: string;
       action: DroneAction;
       reason: CommandRejectionReason;
       at: string;
     }
   | {
-      type: "BatteryCritical";
+      type: 'BatteryCritical';
       droneId: string;
       battery: number;
       at: string;
     }
   | {
-      type: "DroneRecovered";
+      type: 'DroneRecovered';
       droneId: string;
       at: string;
     };

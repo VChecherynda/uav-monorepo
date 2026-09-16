@@ -1,7 +1,7 @@
-import { z } from "zod";
-import { useAuthStore } from "@/contexts/auth";
+import { z } from 'zod';
+import { useAuthStore } from '@/contexts/auth';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
 
 export class ApiError extends Error {
   constructor(message: string, options?: ErrorOptions) {
@@ -28,12 +28,12 @@ export async function authorizedFetch(path: string, options?: RequestInit) {
   const response = await fetch(`${API_URL}${path}`, {
     ...options,
     headers: {
-      ...(options?.body ? { "Content-Type": "application/json" } : {}),
+      ...(options?.body ? { 'Content-Type': 'application/json' } : {}),
       ...options?.headers,
       ...(token && { Authorization: `Bearer ${token}` }),
     },
   }).catch((cause) => {
-    throw new TransportError("Could not reach the server", { cause });
+    throw new TransportError('Could not reach the server', { cause });
   });
 
   if (response.status === 401) {
@@ -54,7 +54,7 @@ export async function fetchOutcome<T>(
     const data = await response.json();
     return scheme.parse(data);
   } catch (cause) {
-    throw new MalformedResponseError("Server sent a malformed response", {
+    throw new MalformedResponseError('Server sent a malformed response', {
       cause,
     });
   }
@@ -69,7 +69,7 @@ export async function apiFetch<T>(
   if (!response.ok) {
     const error = await response
       .json()
-      .catch(() => ({ error: "Request failed" }));
+      .catch(() => ({ error: 'Request failed' }));
     throw new ResponseError(
       error.message ?? error.error ?? `HTTP status: ${response.status}`,
       error,
@@ -77,7 +77,7 @@ export async function apiFetch<T>(
   }
 
   return response.json().catch((cause) => {
-    throw new MalformedResponseError("Server sent a malformed response", {
+    throw new MalformedResponseError('Server sent a malformed response', {
       cause,
     });
   });

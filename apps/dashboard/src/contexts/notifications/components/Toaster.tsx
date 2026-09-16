@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { useNotificationsStore } from "../stores/useNotificationsStore";
-import { Toast } from "./Toast";
+import { useNotificationsStore } from '../stores/useNotificationsStore';
+import { Toast } from './Toast';
 
 export function Toaster() {
   const notifications = useNotificationsStore((s) => s.notifications);

@@ -1,15 +1,15 @@
-"use client";
+'use client';
 
-import { useEffect } from "react";
+import { useEffect } from 'react';
 import {
   GeoJSONSourceSpecification,
   LayerSpecification,
   GeoJSONSource,
-} from "maplibre-gl";
-import { useMap } from "./useMap";
+} from 'maplibre-gl';
+import { useMap } from './useMap';
 
 type LayerConfig<T = LayerSpecification> = T extends unknown
-  ? Omit<T, "source">
+  ? Omit<T, 'source'>
   : never;
 
 export const useMapLayer = ({
@@ -17,7 +17,7 @@ export const useMapLayer = ({
   sourceId,
   layers,
 }: {
-  data: GeoJSONSourceSpecification["data"];
+  data: GeoJSONSourceSpecification['data'];
   sourceId: string;
   layers: LayerConfig[];
 }) => {
@@ -25,7 +25,7 @@ export const useMapLayer = ({
 
   useEffect(() => {
     map.addSource(sourceId, {
-      type: "geojson",
+      type: 'geojson',
       data,
     });
 

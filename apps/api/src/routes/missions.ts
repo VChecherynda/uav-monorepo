@@ -1,7 +1,7 @@
-import { z } from "zod";
-import { prisma } from "../lib/prisma.js";
-import { authenticate } from "../lib/auth.js";
-import type { FastifyInstance } from "fastify";
+import { z } from 'zod';
+import { prisma } from '../lib/prisma.js';
+import { authenticate } from '../lib/auth.js';
+import type { FastifyInstance } from 'fastify';
 import {
   assignMission,
   replaceWaypointsService,
@@ -10,9 +10,9 @@ import {
   startMissionService,
   restoreMissionService,
   unassignMission,
-} from "../services/missionService.js";
-import type { MissionRejectionReason } from "@uav/shared";
-import { mapMissions } from "../lib/mappers.js";
+} from '../services/missionService.js';
+import type { MissionRejectionReason } from '@uav/shared';
+import { mapMissions } from '../lib/mappers.js';
 
 const AssignSchema = z.object({
   droneId: z.string(),
@@ -33,8 +33,8 @@ const WaypointsSchema = z
 
 function statusFor(reason: MissionRejectionReason): number {
   if (
-    reason.code === "MISSION_NOT_FOUND" ||
-    reason.code === "DRONE_NOT_FOUND"
+    reason.code === 'MISSION_NOT_FOUND' ||
+    reason.code === 'DRONE_NOT_FOUND'
   ) {
     return 404;
   }
@@ -43,17 +43,17 @@ function statusFor(reason: MissionRejectionReason): number {
 }
 
 export async function missionRoutes(app: FastifyInstance) {
-  app.get("/missions", async () => {
+  app.get('/missions', async () => {
     const missions = await prisma.mission.findMany({
-      orderBy: { createdAt: "desc" },
-      include: { waypoints: { orderBy: { order: "asc" } } },
+      orderBy: { createdAt: 'desc' },
+      include: { waypoints: { orderBy: { order: 'asc' } } },
     });
 
     return mapMissions(missions);
   });
 
   app.post(
-    "/missions/:id/assign",
+    '/missions/:id/assign',
     { preHandler: authenticate },
     async (req, reply) => {
       const { id } = req.params as { id: string };
@@ -65,7 +65,7 @@ export async function missionRoutes(app: FastifyInstance) {
 
       const { droneId } = parsed.data;
       const result = await assignMission(id, droneId);
-      if (result.status === "rejected") {
+      if (result.status === 'rejected') {
         return reply.code(statusFor(result.reason)).send(result);
       }
 
@@ -74,7 +74,7 @@ export async function missionRoutes(app: FastifyInstance) {
   );
 
   app.post(
-    "/missions/:id/unassign",
+    '/missions/:id/unassign',
     { preHandler: authenticate },
     async (req, reply) => {
       const { id } = req.params as { id: string };
@@ -86,7 +86,7 @@ export async function missionRoutes(app: FastifyInstance) {
 
       const { droneId } = parsed.data;
       const result = await unassignMission(id, droneId);
-      if (result.status === "rejected") {
+      if (result.status === 'rejected') {
         return reply.code(statusFor(result.reason)).send(result);
       }
 
@@ -95,7 +95,7 @@ export async function missionRoutes(app: FastifyInstance) {
   );
 
   app.put(
-    "/missions/:id/waypoints",
+    '/missions/:id/waypoints',
     { preHandler: authenticate },
     async (req, reply) => {
       const { id } = req.params as { id: string };
@@ -106,7 +106,7 @@ export async function missionRoutes(app: FastifyInstance) {
       }
 
       const result = await replaceWaypointsService(id, parsed.data);
-      if (result.status === "rejected") {
+      if (result.status === 'rejected') {
         return reply.code(statusFor(result.reason)).send(result);
       }
 
@@ -115,13 +115,13 @@ export async function missionRoutes(app: FastifyInstance) {
   );
 
   app.post(
-    "/missions/:id/start",
+    '/missions/:id/start',
     { preHandler: authenticate },
     async (req, reply) => {
       const { id } = req.params as { id: string };
 
       const result = await startMissionService(id);
-      if (result.status === "rejected") {
+      if (result.status === 'rejected') {
         return reply.code(statusFor(result.reason)).send(result);
       }
 
@@ -130,13 +130,13 @@ export async function missionRoutes(app: FastifyInstance) {
   );
 
   app.post(
-    "/missions/:id/abort",
+    '/missions/:id/abort',
     { preHandler: authenticate },
     async (req, reply) => {
       const { id } = req.params as { id: string };
 
       const result = await abortMissionService(id);
-      if (result.status === "rejected") {
+      if (result.status === 'rejected') {
         return reply.code(statusFor(result.reason)).send(result);
       }
 
@@ -145,13 +145,13 @@ export async function missionRoutes(app: FastifyInstance) {
   );
 
   app.post(
-    "/missions/:id/restore",
+    '/missions/:id/restore',
     { preHandler: authenticate },
     async (req, reply) => {
       const { id } = req.params as { id: string };
 
       const result = await restoreMissionService(id);
-      if (result.status === "rejected") {
+      if (result.status === 'rejected') {
         return reply.code(statusFor(result.reason)).send(result);
       }
 
@@ -160,13 +160,13 @@ export async function missionRoutes(app: FastifyInstance) {
   );
 
   app.post(
-    "/missions/:id/complete",
+    '/missions/:id/complete',
     { preHandler: authenticate },
     async (req, reply) => {
       const { id } = req.params as { id: string };
 
       const result = await completeMissionService(id);
-      if (result.status === "rejected") {
+      if (result.status === 'rejected') {
         return reply.code(statusFor(result.reason)).send(result);
       }
 

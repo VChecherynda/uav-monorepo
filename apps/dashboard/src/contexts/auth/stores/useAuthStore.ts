@@ -1,6 +1,6 @@
-import { User } from "@uav/shared";
-import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { User } from '@uav/shared';
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 
 type AuthState = {
   token: string | null;
@@ -22,7 +22,7 @@ export const useAuthStore = create<AuthState>()(
       setHydrated: () => set({ isHydrated: true }),
     }),
     {
-      name: "uav-auth",
+      name: 'uav-auth',
       onRehydrateStorage: () => (state) => {
         state?.setHydrated();
       },

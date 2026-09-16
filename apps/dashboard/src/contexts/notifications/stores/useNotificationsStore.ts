@@ -1,13 +1,13 @@
-import { create } from "zustand";
-import { DomainEvent } from "@uav/shared";
-import { useAuthStore } from "@/contexts/auth";
+import { create } from 'zustand';
+import { DomainEvent } from '@uav/shared';
+import { useAuthStore } from '@/contexts/auth';
 
 export type Notification = {
   id: string;
   event: DomainEvent;
   at: string;
   read: boolean;
-  severity: "info" | "warn" | "critical";
+  severity: 'info' | 'warn' | 'critical';
 };
 
 type NotificationStore = {
@@ -20,10 +20,10 @@ type NotificationStore = {
   clearAll: () => void;
 };
 
-const SEVERITY: Record<DomainEvent["type"], Notification["severity"]> = {
-  BatteryCritical: "critical",
-  DroneCommandRejected: "warn",
-  DroneRecovered: "info",
+const SEVERITY: Record<DomainEvent['type'], Notification['severity']> = {
+  BatteryCritical: 'critical',
+  DroneCommandRejected: 'warn',
+  DroneRecovered: 'info',
 };
 
 export const useNotificationsStore = create<NotificationStore>((set) => ({

@@ -1,5 +1,5 @@
-import { create } from "zustand";
-import { Drone } from "@uav/shared";
+import { create } from 'zustand';
+import { Drone } from '@uav/shared';
 
 type DronesState = {
   droneId: string | null;

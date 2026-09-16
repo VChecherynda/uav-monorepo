@@ -1,5 +1,5 @@
-import { useMemo } from "react";
-import { useDronesStore } from "@/contexts/drones";
+import { useMemo } from 'react';
+import { useDronesStore } from '@/contexts/drones';
 
 export function useDrones() {
   const serverDrones = useDronesStore((s) => s.serverDrones);

@@ -1,9 +1,9 @@
-import type { Drone } from "@uav/shared";
-import { prisma } from "./prisma.js";
-import { broadcastEvent } from "../routes/ws.js";
-import { mapDrones } from "./mappers.js";
-import { logger } from "../lib/logger.js";
-import type { Drone as PrismaDrone } from "@prisma/client";
+import type { Drone } from '@uav/shared';
+import { prisma } from './prisma.js';
+import { broadcastEvent } from '../routes/ws.js';
+import { mapDrones } from './mappers.js';
+import { logger } from '../lib/logger.js';
+import type { Drone as PrismaDrone } from '@prisma/client';
 
 const SIMULATION_TIMEOUT = 2 * 1000; // 2 sec
 // Separate on purpose: the skip window may grow (clients can be away for hours)
@@ -14,13 +14,13 @@ const BATTERY_CRITICAL_THRESHOLD = 15; // battery 15%
 const BATTERY_RECOVERY_THRESHOLD = 5;
 const INITIAL_BATTERY = 100;
 
-const log = logger.child({ module: "simulation" });
+const log = logger.child({ module: 'simulation' });
 
 const tick = async (
   broadcastDrones: (drones: Drone[]) => void,
   throttleDroneLog: (errors: unknown[]) => void,
 ) => {
-  const drones = await prisma.drone.findMany({ orderBy: { name: "asc" } });
+  const drones = await prisma.drone.findMany({ orderBy: { name: 'asc' } });
   const updatedDrones = await Promise.allSettled(
     drones.map(async (d) => {
       const shouldRecover = d.battery < BATTERY_RECOVERY_THRESHOLD;
@@ -30,7 +30,7 @@ const tick = async (
           const updatedDrone = await tx.drone.update({
             where: { id: d.id },
             data: {
-              status: "idle",
+              status: 'idle',
               battery: INITIAL_BATTERY,
               altitude: 0,
               lng: d.homeLng,
@@ -52,7 +52,7 @@ const tick = async (
         });
 
         broadcastEvent({
-          type: "DroneRecovered",
+          type: 'DroneRecovered',
           droneId: d.id,
           at: new Date().toISOString(),
         });
@@ -95,7 +95,7 @@ const tick = async (
 
         if (crossedCriticalThreshold) {
           broadcastEvent({
-            type: "BatteryCritical",
+            type: 'BatteryCritical',
             droneId: d.id,
             battery: newBattery,
             at: new Date().toISOString(),
@@ -114,10 +114,10 @@ const tick = async (
     (acc, drone, idx) => {
       const updatedDrone = updatedDrones[idx];
 
-      if (updatedDrone?.status === "fulfilled") {
+      if (updatedDrone?.status === 'fulfilled') {
         acc.latest.push(updatedDrone.value);
       } else {
-        if (updatedDrone?.status === "rejected") {
+        if (updatedDrone?.status === 'rejected') {
           acc.rejected.push(updatedDrone.reason);
         }
         acc.latest.push(drone);
@@ -142,11 +142,11 @@ export const startSimulation = (
   let skipCount = 0;
   let lastSkipLog = Date.now();
   let repeatedCount = 0;
-  let lastErrorKey = "";
+  let lastErrorKey = '';
   let lastErrorLog = 0;
 
   let repeatedDroneErrorCount = 0;
-  let lastDroneErrorKey = "";
+  let lastDroneErrorKey = '';
   let lastDroneErrorLog = 0;
 
   const throttleDroneLog = (errors: unknown[]) => {
@@ -163,7 +163,7 @@ export const startSimulation = (
     ) {
       log.error(
         { err, droneCount: errors.length, repeated: repeatedDroneErrorCount },
-        "Drone update failed",
+        'Drone update failed',
       );
 
       repeatedDroneErrorCount = 0;
@@ -182,7 +182,7 @@ export const startSimulation = (
       if (now - lastSkipLog >= SKIP_LOG_THROTTLE_MS) {
         log.info(
           { skipCount, spanSeconds: Math.round((now - lastSkipLog) / 1000) },
-          "Skipped ticks (no WS clients)",
+          'Skipped ticks (no WS clients)',
         );
 
         skipCount = 0;
@@ -197,7 +197,7 @@ export const startSimulation = (
       const now = Date.now();
 
       if (key !== lastErrorKey || now - lastErrorLog >= ERROR_LOG_THROTTLE_MS) {
-        log.error({ err, repeated: repeatedCount }, "Tick failed");
+        log.error({ err, repeated: repeatedCount }, 'Tick failed');
 
         repeatedCount = 0;
         lastErrorKey = key;

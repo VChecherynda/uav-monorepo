@@ -1,22 +1,22 @@
-import { z } from "zod";
-import { DroneCommandConflictReasonSchema } from "./drone.js";
-import { MissionConflictReasonSchema } from "./mission.js";
+import { z } from 'zod';
+import { DroneCommandConflictReasonSchema } from './drone.js';
+import { MissionConflictReasonSchema } from './mission.js';
 
 export const DroneNotFoundReasonSchema = z.object({
-  code: z.literal("DRONE_NOT_FOUND"),
+  code: z.literal('DRONE_NOT_FOUND'),
   message: z.string(),
 });
 
 export type DroneNotFoundReason = z.infer<typeof DroneNotFoundReasonSchema>;
 
 export const MissionNotFoundReasonSchema = z.object({
-  code: z.literal("MISSION_NOT_FOUND"),
+  code: z.literal('MISSION_NOT_FOUND'),
   message: z.string(),
 });
 
 export type MissionNotFoundReason = z.infer<typeof MissionNotFoundReasonSchema>;
 
-export const CommandRejectionReasonSchema = z.discriminatedUnion("code", [
+export const CommandRejectionReasonSchema = z.discriminatedUnion('code', [
   DroneNotFoundReasonSchema,
   DroneCommandConflictReasonSchema,
 ]);
@@ -25,7 +25,7 @@ export type CommandRejectionReason = z.infer<
   typeof CommandRejectionReasonSchema
 >;
 
-export const MissionRejectionReasonSchema = z.discriminatedUnion("code", [
+export const MissionRejectionReasonSchema = z.discriminatedUnion('code', [
   DroneNotFoundReasonSchema,
   MissionNotFoundReasonSchema,
   MissionConflictReasonSchema,

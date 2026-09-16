@@ -1,5 +1,5 @@
-import { z } from "zod";
-import { CoordinateSchema } from "./geometry.js";
+import { z } from 'zod';
+import { CoordinateSchema } from './geometry.js';
 
 export const GeofenceSchema = z.object({
   id: z.string(),

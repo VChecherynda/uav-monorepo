@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
   AreaChart,
@@ -9,9 +9,9 @@ import {
   ReferenceLine,
   ResponsiveContainer,
   CartesianGrid,
-} from "recharts";
-import { useTelemetry } from "@/contexts/telemetry";
-import { useDronesStore } from "@/contexts/drones";
+} from 'recharts';
+import { useTelemetry } from '@/contexts/telemetry';
+import { useDronesStore } from '@/contexts/drones';
 
 export const BatteryChart = () => {
   const droneId = useDronesStore((s) => s.droneId);
@@ -24,10 +24,10 @@ export const BatteryChart = () => {
       <div
         className="flex h-full items-center justify-center"
         style={{
-          color: "var(--text-muted)",
-          fontFamily: "var(--font-mono)",
-          fontSize: "12px",
-          letterSpacing: "0.08em",
+          color: 'var(--text-muted)',
+          fontFamily: 'var(--font-mono)',
+          fontSize: '12px',
+          letterSpacing: '0.08em',
         }}
       >
         SELECT DRONE TO VIEW TELEMETRY
@@ -59,9 +59,9 @@ export const BatteryChart = () => {
         <YAxis
           domain={[0, 100]}
           tick={{
-            fill: "var(--text-muted)",
+            fill: 'var(--text-muted)',
             fontSize: 10,
-            fontFamily: "var(--font-mono)",
+            fontFamily: 'var(--font-mono)',
           }}
           tickLine={false}
           axisLine={false}
@@ -70,22 +70,22 @@ export const BatteryChart = () => {
 
         <Tooltip
           labelFormatter={(value) =>
-            new Date(value).toLocaleTimeString("uk-UA", {
-              hour: "2-digit",
-              minute: "2-digit",
-              second: "2-digit",
+            new Date(value).toLocaleTimeString('uk-UA', {
+              hour: '2-digit',
+              minute: '2-digit',
+              second: '2-digit',
             })
           }
           contentStyle={{
-            backgroundColor: "var(--bg-elevated)",
-            border: "1px solid var(--border-strong)",
-            borderRadius: "4px",
-            color: "var(--text-primary)",
-            fontFamily: "var(--font-mono)",
-            fontSize: "12px",
+            backgroundColor: 'var(--bg-elevated)',
+            border: '1px solid var(--border-strong)',
+            borderRadius: '4px',
+            color: 'var(--text-primary)',
+            fontFamily: 'var(--font-mono)',
+            fontSize: '12px',
           }}
-          itemStyle={{ color: "var(--accent-info)" }}
-          labelStyle={{ color: "var(--text-muted)", fontSize: "10px" }}
+          itemStyle={{ color: 'var(--accent-info)' }}
+          labelStyle={{ color: 'var(--text-muted)', fontSize: '10px' }}
         />
 
         <ReferenceLine
@@ -111,8 +111,8 @@ export const BatteryChart = () => {
           dot={false}
           activeDot={{
             r: 3,
-            fill: "var(--accent-info)",
-            stroke: "var(--bg-elevated)",
+            fill: 'var(--accent-info)',
+            stroke: 'var(--bg-elevated)',
             strokeWidth: 2,
           }}
         />

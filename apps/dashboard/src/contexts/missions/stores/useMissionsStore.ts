@@ -1,5 +1,5 @@
-import { create } from "zustand";
-import type { Mission } from "@uav/shared";
+import { create } from 'zustand';
+import type { Mission } from '@uav/shared';
 
 type MissionsState = {
   missions: Mission[];

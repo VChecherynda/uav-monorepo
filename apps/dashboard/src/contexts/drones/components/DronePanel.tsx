@@ -1,30 +1,30 @@
-"use client";
+'use client';
 
-import type { Drone } from "@uav/shared";
-import { predictDroneChange } from "@uav/shared";
-import { useSendCommand } from "@/contexts/fleet-commands";
-import { useDrones } from "../hooks/useDrones";
-import { useDronesStore } from "../stores/useDronesStore";
+import type { Drone } from '@uav/shared';
+import { predictDroneChange } from '@uav/shared';
+import { useSendCommand } from '@/contexts/fleet-commands';
+import { useDrones } from '../hooks/useDrones';
+import { useDronesStore } from '../stores/useDronesStore';
 
-const STATUS_DOT: Record<Drone["status"], { color: string; glow: string }> = {
-  active: { color: "var(--accent-ok)", glow: "var(--glow-ok)" },
-  idle: { color: "var(--text-muted)", glow: "none" },
-  offline: { color: "var(--accent-critical)", glow: "var(--glow-critical)" },
-  returning: { color: "var(--accent-warn)", glow: "var(--glow-warn)" },
-  assigned: { color: "var(--accent-ok)", glow: "var(--glow-ok)" },
+const STATUS_DOT: Record<Drone['status'], { color: string; glow: string }> = {
+  active: { color: 'var(--accent-ok)', glow: 'var(--glow-ok)' },
+  idle: { color: 'var(--text-muted)', glow: 'none' },
+  offline: { color: 'var(--accent-critical)', glow: 'var(--glow-critical)' },
+  returning: { color: 'var(--accent-warn)', glow: 'var(--glow-warn)' },
+  assigned: { color: 'var(--accent-ok)', glow: 'var(--glow-ok)' },
 };
 
-function StatusDot({ status }: { status: Drone["status"] }) {
+function StatusDot({ status }: { status: Drone['status'] }) {
   const { color, glow } = STATUS_DOT[status];
   return (
     <span
       style={{
-        display: "inline-block",
+        display: 'inline-block',
         width: 8,
         height: 8,
-        borderRadius: "50%",
+        borderRadius: '50%',
         background: color,
-        boxShadow: glow !== "none" ? `0 0 6px ${glow}` : undefined,
+        boxShadow: glow !== 'none' ? `0 0 6px ${glow}` : undefined,
         flexShrink: 0,
       }}
     />
@@ -32,9 +32,9 @@ function StatusDot({ status }: { status: Drone["status"] }) {
 }
 
 function getBatteryLevel(value: number) {
-  if (value < 20) return "var(--accent-critical)";
-  if (value < 40) return "var(--accent-warn)";
-  return "var(--accent-info)";
+  if (value < 20) return 'var(--accent-critical)';
+  if (value < 40) return 'var(--accent-warn)';
+  return 'var(--accent-info)';
 }
 
 function BatteryBar({ value }: { value: number }) {
@@ -44,7 +44,7 @@ function BatteryBar({ value }: { value: number }) {
     <div className="flex items-center gap-2">
       <div
         className="relative h-1.5 rounded-full overflow-hidden"
-        style={{ width: 64, background: "var(--bg-elevated)" }}
+        style={{ width: 64, background: 'var(--bg-elevated)' }}
       >
         <div
           className="absolute inset-y-0 left-0 rounded-full transition-all duration-500"
@@ -79,18 +79,18 @@ function DroneCard({
   const sendCmd = useSendCommand();
   const isSelected = useDronesStore((s) => s.droneId === drone.id);
   const canReturnHome =
-    predictDroneChange("return-home", drone.status) !== undefined;
+    predictDroneChange('return-home', drone.status) !== undefined;
 
   return (
     <div
       onClick={() => onCardClick(drone.id)}
       className={`card flex flex-col gap-3 rounded border px-4 py-3 cursor-pointer ${
-        isSelected ? "selected" : ""
+        isSelected ? 'selected' : ''
       }`}
       style={{
         borderLeft: isSelected
-          ? "3px solid var(--accent-info)"
-          : "3px solid transparent",
+          ? '3px solid var(--accent-info)'
+          : '3px solid transparent',
       }}
     >
       {/* Top row — identity + battery */}
@@ -130,20 +130,20 @@ function DroneCard({
           disabled={sendCmd.isPending || !canReturnHome}
           onClick={(e) => {
             e.stopPropagation();
-            sendCmd.mutate({ id: drone.id, action: "return-home" });
+            sendCmd.mutate({ id: drone.id, action: 'return-home' });
           }}
           className="btn-rth px-3 py-1 text-xs rounded border"
         >
-          {sendCmd.isPending ? "SENDING..." : "RTH"}
+          {sendCmd.isPending ? 'SENDING...' : 'RTH'}
         </button>
 
-        {sendCmd.data?.status === "rejected" && (
+        {sendCmd.data?.status === 'rejected' && (
           <span className="font-mono text-xs text-critical">
             {sendCmd.data.reason.message}
           </span>
         )}
 
-        {sendCmd.data?.status === "success" && (
+        {sendCmd.data?.status === 'success' && (
           <span className="font-mono text-xs text-ok">ACKNOWLEDGED</span>
         )}
       </div>

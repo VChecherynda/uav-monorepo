@@ -1,66 +1,61 @@
-"use client";
+'use client';
 
-import { useDronesStore } from "@/contexts/drones";
-import { PlanRouteButton, useRouteDraftStore } from "@/contexts/routes";
-import { useAssignMission } from "../hooks/useAssignMission";
-import { useState } from "react";
-import { useStartMission } from "../hooks/useStartMission";
-import { useAbortMission } from "../hooks/useAbortMission";
-import { useCompleteMission } from "../hooks/useCompleteMission";
-import { useReplaceWaypoints } from "../hooks/useReplaceWaypoints";
-import { useMissionsStore } from "../stores/useMissionsStore";
-import { useRestoreMission } from "../hooks/useRestoreMission";
+import { useDronesStore } from '@/contexts/drones';
+import { PlanRouteButton, useRouteDraftStore } from '@/contexts/routes';
+import { useAssignMission } from '../hooks/useAssignMission';
+import { useState } from 'react';
+import { useStartMission } from '../hooks/useStartMission';
+import { useAbortMission } from '../hooks/useAbortMission';
+import { useCompleteMission } from '../hooks/useCompleteMission';
+import { useReplaceWaypoints } from '../hooks/useReplaceWaypoints';
+import { useMissionsStore } from '../stores/useMissionsStore';
+import { useRestoreMission } from '../hooks/useRestoreMission';
 
-import type { Drone, Mission, MissionStatus } from "@uav/shared";
+import type { Drone, Mission, MissionStatus } from '@uav/shared';
 
 type MissionAction =
-  | "assign"
-  | "start"
-  | "abort"
-  | "complete"
-  | "save"
-  | "restore";
+  'assign' | 'start' | 'abort' | 'complete' | 'save' | 'restore';
 type ButtonAction = (typeof STATUS_ACTIONS)[MissionStatus][number];
 type ActionRejection = {
   error: Error | null;
   submittedAt: number;
   data:
-    | { status: "rejected"; reason: { message: string } }
-    | { status: "success" }
+    | { status: 'rejected'; reason: { message: string } }
+    | { status: 'success' }
     | undefined;
 };
 type MissionMutation = { mutate: (id: string) => void; isPending: boolean };
 
 const STATUS_ACTIONS = {
   draft: [],
-  assigned: ["start", "abort"],
-  "in-progress": ["abort", "complete"],
+  assigned: ['start', 'abort'],
+  'in-progress': ['abort', 'complete'],
   completed: [],
   aborted: [],
 } as const satisfies Record<MissionStatus, readonly MissionAction[]>;
 
 const ACTION_LABEL: Record<MissionAction, string> = {
-  assign: "ASSIGN",
-  start: "START",
-  abort: "ABORT",
-  complete: "COMPLETE",
-  save: "SAVE",
-  restore: "RESTORE",
+  assign: 'ASSIGN',
+  start: 'START',
+  abort: 'ABORT',
+  complete: 'COMPLETE',
+  save: 'SAVE',
+  restore: 'RESTORE',
 };
 
 const STATUS_COLOR: Record<MissionStatus, string> = {
-  draft: "var(--text-muted)",
-  assigned: "var(--accent-info)",
-  "in-progress": "var(--accent-ok)",
-  completed: "var(--text-secondary)",
-  aborted: "var(--accent-critical)",
+  draft: 'var(--text-muted)',
+  assigned: 'var(--accent-info)',
+  'in-progress': 'var(--accent-ok)',
+  completed: 'var(--text-secondary)',
+  aborted: 'var(--accent-critical)',
 };
 
 function getDroneLabel(mission: Mission, drones: Drone[]) {
-  if (!mission.droneId) return "Drone is not assigned";
+  if (!mission.droneId) return 'Drone is not assigned';
 
   const drone = drones.find((d) => d.id === mission.droneId);
-  if (!drone) return "Assigned drone not found";
+  if (!drone) return 'Assigned drone not found';
 
   return drone.name;
 }
@@ -88,18 +83,18 @@ export const MissionCard = ({ mission }: { mission: Mission }) => {
     readonly { action: MissionAction; mutation: ActionRejection }[]
   > = {
     draft: [
-      { action: "assign", mutation: assign },
-      { action: "save", mutation: replace },
+      { action: 'assign', mutation: assign },
+      { action: 'save', mutation: replace },
     ],
     assigned: [
-      { action: "start", mutation: start },
-      { action: "abort", mutation: abort },
+      { action: 'start', mutation: start },
+      { action: 'abort', mutation: abort },
     ],
-    "in-progress": [
-      { action: "abort", mutation: abort },
-      { action: "complete", mutation: complete },
+    'in-progress': [
+      { action: 'abort', mutation: abort },
+      { action: 'complete', mutation: complete },
     ],
-    aborted: [{ action: "restore", mutation: restore }],
+    aborted: [{ action: 'restore', mutation: restore }],
     completed: [],
   };
 
@@ -111,8 +106,8 @@ export const MissionCard = ({ mission }: { mission: Mission }) => {
     (s) => s.planningMissionId === mission.id && s.waypoints.length > 0,
   );
 
-  const idleDrones = serverDrones.filter((d) => d.status === "idle");
-  const [selectedDroneId, setSelectedDroneId] = useState<string>("");
+  const idleDrones = serverDrones.filter((d) => d.status === 'idle');
+  const [selectedDroneId, setSelectedDroneId] = useState<string>('');
 
   let actions;
   const latest = STATUS_MUTATIONS[mission.status].reduce<{
@@ -130,7 +125,7 @@ export const MissionCard = ({ mission }: { mission: Mission }) => {
   const rejectionMessage =
     latest == null
       ? null
-      : latest.mutation.data?.status === "rejected"
+      : latest.mutation.data?.status === 'rejected'
         ? latest.mutation.data.reason.message
         : latest.mutation.error?.message;
   const rejection =
@@ -139,7 +134,7 @@ export const MissionCard = ({ mission }: { mission: Mission }) => {
       : null;
 
   switch (mission.status) {
-    case "draft":
+    case 'draft':
       actions = (
         <div className="flex flex-col gap-2">
           <select
@@ -192,8 +187,8 @@ export const MissionCard = ({ mission }: { mission: Mission }) => {
         </div>
       );
       break;
-    case "assigned":
-    case "in-progress": {
+    case 'assigned':
+    case 'in-progress': {
       const statusActions = STATUS_ACTIONS[mission.status] ?? [];
       actions = statusActions.map((a) => {
         const { label, mutation } = ACTION_ENTRY[a];
@@ -215,7 +210,7 @@ export const MissionCard = ({ mission }: { mission: Mission }) => {
       });
       break;
     }
-    case "aborted":
+    case 'aborted':
       actions = (
         <div className="flex flex-col gap-1 min-w-0">
           <button
@@ -231,7 +226,7 @@ export const MissionCard = ({ mission }: { mission: Mission }) => {
         </div>
       );
       break;
-    case "completed":
+    case 'completed':
       actions = null;
       break;
     default:
@@ -242,14 +237,14 @@ export const MissionCard = ({ mission }: { mission: Mission }) => {
 
   return (
     <div
-      className={`card flex flex-col gap-3 rounded border px-4 py-3 cursor-pointer ${isSelected ? "selected" : ""}`}
+      className={`card flex flex-col gap-3 rounded border px-4 py-3 cursor-pointer ${isSelected ? 'selected' : ''}`}
       onClick={() => {
         selectMission(mission.id);
       }}
       style={{
         borderLeft: isSelected
-          ? "3px solid var(--accent-info)"
-          : "3px solid transparent",
+          ? '3px solid var(--accent-info)'
+          : '3px solid transparent',
       }}
     >
       <div className="flex flex-col gap-1">

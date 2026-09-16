@@ -1,17 +1,17 @@
-import { useEffect, useRef, useState } from "react";
-import { useAuthStore } from "@/contexts/auth";
-import type { WSConnectionStatus, WSMessage } from "@uav/shared";
-import { routeMessage } from "../lib/routeMessage";
+import { useEffect, useRef, useState } from 'react';
+import { useAuthStore } from '@/contexts/auth';
+import type { WSConnectionStatus, WSMessage } from '@uav/shared';
+import { routeMessage } from '../lib/routeMessage';
 
 const WS_URL =
-  process.env.NEXT_PUBLIC_WS_URL ?? "ws://localhost:4000/ws/drones";
+  process.env.NEXT_PUBLIC_WS_URL ?? 'ws://localhost:4000/ws/drones';
 
 const MAX_RETRIES = 3;
 const MAX_RETRY_DELAY = 16000;
 const HEARTBEAT_TIMEOUT_MS = 6000;
 
 export function useRealtimeChannel() {
-  const [status, setStatus] = useState<WSConnectionStatus>("connecting");
+  const [status, setStatus] = useState<WSConnectionStatus>('connecting');
   const [retryTrigger, setRetryTrigger] = useState(0);
 
   const token = useAuthStore((s) => s.token);
@@ -30,7 +30,7 @@ export function useRealtimeChannel() {
       }
 
       heartbeatTimerRef.current = setTimeout(() => {
-        console.warn("[WS] heartbeat timeout - connection appears dead");
+        console.warn('[WS] heartbeat timeout - connection appears dead');
         ws.close();
       }, HEARTBEAT_TIMEOUT_MS);
     }
@@ -48,8 +48,8 @@ export function useRealtimeChannel() {
       ws.onopen = () => {
         if (cancelled) return;
         retryRef.current = 0;
-        console.log("[WS] open");
-        setStatus("open");
+        console.log('[WS] open');
+        setStatus('open');
         resetHeartbeat(ws);
       };
 
@@ -59,13 +59,13 @@ export function useRealtimeChannel() {
           const message = JSON.parse(event.data) as WSMessage;
           routeMessage(message);
         } catch (e) {
-          console.error("Bad WS payload", e);
+          console.error('Bad WS payload', e);
         }
       };
 
       ws.onclose = (event) => {
         if (cancelled) return;
-        console.log("[WS] close", event.code, event.reason);
+        console.log('[WS] close', event.code, event.reason);
 
         if (heartbeatTimerRef.current) {
           clearTimeout(heartbeatTimerRef.current);
@@ -77,10 +77,10 @@ export function useRealtimeChannel() {
           return;
         }
 
-        setStatus("reconnecting");
+        setStatus('reconnecting');
 
         if (retryRef.current >= MAX_RETRIES) {
-          setStatus("lost");
+          setStatus('lost');
           return;
         }
 

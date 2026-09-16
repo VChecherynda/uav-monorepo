@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { zonesToGeoJSON, useMapLayer } from "@/infrastructure/map";
-import { useGeofences } from "../hooks/useGeofences";
+import { zonesToGeoJSON, useMapLayer } from '@/infrastructure/map';
+import { useGeofences } from '../hooks/useGeofences';
 
-const SOURCE_ID = "geofence-zone";
-const POLYGON_LAYER_ID = "geofence-zone-polygon";
+const SOURCE_ID = 'geofence-zone';
+const POLYGON_LAYER_ID = 'geofence-zone-polygon';
 
 export function GeofenceLayer() {
   const zones = useGeofences();
@@ -16,10 +16,10 @@ export function GeofenceLayer() {
     layers: [
       {
         id: POLYGON_LAYER_ID,
-        type: "fill",
+        type: 'fill',
         paint: {
-          "fill-color": "#e5534b",
-          "fill-opacity": 0.4,
+          'fill-color': '#e5534b',
+          'fill-opacity': 0.4,
         },
       },
     ],

@@ -1,5 +1,5 @@
-import { Coordinate, ZoneViolation } from "@uav/shared";
-import { create } from "zustand";
+import { Coordinate, ZoneViolation } from '@uav/shared';
+import { create } from 'zustand';
 
 type ViolationsState = {
   missionId: string | null;

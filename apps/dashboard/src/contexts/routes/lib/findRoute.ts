@@ -23,7 +23,7 @@ const cutItem = (queue: Candidate[]) => {
   });
 
   const minCandidate = queue[minIndex];
-  if (!minCandidate) throw new Error("cutItem on empty queue");
+  if (!minCandidate) throw new Error('cutItem on empty queue');
 
   queue.splice(minIndex, 1);
   return minCandidate;

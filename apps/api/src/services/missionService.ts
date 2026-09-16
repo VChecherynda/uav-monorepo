@@ -11,7 +11,7 @@ import {
   GeofenceSchema,
   MissionStatusSchema,
   type RejectedDrone,
-} from "@uav/shared";
+} from '@uav/shared';
 import {
   assignDrone,
   startMission,
@@ -20,15 +20,15 @@ import {
   canReplaceWaypoints,
   restoreMission,
   unassignDrone,
-} from "../domain/mission.js";
+} from '../domain/mission.js';
 import {
   mapMission,
   mapDrone,
   mapWaypoints,
   mapDrones,
-} from "../lib/mappers.js";
-import { prisma } from "../lib/prisma.js";
-import { sendCommandService } from "./sendCommandService.js";
+} from '../lib/mappers.js';
+import { prisma } from '../lib/prisma.js';
+import { sendCommandService } from './sendCommandService.js';
 
 class MissionRejectedError extends Error {
   constructor(public reason: MissionRejectionReason) {
@@ -48,8 +48,8 @@ export async function assignMission(
 
       if (!missionRow) {
         throw new MissionRejectedError({
-          code: "MISSION_NOT_FOUND",
-          message: "Mission not found",
+          code: 'MISSION_NOT_FOUND',
+          message: 'Mission not found',
         });
       }
 
@@ -58,8 +58,8 @@ export async function assignMission(
       });
       if (!droneRow) {
         throw new MissionRejectedError({
-          code: "DRONE_NOT_FOUND",
-          message: "Drone not found",
+          code: 'DRONE_NOT_FOUND',
+          message: 'Drone not found',
         });
       }
 
@@ -67,7 +67,7 @@ export async function assignMission(
         { status: MissionStatusSchema.parse(missionRow.status) },
         mapDrone(droneRow),
       );
-      if (nextDrone.status === "rejected") {
+      if (nextDrone.status === 'rejected') {
         throw new MissionRejectedError(nextDrone.reason);
       }
 
@@ -84,12 +84,12 @@ export async function assignMission(
     });
 
     return {
-      status: "success",
+      status: 'success',
       drone: mapDrone(updatedDrone),
     };
   } catch (e) {
     if (e instanceof MissionRejectedError) {
-      return { status: "rejected", reason: e.reason };
+      return { status: 'rejected', reason: e.reason };
     }
 
     throw e;
@@ -108,8 +108,8 @@ export async function unassignMission(
 
       if (!missionRow) {
         throw new MissionRejectedError({
-          code: "MISSION_NOT_FOUND",
-          message: "Mission not found",
+          code: 'MISSION_NOT_FOUND',
+          message: 'Mission not found',
         });
       }
 
@@ -118,8 +118,8 @@ export async function unassignMission(
       });
       if (!droneRow) {
         throw new MissionRejectedError({
-          code: "DRONE_NOT_FOUND",
-          message: "Drone not found",
+          code: 'DRONE_NOT_FOUND',
+          message: 'Drone not found',
         });
       }
 
@@ -130,7 +130,7 @@ export async function unassignMission(
         },
         mapDrone(droneRow),
       );
-      if (nextDrone.status === "rejected") {
+      if (nextDrone.status === 'rejected') {
         throw new MissionRejectedError(nextDrone.reason);
       }
 
@@ -145,12 +145,12 @@ export async function unassignMission(
     });
 
     return {
-      status: "success",
+      status: 'success',
       drone: mapDrone(updatedDrone),
     };
   } catch (e) {
     if (e instanceof MissionRejectedError) {
-      return { status: "rejected", reason: e.reason };
+      return { status: 'rejected', reason: e.reason };
     }
 
     throw e;
@@ -166,17 +166,17 @@ export async function replaceWaypointsService(
       async (tx) => {
         const missionRow = await tx.mission.findUnique({
           where: { id: missionId },
-          include: { waypoints: { orderBy: { order: "asc" } } },
+          include: { waypoints: { orderBy: { order: 'asc' } } },
         });
         if (!missionRow) {
           throw new MissionRejectedError({
-            code: "MISSION_NOT_FOUND",
-            message: "Mission not found",
+            code: 'MISSION_NOT_FOUND',
+            message: 'Mission not found',
           });
         }
 
         const next = canReplaceWaypoints(mapMission(missionRow));
-        if (next.status === "rejected") {
+        if (next.status === 'rejected') {
           throw new MissionRejectedError(next.reason);
         }
 
@@ -190,12 +190,12 @@ export async function replaceWaypointsService(
     );
 
     return {
-      status: "success",
+      status: 'success',
       mission: { ...mission, waypoints: mapWaypoints(savedWaypoints) },
     };
   } catch (e) {
     if (e instanceof MissionRejectedError) {
-      return { status: "rejected", reason: e.reason };
+      return { status: 'rejected', reason: e.reason };
     }
 
     throw e;
@@ -210,19 +210,19 @@ export async function startMissionService(
       async (tx) => {
         const missionRow = await tx.mission.findUnique({
           where: { id: missionId },
-          include: { waypoints: { orderBy: { order: "asc" } } },
+          include: { waypoints: { orderBy: { order: 'asc' } } },
         });
         if (!missionRow) {
           throw new MissionRejectedError({
-            code: "MISSION_NOT_FOUND",
-            message: "Mission not found",
+            code: 'MISSION_NOT_FOUND',
+            message: 'Mission not found',
           });
         }
         const droneRows = await tx.drone.findMany({ where: { missionId } });
         const zoneRows = await tx.geofence.findMany();
         const zones = GeofenceSchema.array().parse(zoneRows);
         if (!zones.length) {
-          throw new Error("No geofences in database");
+          throw new Error('No geofences in database');
         }
 
         const next = startMission(
@@ -231,13 +231,13 @@ export async function startMissionService(
           zones,
         );
 
-        if (next.status === "rejected") {
+        if (next.status === 'rejected') {
           throw new MissionRejectedError(next.reason);
         }
 
         const updatedMission = await tx.mission.update({
           where: { id: missionId },
-          include: { waypoints: { orderBy: { order: "asc" } } },
+          include: { waypoints: { orderBy: { order: 'asc' } } },
           data: next.mission,
         });
 
@@ -251,10 +251,10 @@ export async function startMissionService(
     const rejected: RejectedDrone[] = [];
 
     for (const droneRow of droneRows) {
-      const result = await sendCommandService(droneRow.id, "takeoff");
+      const result = await sendCommandService(droneRow.id, 'takeoff');
 
-      if (result.status === "rejected") {
-        if (result.reason.code === "DRONE_NOT_FOUND") {
+      if (result.status === 'rejected') {
+        if (result.reason.code === 'DRONE_NOT_FOUND') {
           throw new Error(
             `Drone ${droneRow.id} vanished between findMany and takeoff`,
           );
@@ -265,13 +265,13 @@ export async function startMissionService(
     }
 
     return {
-      status: "success",
+      status: 'success',
       mission: mapMission(updatedMission),
       rejected,
     };
   } catch (e) {
     if (e instanceof MissionRejectedError) {
-      return { status: "rejected", reason: e.reason };
+      return { status: 'rejected', reason: e.reason };
     }
 
     throw e;
@@ -283,15 +283,15 @@ export async function abortMissionService(
 ): Promise<AbortMissionServiceResult> {
   const missionRow = await prisma.mission.findUnique({
     where: { id: missionId },
-    include: { waypoints: { orderBy: { order: "asc" } } },
+    include: { waypoints: { orderBy: { order: 'asc' } } },
   });
 
   if (!missionRow) {
     return {
-      status: "rejected",
+      status: 'rejected',
       reason: {
-        code: "MISSION_NOT_FOUND",
-        message: "Mission not found",
+        code: 'MISSION_NOT_FOUND',
+        message: 'Mission not found',
       },
     };
   }
@@ -299,23 +299,23 @@ export async function abortMissionService(
   const droneRows = await prisma.drone.findMany({ where: { missionId } });
 
   const next = abortMission(mapMission(missionRow));
-  if (next.status === "rejected") {
+  if (next.status === 'rejected') {
     return next;
   }
 
   const updatedMission = await prisma.mission.update({
     where: { id: missionId },
-    include: { waypoints: { orderBy: { order: "asc" } } },
+    include: { waypoints: { orderBy: { order: 'asc' } } },
     data: next.mission,
   });
 
   const rejected: RejectedDrone[] = [];
 
   for (const droneRow of droneRows) {
-    const result = await sendCommandService(droneRow.id, "hold");
+    const result = await sendCommandService(droneRow.id, 'hold');
 
-    if (result.status === "rejected") {
-      if (result.reason.code === "DRONE_NOT_FOUND") {
+    if (result.status === 'rejected') {
+      if (result.reason.code === 'DRONE_NOT_FOUND') {
         throw new Error(
           `Drone ${droneRow.id} vanished between findMany and hold`,
         );
@@ -326,7 +326,7 @@ export async function abortMissionService(
   }
 
   return {
-    status: "success",
+    status: 'success',
     mission: mapMission(updatedMission),
     rejected,
   };
@@ -337,31 +337,31 @@ export async function restoreMissionService(
 ): Promise<RestoreMissionServiceResult> {
   const missionRow = await prisma.mission.findUnique({
     where: { id: missionId },
-    include: { waypoints: { orderBy: { order: "asc" } } },
+    include: { waypoints: { orderBy: { order: 'asc' } } },
   });
   if (!missionRow) {
     return {
-      status: "rejected",
+      status: 'rejected',
       reason: {
-        code: "MISSION_NOT_FOUND",
-        message: "Mission not found",
+        code: 'MISSION_NOT_FOUND',
+        message: 'Mission not found',
       },
     };
   }
 
   const next = restoreMission(mapMission(missionRow));
-  if (next.status === "rejected") {
+  if (next.status === 'rejected') {
     return next;
   }
 
   const updatedMission = await prisma.mission.update({
     where: { id: missionId },
-    include: { waypoints: { orderBy: { order: "asc" } } },
+    include: { waypoints: { orderBy: { order: 'asc' } } },
     data: next.mission,
   });
 
   return {
-    status: "success",
+    status: 'success',
     mission: mapMission(updatedMission),
   };
 }
@@ -371,28 +371,28 @@ export async function completeMissionService(
 ): Promise<CompleteMissionServiceResult> {
   const missionRow = await prisma.mission.findUnique({
     where: { id: missionId },
-    include: { waypoints: { orderBy: { order: "asc" } } },
+    include: { waypoints: { orderBy: { order: 'asc' } } },
   });
 
   if (!missionRow) {
     return {
-      status: "rejected",
+      status: 'rejected',
       reason: {
-        code: "MISSION_NOT_FOUND",
-        message: "Mission not found",
+        code: 'MISSION_NOT_FOUND',
+        message: 'Mission not found',
       },
     };
   }
 
   const next = completeMission(mapMission(missionRow));
-  if (next.status === "rejected") {
+  if (next.status === 'rejected') {
     return next;
   }
 
   const [updatedMission] = await prisma.$transaction([
     prisma.mission.update({
       where: { id: missionId },
-      include: { waypoints: { orderBy: { order: "asc" } } },
+      include: { waypoints: { orderBy: { order: 'asc' } } },
       data: next.mission,
     }),
     prisma.drone.updateMany({
@@ -402,7 +402,7 @@ export async function completeMissionService(
   ]);
 
   return {
-    status: "success",
+    status: 'success',
     mission: mapMission(updatedMission),
   };
 }

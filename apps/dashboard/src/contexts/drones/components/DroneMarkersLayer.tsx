@@ -1,16 +1,16 @@
-"use client";
+'use client';
 
-import { useEffect, useRef } from "react";
-import maplibregl from "maplibre-gl";
-import { useDrones } from "../hooks/useDrones";
-import { useMap } from "@/infrastructure/map";
-import type { Drone } from "@uav/shared";
+import { useEffect, useRef } from 'react';
+import maplibregl from 'maplibre-gl';
+import { useDrones } from '../hooks/useDrones';
+import { useMap } from '@/infrastructure/map';
+import type { Drone } from '@uav/shared';
 
 const DRONE_STATUS_COLOR: Record<string, string> = {
-  active: "#2ea043",
-  idle: "#7d8590",
-  offline: "#e5534b",
-  returning: "#d29922",
+  active: '#2ea043',
+  idle: '#7d8590',
+  offline: '#e5534b',
+  returning: '#d29922',
 };
 
 function getDroneCaption(drone: Drone): string {
@@ -22,19 +22,19 @@ function createDroneMarkerElements(status: string): {
   icon: SVGSVGElement;
   plate: HTMLDivElement;
 } {
-  const color = DRONE_STATUS_COLOR[status] ?? "#7d8590";
+  const color = DRONE_STATUS_COLOR[status] ?? '#7d8590';
 
-  const wrapper = document.createElement("div");
-  wrapper.style.width = "24px";
-  wrapper.style.height = "24px";
-  wrapper.style.position = "relative";
-  wrapper.style.cursor = "pointer";
+  const wrapper = document.createElement('div');
+  wrapper.style.width = '24px';
+  wrapper.style.height = '24px';
+  wrapper.style.position = 'relative';
+  wrapper.style.cursor = 'pointer';
 
-  const icon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-  icon.setAttribute("width", "24px");
-  icon.setAttribute("height", "24px");
-  icon.setAttribute("viewBox", "0 0 24px 24px");
-  icon.setAttribute("fill", "none");
+  const icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  icon.setAttribute('width', '24px');
+  icon.setAttribute('height', '24px');
+  icon.setAttribute('viewBox', '0 0 24px 24px');
+  icon.setAttribute('fill', 'none');
 
   icon.innerHTML = `
         <!-- Propeller arms -->
@@ -51,18 +51,18 @@ function createDroneMarkerElements(status: string): {
         <circle cx="12" cy="12" r="3" fill="${color}"/>
     `;
 
-  const plate = document.createElement("div");
-  plate.style.position = "absolute";
-  plate.style.top = "26px";
-  plate.style.left = "50%";
-  plate.style.transform = "translateX(-50%)";
-  plate.style.whiteSpace = "nowrap";
-  plate.style.pointerEvents = "none";
-  plate.style.fontFamily = "var(--font-mono)";
-  plate.style.fontSize = "10px";
-  plate.style.letterSpacing = "0.04em";
+  const plate = document.createElement('div');
+  plate.style.position = 'absolute';
+  plate.style.top = '26px';
+  plate.style.left = '50%';
+  plate.style.transform = 'translateX(-50%)';
+  plate.style.whiteSpace = 'nowrap';
+  plate.style.pointerEvents = 'none';
+  plate.style.fontFamily = 'var(--font-mono)';
+  plate.style.fontSize = '10px';
+  plate.style.letterSpacing = '0.04em';
   plate.style.color = color;
-  plate.style.textShadow = "0 0 2px var(--bg-deep)";
+  plate.style.textShadow = '0 0 2px var(--bg-deep)';
 
   wrapper.appendChild(icon);
   wrapper.appendChild(plate);
@@ -117,22 +117,22 @@ export function DroneMarkersLayer() {
       entry.plate.textContent = getDroneCaption(drone);
 
       if (entry.status !== drone.status) {
-        const color = DRONE_STATUS_COLOR[drone.status] ?? "#7d8590";
-        const lines = entry.icon.querySelectorAll("line");
-        const circles = entry.icon.querySelectorAll("circle");
+        const color = DRONE_STATUS_COLOR[drone.status] ?? '#7d8590';
+        const lines = entry.icon.querySelectorAll('line');
+        const circles = entry.icon.querySelectorAll('circle');
 
-        lines.forEach((l) => l.setAttribute("stroke", color));
+        lines.forEach((l) => l.setAttribute('stroke', color));
         circles.forEach((c) => {
-          c.setAttribute("stroke", color);
-          c.setAttribute("fill", color);
+          c.setAttribute('stroke', color);
+          c.setAttribute('fill', color);
         });
         entry.plate.style.color = color;
 
         // Повертаємо opacity propeller колам
         const propellers = entry.icon.querySelectorAll(
-          "circle:not(:last-child)",
+          'circle:not(:last-child)',
         );
-        propellers.forEach((c) => c.setAttribute("fill-opacity", "0.3"));
+        propellers.forEach((c) => c.setAttribute('fill-opacity', '0.3'));
 
         entry.status = drone.status;
       }

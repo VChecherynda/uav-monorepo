@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { useEffect } from "react";
-import { TOAST_COLORS, TOAST_DURATION, TOAST_LABELS } from "../constants";
-import { useNotificationsStore } from "../stores/useNotificationsStore";
-import type { Notification } from "../stores/useNotificationsStore";
-import { useDronesStore } from "@/contexts/drones";
+import { useEffect } from 'react';
+import { TOAST_COLORS, TOAST_DURATION, TOAST_LABELS } from '../constants';
+import { useNotificationsStore } from '../stores/useNotificationsStore';
+import type { Notification } from '../stores/useNotificationsStore';
+import { useDronesStore } from '@/contexts/drones';
 
 type ToastProps = {
   notification: Notification;
@@ -31,7 +31,7 @@ export function Toast({ notification }: ToastProps) {
       style={{
         borderLeft: `3px solid ${colors.border}`,
         boxShadow:
-          colors.glow !== "none" ? `0 0 12px ${colors.glow}` : undefined,
+          colors.glow !== 'none' ? `0 0 12px ${colors.glow}` : undefined,
       }}
       className="relative flex flex-col gap-1
       bg-surface border border-subtle
@@ -55,13 +55,13 @@ export function Toast({ notification }: ToastProps) {
   );
 }
 
-function ToastMessage({ event }: { event: Notification["event"] }) {
+function ToastMessage({ event }: { event: Notification['event'] }) {
   const drone = useDronesStore((s) =>
     s.serverDrones.find((d) => d.id === event.droneId),
   );
-  const droneName = drone?.name ?? "Unknown drone";
+  const droneName = drone?.name ?? 'Unknown drone';
 
-  if (event.type === "BatteryCritical") {
+  if (event.type === 'BatteryCritical') {
     return (
       <p className="text-sm text-primary font-mono">
         Drone {droneName} - {event.battery}% battery
@@ -69,7 +69,7 @@ function ToastMessage({ event }: { event: Notification["event"] }) {
     );
   }
 
-  if (event.type === "DroneCommandRejected") {
+  if (event.type === 'DroneCommandRejected') {
     return <p className="text-sm text-primary">{event.reason.message}</p>;
   }
 

@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { Toaster } from "@/contexts/notifications";
+import { Toaster } from '@/contexts/notifications';
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useAuthStore } from "@/contexts/auth";
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuthStore } from '@/contexts/auth';
 
 export default function ProtectedLayout({
   children,
@@ -17,7 +17,7 @@ export default function ProtectedLayout({
 
   useEffect(() => {
     if (isHydrated && !token) {
-      router.replace("/login");
+      router.replace('/login');
     }
   }, [isHydrated, token, router]);
 

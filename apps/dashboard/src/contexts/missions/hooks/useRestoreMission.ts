@@ -1,6 +1,6 @@
-import { useMutation } from "@tanstack/react-query";
-import { restoreMission } from "../api/restoreMission";
-import { useMissionsStore } from "../stores/useMissionsStore";
+import { useMutation } from '@tanstack/react-query';
+import { restoreMission } from '../api/restoreMission';
+import { useMissionsStore } from '../stores/useMissionsStore';
 
 export const useRestoreMission = () => {
   return useMutation({
@@ -8,7 +8,7 @@ export const useRestoreMission = () => {
     onSuccess: (result) => {
       const store = useMissionsStore.getState();
 
-      if (result.status !== "success") {
+      if (result.status !== 'success') {
         return;
       }
       store.updateMission(result.mission);

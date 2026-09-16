@@ -1,25 +1,25 @@
-"use client";
+'use client';
 import {
   ConnectionBadge,
   DroneMarkersLayer,
   DronePanel,
-} from "@/contexts/drones";
-import { useRealtimeChannel } from "@/infrastructure/realtime";
-import { BatteryChart } from "@/contexts/telemetry";
-import { LogoutButton } from "@/contexts/auth";
-import { MissionPanel, MissionRouteLayer } from "@/contexts/missions";
-import { CrosshairIcon, SignalLostIcon } from "@/components";
-import { useState } from "react";
-import { MapCanvas } from "@/infrastructure/map";
-import { PlanningModeBadge, RouteDraftLayer } from "@/contexts/routes";
-import { GeofenceLayer } from "@/contexts/geofences";
-import { MissionViolationLayer } from "@/contexts/missions";
+} from '@/contexts/drones';
+import { useRealtimeChannel } from '@/infrastructure/realtime';
+import { BatteryChart } from '@/contexts/telemetry';
+import { LogoutButton } from '@/contexts/auth';
+import { MissionPanel, MissionRouteLayer } from '@/contexts/missions';
+import { CrosshairIcon, SignalLostIcon } from '@/components';
+import { useState } from 'react';
+import { MapCanvas } from '@/infrastructure/map';
+import { PlanningModeBadge, RouteDraftLayer } from '@/contexts/routes';
+import { GeofenceLayer } from '@/contexts/geofences';
+import { MissionViolationLayer } from '@/contexts/missions';
 
-type Tab = "drones" | "missions";
+type Tab = 'drones' | 'missions';
 
 export default function Home() {
   const { status, reconnect } = useRealtimeChannel();
-  const [activeTab, setActiveTab] = useState<Tab>("drones");
+  const [activeTab, setActiveTab] = useState<Tab>('drones');
 
   return (
     <div className="grid grid-cols-12 grid-rows-[56px_1fr_200px] h-screen bg-deep">
@@ -31,8 +31,8 @@ export default function Home() {
             <span
               className="text-xs font-semibold tracking-[0.2em]"
               style={{
-                fontFamily: "var(--font-mono)",
-                color: "var(--text-primary)",
+                fontFamily: 'var(--font-mono)',
+                color: 'var(--text-primary)',
               }}
             >
               UAV FLEET
@@ -47,14 +47,14 @@ export default function Home() {
         <LogoutButton />
       </header>
 
-      {status === "lost" ? (
+      {status === 'lost' ? (
         <main className="col-span-12 row-span-1 flex items-center justify-center">
           <div className="flex flex-col items-center gap-4">
             <div
               className="flex items-center gap-2"
               style={{
-                color: "var(--accent-critical)",
-                fontFamily: "var(--font-mono)",
+                color: 'var(--accent-critical)',
+                fontFamily: 'var(--font-mono)',
               }}
             >
               <SignalLostIcon />
@@ -64,8 +64,8 @@ export default function Home() {
             <p
               className="text-xs text-center"
               style={{
-                color: "var(--text-muted)",
-                fontFamily: "var(--font-mono)",
+                color: 'var(--text-muted)',
+                fontFamily: 'var(--font-mono)',
               }}
             >
               Unable to reach ground station
@@ -85,12 +85,12 @@ export default function Home() {
             <div
               className="absolute top-3 left-3 z-10 tactical-badge font-mono pointer-events-none"
               style={{
-                borderColor: "var(--accent-warn)",
+                borderColor: 'var(--accent-warn)',
               }}
             >
               <span
                 className="text-xs tracking-widest"
-                style={{ color: "var(--accent-warn)" }}
+                style={{ color: 'var(--accent-warn)' }}
               >
                 SIMULATED DATA · DEMO ENVIRONMENT
               </span>
@@ -110,21 +110,21 @@ export default function Home() {
           <aside className="col-span-4 row-span-1 flex flex-col gap-3 overflow-auto p-3 border border-subtle">
             <div className="flex gap-2">
               <button
-                onClick={() => setActiveTab("drones")}
-                className={`btn-tab px-3 py-1 rounded border ${activeTab === "drones" ? "active" : ""}`}
+                onClick={() => setActiveTab('drones')}
+                className={`btn-tab px-3 py-1 rounded border ${activeTab === 'drones' ? 'active' : ''}`}
               >
                 Drones
               </button>
               <button
-                onClick={() => setActiveTab("missions")}
-                className={`btn-tab px-3 py-1 rounded border ${activeTab === "missions" ? "active" : ""}`}
+                onClick={() => setActiveTab('missions')}
+                className={`btn-tab px-3 py-1 rounded border ${activeTab === 'missions' ? 'active' : ''}`}
               >
                 Missions
               </button>
             </div>
 
-            {activeTab === "drones" && <DronePanel />}
-            {activeTab === "missions" && <MissionPanel />}
+            {activeTab === 'drones' && <DronePanel />}
+            {activeTab === 'missions' && <MissionPanel />}
           </aside>
         </>
       )}

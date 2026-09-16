@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { useEffect, useRef, useState } from "react";
-import maplibregl from "maplibre-gl";
-import "maplibre-gl/dist/maplibre-gl.css";
-import { MapContext } from "../lib/MapContext";
+import { useEffect, useRef, useState } from 'react';
+import maplibregl from 'maplibre-gl';
+import 'maplibre-gl/dist/maplibre-gl.css';
+import { MapContext } from '../lib/MapContext';
 
 const MAP_STYLE_URL = `https://api.maptiler.com/maps/darkmatter/style.json?key=${process.env.NEXT_PUBLIC_MAPTILER_KEY}`;
 const MAP_ZOOM = 11;
@@ -25,7 +25,7 @@ export function MapCanvas({ children }: { children: React.ReactNode }) {
       zoom: MAP_ZOOM,
     });
 
-    _map.on("load", () => {
+    _map.on('load', () => {
       if (!cancelled) {
         setMap(_map);
       }
