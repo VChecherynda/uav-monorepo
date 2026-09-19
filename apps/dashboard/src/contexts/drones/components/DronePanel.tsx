@@ -1,21 +1,18 @@
 'use client';
 
 import type { Drone } from '@uav/shared';
-import { predictDroneChange } from '@uav/shared';
+import { resolveRejection } from '@uav/shared';
 import { useSendCommand } from '@/contexts/fleet-commands';
 import { useDrones } from '../hooks/useDrones';
 import { useDronesStore } from '../stores/useDronesStore';
 
-const STATUS_DOT: Record<Drone['status'], { color: string; glow: string }> = {
-  active: { color: 'var(--accent-ok)', glow: 'var(--glow-ok)' },
-  idle: { color: 'var(--text-muted)', glow: 'none' },
-  offline: { color: 'var(--accent-critical)', glow: 'var(--glow-critical)' },
-  returning: { color: 'var(--accent-warn)', glow: 'var(--glow-warn)' },
-  assigned: { color: 'var(--accent-ok)', glow: 'var(--glow-ok)' },
+const LINK_DOT: Record<Drone['link'], { color: string; glow: string }> = {
+  ONLINE: { color: 'var(--accent-ok)', glow: 'var(--glow-ok)' },
+  OFFLINE: { color: 'var(--accent-critical)', glow: 'var(--glow-critical)' },
 };
 
-function StatusDot({ status }: { status: Drone['status'] }) {
-  const { color, glow } = STATUS_DOT[status];
+function StatusDot({ link }: { link: Drone['link'] }) {
+  const { color, glow } = LINK_DOT[link];
   return (
     <span
       style={{
@@ -78,8 +75,7 @@ function DroneCard({
 }) {
   const sendCmd = useSendCommand();
   const isSelected = useDronesStore((s) => s.droneId === drone.id);
-  const canReturnHome =
-    predictDroneChange('return-home', drone.status) !== undefined;
+  const canReturnHome = resolveRejection(drone, 'return-home') === undefined;
 
   return (
     <div
@@ -96,7 +92,7 @@ function DroneCard({
       {/* Top row — identity + battery */}
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 min-w-0">
-          <StatusDot status={drone.status} />
+          <StatusDot link={drone.link} />
           <span className="text-sm font-semibold truncate text-primary">
             {drone.name}
           </span>
@@ -120,7 +116,7 @@ function DroneCard({
 
         <div className="flex flex-col gap-0.5">
           <span className="label">Status</span>
-          <span className="text-data">{drone.status.toUpperCase()}</span>
+          <span className="text-data">{`${drone.flightPhase} · ${drone.flightMode}`}</span>
         </div>
       </div>
 

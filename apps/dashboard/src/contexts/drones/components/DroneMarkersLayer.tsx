@@ -4,25 +4,34 @@ import { useEffect, useRef } from 'react';
 import maplibregl from 'maplibre-gl';
 import { useDrones } from '../hooks/useDrones';
 import { useMap } from '@/infrastructure/map';
-import type { Drone } from '@uav/shared';
+import type { Drone, FlightPhase, LinkState } from '@uav/shared';
 
-const DRONE_STATUS_COLOR: Record<string, string> = {
-  active: '#2ea043',
-  idle: '#7d8590',
-  offline: '#e5534b',
-  returning: '#d29922',
+const FLIGHT_PHASE_COLOR: Record<FlightPhase, string> = {
+  ON_GROUND: '#2d3748',
+  TAKEOFF: '#d29922',
+  IN_AIR: '#2ea043',
+  LANDING: '#d29922',
 };
 
+const DEFAULT_DRONE_COLOR = '#7d8590';
+
 function getDroneCaption(drone: Drone): string {
-  return drone.name;
+  return `${drone.name} · ${drone.flightMode}`;
 }
 
-function createDroneMarkerElements(status: string): {
+function getLinkOpacity(link: LinkState) {
+  return link === 'ONLINE' ? '1' : '0.3';
+}
+
+function createDroneMarkerElements(
+  flightPhase: FlightPhase,
+  link: LinkState,
+): {
   wrapper: HTMLDivElement;
   icon: SVGSVGElement;
   plate: HTMLDivElement;
 } {
-  const color = DRONE_STATUS_COLOR[status] ?? '#7d8590';
+  const color = FLIGHT_PHASE_COLOR[flightPhase] ?? DEFAULT_DRONE_COLOR;
 
   const wrapper = document.createElement('div');
   wrapper.style.width = '24px';
@@ -40,16 +49,18 @@ function createDroneMarkerElements(status: string): {
         <!-- Propeller arms -->
         <line x1="4" y1="4" x2="20" y2="20" stroke="${color}" stroke-width="1.5"/>
         <line x1="20" y1="4" x2="4" y2="20" stroke="${color}" stroke-width="1.5"/>
-  
+
         <!-- Propellers -->
         <circle cx="4"  cy="4"  r="3" fill="${color}" fill-opacity="0.3" stroke="${color}" stroke-width="1"/>
         <circle cx="20" cy="4"  r="3" fill="${color}" fill-opacity="0.3" stroke="${color}" stroke-width="1"/>
         <circle cx="4"  cy="20" r="3" fill="${color}" fill-opacity="0.3" stroke="${color}" stroke-width="1"/>
         <circle cx="20" cy="20" r="3" fill="${color}" fill-opacity="0.3" stroke="${color}" stroke-width="1"/>
-  
+
         <!-- Center body -->
         <circle cx="12" cy="12" r="3" fill="${color}"/>
     `;
+
+  icon.style.opacity = getLinkOpacity(link);
 
   const plate = document.createElement('div');
   plate.style.position = 'absolute';
@@ -80,7 +91,8 @@ export function DroneMarkersLayer() {
         marker: maplibregl.Marker;
         icon: SVGSVGElement;
         plate: HTMLDivElement;
-        status: string;
+        flightPhase: FlightPhase;
+        link: LinkState;
       }
     >
   >(new Map());
@@ -96,18 +108,22 @@ export function DroneMarkersLayer() {
       seen.add(drone.id);
 
       let entry = markersRef.current.get(drone.id);
+      const { flightPhase, link } = drone;
 
       if (!entry) {
         const { wrapper, icon, plate } = createDroneMarkerElements(
-          drone.status,
+          flightPhase,
+          link,
         );
+
         entry = {
           marker: new maplibregl.Marker({ element: wrapper })
             .setLngLat([drone.lng, drone.lat])
             .addTo(map),
           icon,
           plate,
-          status: drone.status,
+          flightPhase,
+          link,
         };
 
         markersRef.current.set(drone.id, entry);
@@ -116,8 +132,9 @@ export function DroneMarkersLayer() {
       entry.marker.setLngLat([drone.lng, drone.lat]);
       entry.plate.textContent = getDroneCaption(drone);
 
-      if (entry.status !== drone.status) {
-        const color = DRONE_STATUS_COLOR[drone.status] ?? '#7d8590';
+      if (entry.flightPhase !== drone.flightPhase) {
+        const color =
+          FLIGHT_PHASE_COLOR[drone.flightPhase] ?? DEFAULT_DRONE_COLOR;
         const lines = entry.icon.querySelectorAll('line');
         const circles = entry.icon.querySelectorAll('circle');
 
@@ -134,7 +151,12 @@ export function DroneMarkersLayer() {
         );
         propellers.forEach((c) => c.setAttribute('fill-opacity', '0.3'));
 
-        entry.status = drone.status;
+        entry.flightPhase = drone.flightPhase;
+      }
+
+      if (entry.link !== drone.link) {
+        entry.icon.style.opacity = getLinkOpacity(link);
+        entry.link = drone.link;
       }
     });
 
