@@ -26,7 +26,7 @@ test('operator issues RTH and sees optimistic update then confirmation', async (
   await rthButton.click();
 
   // OPTIMISTIC
-  await expect(page.getByText('RETURNING')).toBeVisible();
+  await expect(page.getByText('IN_AIR · RTL')).toBeVisible();
 
   // SERVER CONFIRMED
   await expect(page.getByText('ACKNOWLEDGED')).toBeVisible();
