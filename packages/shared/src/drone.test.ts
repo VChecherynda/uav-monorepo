@@ -24,7 +24,7 @@ const buildDrone = (fields?: Partial<Drone>): Drone => {
 
 describe('resolveRejection', () => {
   it('rejects offline drone', () => {
-    const drone = buildDrone({ link: 'OFFLINE' });©
+    const drone = buildDrone({ link: 'OFFLINE' });
 
     expect(resolveRejection(drone, 'takeoff')).toEqual({
       code: 'DRONE_OFFLINE',
