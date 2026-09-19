@@ -27,11 +27,11 @@ type ActionRejection = {
 type MissionMutation = { mutate: (id: string) => void; isPending: boolean };
 
 const STATUS_ACTIONS = {
-  draft: [],
-  assigned: ['start', 'abort'],
+  draft: ['start'],
   'in-progress': ['abort', 'complete'],
+  terminated: [],
   completed: [],
-  aborted: [],
+  aborted: ['restore'],
 } as const satisfies Record<MissionStatus, readonly MissionAction[]>;
 
 const ACTION_LABEL: Record<MissionAction, string> = {
@@ -45,19 +45,18 @@ const ACTION_LABEL: Record<MissionAction, string> = {
 
 const STATUS_COLOR: Record<MissionStatus, string> = {
   draft: 'var(--text-muted)',
-  assigned: 'var(--accent-info)',
+  terminated: 'var(--accent-critical)',
   'in-progress': 'var(--accent-ok)',
   completed: 'var(--text-secondary)',
   aborted: 'var(--accent-critical)',
 };
 
-function getDroneLabel(mission: Mission, drones: Drone[]) {
-  if (!mission.droneId) return 'Drone is not assigned';
+function getDronesLabel(mission: Mission, drones: Drone[]) {
+  const assignedDrones = drones.filter((d) => d.missionId === mission.id);
 
-  const drone = drones.find((d) => d.id === mission.droneId);
-  if (!drone) return 'Assigned drone not found';
+  if (assignedDrones.length === 0) return 'No drones assigned';
 
-  return drone.name;
+  return assignedDrones.map((d) => d.name).join(', ');
 }
 
 export const MissionCard = ({ mission }: { mission: Mission }) => {
@@ -75,6 +74,7 @@ export const MissionCard = ({ mission }: { mission: Mission }) => {
   > = {
     start: { label: ACTION_LABEL.start, mutation: start },
     abort: { label: ACTION_LABEL.abort, mutation: abort },
+    restore: { label: ACTION_LABEL.restore, mutation: restore },
     complete: { label: ACTION_LABEL.complete, mutation: complete },
   };
 
@@ -85,16 +85,14 @@ export const MissionCard = ({ mission }: { mission: Mission }) => {
     draft: [
       { action: 'assign', mutation: assign },
       { action: 'save', mutation: replace },
-    ],
-    assigned: [
       { action: 'start', mutation: start },
-      { action: 'abort', mutation: abort },
     ],
     'in-progress': [
       { action: 'abort', mutation: abort },
       { action: 'complete', mutation: complete },
     ],
     aborted: [{ action: 'restore', mutation: restore }],
+    terminated: [],
     completed: [],
   };
 
@@ -106,10 +104,11 @@ export const MissionCard = ({ mission }: { mission: Mission }) => {
     (s) => s.planningMissionId === mission.id && s.waypoints.length > 0,
   );
 
-  const idleDrones = serverDrones.filter((d) => d.status === 'idle');
+  const idleDrones = serverDrones.filter(
+    (d) => d.missionId === null && d.disposition === 'ACTIVE',
+  );
   const [selectedDroneId, setSelectedDroneId] = useState<string>('');
 
-  let actions;
   const latest = STATUS_MUTATIONS[mission.status].reduce<{
     action: MissionAction;
     mutation: ActionRejection;
@@ -128,112 +127,13 @@ export const MissionCard = ({ mission }: { mission: Mission }) => {
       : latest.mutation.data?.status === 'rejected'
         ? latest.mutation.data.reason.message
         : latest.mutation.error?.message;
+
   const rejection =
     latest != null && rejectionMessage
       ? `${ACTION_LABEL[latest.action].toLowerCase()}: ${rejectionMessage}`
       : null;
 
-  switch (mission.status) {
-    case 'draft':
-      actions = (
-        <div className="flex flex-col gap-2">
-          <select
-            className="input-tactical"
-            value={selectedDroneId}
-            onClick={(e) => {
-              e.stopPropagation();
-            }}
-            onChange={(e) => {
-              setSelectedDroneId(e.target.value);
-            }}
-          >
-            <option value="">Please select drone</option>
-            {idleDrones.map((d) => (
-              <option key={d.id} value={d.id}>
-                {d.name}
-              </option>
-            ))}
-          </select>
-
-          <div className="flex flex-wrap gap-2">
-            <PlanRouteButton missionId={mission.id} />
-            <div className="flex flex-col gap-1 min-w-0">
-              <button
-                className="btn-rth px-3 py-1 text-xs rounded border"
-                disabled={!selectedDroneId || assign.isPending}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  assign.mutate({ id: mission.id, droneId: selectedDroneId });
-                }}
-              >
-                ASSIGN
-              </button>
-            </div>
-            {canSave && (
-              <div className="flex flex-col gap-1 min-w-0">
-                <button
-                  className="btn-rth px-3 py-1 text-xs rounded border"
-                  disabled={replace.isPending}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    replace.mutate(mission.id);
-                  }}
-                >
-                  SAVE
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      );
-      break;
-    case 'assigned':
-    case 'in-progress': {
-      const statusActions = STATUS_ACTIONS[mission.status] ?? [];
-      actions = statusActions.map((a) => {
-        const { label, mutation } = ACTION_ENTRY[a];
-
-        return (
-          <div key={a} className="flex flex-col gap-1 min-w-0">
-            <button
-              className="btn-rth px-3 py-1 text-xs rounded border self-start"
-              disabled={mutation.isPending}
-              onClick={(e) => {
-                e.stopPropagation();
-                mutation.mutate(mission.id);
-              }}
-            >
-              {label}
-            </button>
-          </div>
-        );
-      });
-      break;
-    }
-    case 'aborted':
-      actions = (
-        <div className="flex flex-col gap-1 min-w-0">
-          <button
-            className="btn-rth px-3 py-1 text-xs rounded border self-start"
-            disabled={restore.isPending}
-            onClick={(e) => {
-              e.stopPropagation();
-              restore.mutate(mission.id);
-            }}
-          >
-            RESTORE
-          </button>
-        </div>
-      );
-      break;
-    case 'completed':
-      actions = null;
-      break;
-    default:
-      actions = null;
-  }
-
-  const droneLabel = getDroneLabel(mission, serverDrones);
+  const dronesLabel = getDronesLabel(mission, serverDrones);
 
   return (
     <div
@@ -257,10 +157,80 @@ export const MissionCard = ({ mission }: { mission: Mission }) => {
         >
           {mission.status}
         </span>
-        <p className="text-data">{droneLabel}</p>
+        <p className="text-data">{dronesLabel}</p>
       </div>
 
-      <div className="flex gap-2">{actions}</div>
+      <div className="flex gap-2">
+        {mission.status === 'draft' && (
+          <div className="flex flex-col gap-2">
+            <select
+              className="input-tactical"
+              value={selectedDroneId}
+              onClick={(e) => {
+                e.stopPropagation();
+              }}
+              onChange={(e) => {
+                setSelectedDroneId(e.target.value);
+              }}
+            >
+              <option value="">Please select drone</option>
+              {idleDrones.map((d) => (
+                <option key={d.id} value={d.id}>
+                  {d.name}
+                </option>
+              ))}
+            </select>
+
+            <div className="flex flex-wrap gap-2">
+              <PlanRouteButton missionId={mission.id} />
+              <div className="flex flex-col gap-1 min-w-0">
+                <button
+                  className="btn-rth px-3 py-1 text-xs rounded border"
+                  disabled={!selectedDroneId || assign.isPending}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    assign.mutate({ id: mission.id, droneId: selectedDroneId });
+                  }}
+                >
+                  ASSIGN
+                </button>
+              </div>
+              {canSave && (
+                <div className="flex flex-col gap-1 min-w-0">
+                  <button
+                    className="btn-rth px-3 py-1 text-xs rounded border"
+                    disabled={replace.isPending}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      replace.mutate(mission.id);
+                    }}
+                  >
+                    SAVE
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+        {STATUS_ACTIONS[mission.status].map((action) => {
+          const { label, mutation } = ACTION_ENTRY[action];
+
+          return (
+            <div key={action} className="flex flex-col gap-1 min-w-0">
+              <button
+                className="btn-rth px-3 py-1 text-xs rounded border self-start"
+                disabled={mutation.isPending}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  mutation.mutate(mission.id);
+                }}
+              >
+                {label}
+              </button>
+            </div>
+          );
+        })}
+      </div>
       <div className="flex">
         {rejection && (
           <span className="error-message truncate" title={rejection}>

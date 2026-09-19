@@ -27,7 +27,7 @@ export function MissionViolationLayer() {
     s.missions.find((m) => m.id === missionId),
   );
   const drone = useDronesStore((s) =>
-    s.serverDrones.find((d) => d.id === mission?.droneId),
+    s.serverDrones.find((d) => d.missionId === mission?.id),
   );
 
   const waypoints = mission?.waypoints ?? EMPTY_COORDINATES;
