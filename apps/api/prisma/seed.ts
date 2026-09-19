@@ -6,7 +6,7 @@ const prisma = new PrismaClient();
 const drones = [
   {
     name: 'Falcon-1',
-    missionId: 'm1',
+    missionId: 'm2',
     flightMode: 'AUTO' as FlightMode,
     flightPhase: 'IN_AIR' as FlightPhase,
     battery: 87,
@@ -66,8 +66,8 @@ const zones = [
 async function main() {
   await prisma.telemetry.deleteMany();
   await prisma.waypoint.deleteMany();
-  await prisma.mission.deleteMany();
   await prisma.drone.deleteMany();
+  await prisma.mission.deleteMany();
   await prisma.geofence.deleteMany();
 
   await prisma.mission.createMany({
@@ -75,7 +75,7 @@ async function main() {
       { status: 'draft', name: 'Recon sector 1' },
       {
         id: 'm1',
-        status: 'assigned',
+        status: 'draft',
         name: 'Destroy infantry sector 2',
       },
       {
