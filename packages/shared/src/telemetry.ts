@@ -7,6 +7,7 @@ export const TelemetrySchema = z.object({
   altitude: z.number(),
   lng: z.number(),
   lat: z.number(),
+  recordedAt: z.coerce.date(),
 });
 
 export type Telemetry = z.infer<typeof TelemetrySchema>;
