@@ -83,10 +83,10 @@ Rejected commands return HTTP 200, not 4xx:
 
 ```ts
 // ❌ Wrong — this is not a transport error
-return reply.status(422).send({ error: "Insufficient battery" });
+return reply.status(422).send({ error: 'Insufficient battery' });
 
 // ✅ Correct — valid domain outcome
-return { status: "rejected", reason: { code: "INSUFFICIENT_BATTERY" } };
+return { status: 'rejected', reason: { code: 'INSUFFICIENT_BATTERY' } };
 ```
 
 HTTP status codes describe transport results — whether the request was received and processed. A rejected command is a valid domain outcome: the drone received the command, understood it, and declined based on a business rule. Using 4xx would cause middleware, proxies, and monitoring systems to treat a low-battery drone as a system error.
