@@ -30,7 +30,6 @@ const tick = async (
           const updatedDrone = await tx.drone.update({
             where: { id: d.id },
             data: {
-              status: 'idle',
               battery: INITIAL_BATTERY,
               altitude: 0,
               lng: d.homeLng,
