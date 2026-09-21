@@ -46,8 +46,14 @@ export async function droneRoutes(app: FastifyInstance) {
 
       const { action } = parsed.data;
       const { id } = req.params as { id: string };
+      const droneRow = await prisma.drone.findUnique({ where: { id } });
+      if (!droneRow)
+        return reply.send({
+          status: 'rejected',
+          reason: { code: 'DRONE_NOT_FOUND', message: 'Drone not found' },
+        });
 
-      const result = await sendCommandService(id, action);
+      const result = await sendCommandService(mapDrone(droneRow), action);
       return reply.send(result);
     },
   );

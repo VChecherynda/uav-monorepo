@@ -1,28 +1,25 @@
-import type { CommandResult, DomainEvent, DroneAction } from '@uav/shared';
+import type {
+  DroneCommandResult,
+  DomainEvent,
+  Drone,
+  DroneAction,
+} from '@uav/shared';
 import { executeCommand } from '../domain/drone.js';
 import { mapDrone } from '../lib/mappers.js';
 import { prisma } from '../lib/prisma.js';
+import type { Drone as PrismaDrone } from '@prisma/client';
 import { broadcastEvent } from '../routes/ws.js';
 
 export async function sendCommandService(
-  droneId: string,
+  drone: Drone,
   action: DroneAction,
-): Promise<CommandResult> {
-  const drone = await prisma.drone.findUnique({ where: { id: droneId } });
-
-  if (!drone) {
-    return {
-      status: 'rejected',
-      reason: { code: 'DRONE_NOT_FOUND', message: 'Drone not found' },
-    };
-  }
-
-  const next = executeCommand(mapDrone(drone), action);
+): Promise<DroneCommandResult> {
+  const next = executeCommand(drone, action);
 
   if (next.status === 'rejected') {
     const event: DomainEvent = {
       type: 'DroneCommandRejected',
-      droneId,
+      droneId: drone.id,
       action,
       reason: next.reason,
       at: new Date().toISOString(),
@@ -32,7 +29,7 @@ export async function sendCommandService(
   }
 
   const updated = await prisma.drone.update({
-    where: { id: droneId },
+    where: { id: drone.id },
     data: next.drone,
   });
 

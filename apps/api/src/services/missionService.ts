@@ -253,15 +253,9 @@ export async function startMissionService(
     const rejected: RejectedDrone[] = [];
 
     for (const droneRow of droneRows) {
-      const result = await sendCommandService(droneRow.id, 'takeoff');
+      const result = await sendCommandService(mapDrone(droneRow), 'takeoff');
 
       if (result.status === 'rejected') {
-        if (result.reason.code === 'DRONE_NOT_FOUND') {
-          throw new Error(
-            `Drone ${droneRow.id} vanished between findMany and takeoff`,
-          );
-        }
-
         rejected.push({ droneId: droneRow.id, reason: result.reason });
       }
     }
@@ -314,15 +308,9 @@ export async function abortMissionService(
   const rejected: RejectedDrone[] = [];
 
   for (const droneRow of droneRows) {
-    const result = await sendCommandService(droneRow.id, 'hold');
+    const result = await sendCommandService(mapDrone(droneRow), 'hold');
 
     if (result.status === 'rejected') {
-      if (result.reason.code === 'DRONE_NOT_FOUND') {
-        throw new Error(
-          `Drone ${droneRow.id} vanished between findMany and hold`,
-        );
-      }
-
       rejected.push({ droneId: droneRow.id, reason: result.reason });
     }
   }
