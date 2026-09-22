@@ -6,9 +6,9 @@ import { routeMessage } from '../lib/routeMessage';
 const WS_URL =
   process.env.NEXT_PUBLIC_WS_URL ?? 'ws://localhost:4000/ws/drones';
 
-const MAX_RETRIES = 3;
 const MAX_RETRY_DELAY = 16000;
 const HEARTBEAT_TIMEOUT_MS = 6000;
+const RECONNECT_WINDOW_MS = 60_000;
 
 export function useRealtimeChannel() {
   const [status, setStatus] = useState<WSConnectionStatus>('connecting');
@@ -20,6 +20,7 @@ export function useRealtimeChannel() {
   const heartbeatTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const retryRef = useRef<number>(0);
+  const disconnectedAtRef = useRef<number | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -48,6 +49,7 @@ export function useRealtimeChannel() {
       ws.onopen = () => {
         if (cancelled) return;
         retryRef.current = 0;
+        disconnectedAtRef.current = null;
         console.log('[WS] open');
         setStatus('open');
         resetHeartbeat(ws);
@@ -79,7 +81,11 @@ export function useRealtimeChannel() {
 
         setStatus('reconnecting');
 
-        if (retryRef.current >= MAX_RETRIES) {
+        if (disconnectedAtRef.current === null) {
+          disconnectedAtRef.current = Date.now();
+        }
+
+        if (Date.now() - disconnectedAtRef.current > RECONNECT_WINDOW_MS) {
           setStatus('lost');
           return;
         }
@@ -114,6 +120,7 @@ export function useRealtimeChannel() {
 
   const reconnect = () => {
     retryRef.current = 0;
+    disconnectedAtRef.current = null;
     setRetryTrigger((n) => n + 1); // ← змінює deps → useEffect re-runs
   };
 
