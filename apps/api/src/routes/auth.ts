@@ -3,6 +3,7 @@ import bcrypt from 'bcrypt';
 import { prisma } from '../lib/prisma.js';
 import { z } from 'zod';
 import jwt from 'jsonwebtoken';
+import { Prisma } from '@prisma/client';
 
 const EmailSchema = z.string().trim().toLowerCase().pipe(z.email());
 
@@ -41,12 +42,25 @@ export async function authRoutes(fastify: FastifyInstance) {
 
     const passwordHash = await bcrypt.hash(password, 10);
 
-    const user = await prisma.user.create({
-      data: { email, passwordHash },
-      select: { id: true, email: true, createdAt: true },
-    });
+    try {
+      const user = await prisma.user.create({
+        data: { email, passwordHash },
+        select: { id: true, email: true, createdAt: true },
+      });
 
-    return reply.status(201).send({ user });
+      return reply.status(201).send({ user });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        // P2002 -specific prisma error «Unique constraint failed»
+        if (error.code === 'P2002') {
+          return reply.status(409).send({
+            error: 'Email already registered',
+          });
+        }
+      }
+
+      throw error;
+    }
   });
 
   fastify.post('/auth/login', async (req, reply) => {
