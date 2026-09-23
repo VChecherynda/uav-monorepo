@@ -4,13 +4,15 @@ import { prisma } from '../lib/prisma.js';
 import { z } from 'zod';
 import jwt from 'jsonwebtoken';
 
+const EmailSchema = z.string().trim().toLowerCase().pipe(z.email());
+
 const RegisterSchema = z.object({
-  email: z.email(),
+  email: EmailSchema,
   password: z.string().min(8),
 });
 
 const LoginSchema = z.object({
-  email: z.email(),
+  email: EmailSchema,
   password: z.string(),
 });
 
