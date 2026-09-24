@@ -36,7 +36,13 @@ await app.register(fleetRoutes);
 await app.register(missionRoutes);
 await app.register(geofenceRoutes);
 
-app.get('/health', async () => ({ status: 'ok' }));
+app.get('/health', async (req) => {
+  req.log.info({ ip: req.ip, headers: req.headers['x-forwarded-for'] }, 'info');
+
+  return {
+    status: 'ok',
+  };
+});
 
 const port = Number(process.env.PORT ?? 4000);
 const host = '0.0.0.0';
