@@ -15,6 +15,7 @@ import { logger } from './lib/logger.js';
 
 const app = Fastify({
   loggerInstance: logger,
+  trustProxy: 2,
 });
 
 const allowedOrigins = (process.env.CORS_ORIGINS ?? 'http://localhost:3000')
