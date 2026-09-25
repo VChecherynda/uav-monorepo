@@ -5,6 +5,7 @@ import { z } from 'zod';
 import jwt from 'jsonwebtoken';
 import { Prisma } from '@prisma/client';
 import rateLimit from '@fastify/rate-limit';
+import { config } from '../lib/config.js';
 
 const EmailSchema = z.string().trim().toLowerCase().pipe(z.email());
 
@@ -111,8 +112,7 @@ export async function authRoutes(fastify: FastifyInstance) {
         });
       }
 
-      const secret =
-        process.env.JWT_SECRET ?? 'dev-secret-change-in-production';
+      const secret = config.jwtSecret;
       const token = jwt.sign({ userId: user.id }, secret, { expiresIn: '1h' });
 
       return reply.status(200).send({

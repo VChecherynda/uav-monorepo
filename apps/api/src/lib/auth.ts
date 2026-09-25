@@ -1,5 +1,6 @@
 import type { FastifyRequest, FastifyReply } from 'fastify';
 import jwt from 'jsonwebtoken';
+import { config } from './config.js';
 
 export async function authenticate(req: FastifyRequest, reply: FastifyReply) {
   const authHeader = req.headers.authorization;
@@ -10,7 +11,7 @@ export async function authenticate(req: FastifyRequest, reply: FastifyReply) {
     });
   }
 
-  const secret = process.env.JWT_SECRET ?? 'dev-secret-change-in-production';
+  const secret = config.jwtSecret;
   const token = authHeader.slice(7);
 
   try {

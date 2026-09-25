@@ -2,6 +2,7 @@ import jwt from 'jsonwebtoken';
 
 import type { FastifyInstance } from 'fastify';
 import type { WSMessage, Drone, DomainEvent } from '@uav/shared';
+import { config } from '../lib/config.js';
 
 const clients = new Set<WebSocket>();
 
@@ -20,10 +21,7 @@ export async function wsRoutes(app: FastifyInstance) {
     }
 
     try {
-      jwt.verify(
-        token,
-        process.env.JWT_SECRET ?? 'dev-secret-change-in-production',
-      );
+      jwt.verify(token, config.jwtSecret);
     } catch {
       socket.close(4001, 'Unauthorized: invalid token');
       return;
