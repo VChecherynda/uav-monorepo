@@ -12,18 +12,15 @@ import { geofenceRoutes } from './routes/geofence.js';
 import { wsRoutes, hasClients, broadcastDrones } from './routes/ws.js';
 import { prisma } from './lib/prisma.js';
 import { logger } from './lib/logger.js';
+import { config } from './lib/config.js';
 
 const app = Fastify({
   loggerInstance: logger,
   trustProxy: 2,
 });
 
-const allowedOrigins = (process.env.CORS_ORIGINS ?? 'http://localhost:3000')
-  .split(',')
-  .map((o) => o.trim());
-
 await app.register(cors, {
-  origin: allowedOrigins,
+  origin: config.corsOrigins,
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
 });
 
@@ -39,10 +36,7 @@ await app.register(geofenceRoutes);
 
 app.get('/health', async (req) => ({ status: 'ok' }));
 
-const port = Number(process.env.PORT ?? 4000);
-const host = '0.0.0.0';
-
-const address = await app.listen({ port, host });
+const address = await app.listen({ port: config.port, host: config.host });
 app.log.info(`API on ${address}`);
 
 const simulationTimer = startSimulation(broadcastDrones, hasClients);
