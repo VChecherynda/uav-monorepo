@@ -12,8 +12,8 @@ const buildMissionRow = (
     id: 'M1',
     status: 'draft',
     reason: null,
-    unitId: null,
-    authorId: null,
+    unitId: 'u1',
+    authorId: 'D1',
     createdAt: CREATED_AT,
     waypoints: [],
   };

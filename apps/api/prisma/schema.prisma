@@ -87,10 +87,10 @@ model Mission {
   status    String     @default("draft") // "draft" | "assigned" | "in-progress | "completed" | "aborted"
   reason    String?
   createdAt DateTime   @default(now())
-  unitId    String?
-  authorId  String?
-  author    User?      @relation(fields: [authorId], references: [id], onDelete: Restrict)
-  unit      Unit?      @relation(fields: [unitId], references: [id], onDelete: Restrict)
+  unitId    String
+  authorId  String
+  author    User      @relation(fields: [authorId], references: [id], onDelete: Restrict)
+  unit      Unit      @relation(fields: [unitId], references: [id], onDelete: Restrict)
   waypoints Waypoint[]
   drones    Drone[]
 }
