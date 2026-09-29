@@ -32,6 +32,11 @@ enum Disposition {
   EXPENDED
 }
 
+enum UnitRole {
+  COMMANDER
+  OPERATOR
+}
+
 model Drone {
   id          String      @id @default(cuid())
   missionId   String?
@@ -45,10 +50,12 @@ model Drone {
   lat         Float
   homeLng     Float       @default(133.8800)
   homeLat     Float       @default(-23.7000)
+  unitId      String?
   updatedAt   DateTime    @updatedAt
   createdAt   DateTime    @default(now())
   telemetries Telemetry[]
   missions    Mission?    @relation(fields: [missionId], references: [id], onDelete: Restrict)
+  unit        Unit?       @relation(fields: [unitId], references: [id], onDelete: SetNull)
 }
 
 model Telemetry {
@@ -64,12 +71,26 @@ model Telemetry {
   @@index([droneId, recordedAt])
 }
 
+model Unit {
+  id          String     @id @default(cuid())
+  name        String     @unique
+  missions    Mission[]
+  drones      Drone[]
+  unitMembers UnitMember[]
+  createdAt   DateTime   @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
 model Mission {
   id        String     @id @default(cuid())
   name      String     @db.VarChar(120)
   status    String     @default("draft") // "draft" | "assigned" | "in-progress | "completed" | "aborted"
   reason    String?
   createdAt DateTime   @default(now())
+  unitId    String?
+  authorId  String?
+  author    User?      @relation(fields: [authorId], references: [id], onDelete: Restrict)
+  unit      Unit?      @relation(fields: [unitId], references: [id], onDelete: Restrict)
   waypoints Waypoint[]
   drones    Drone[]
 }
@@ -96,6 +117,20 @@ model User {
   id           String   @id @default(cuid())
   email        String   @unique
   passwordHash String
+  missions     Mission[]
+  unitMember   UnitMember?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+}
+
+model UnitMember {
+  id              String     @id @default(cuid())
+  unitId          String
+  userId          String     @unique
+  unitRole        UnitRole
+  canAcceptDrones Boolean    @default(false)
+  user            User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  unit            Unit       @relation(fields: [unitId], references: [id], onDelete: Restrict)
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
 }

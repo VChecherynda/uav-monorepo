@@ -12,6 +12,8 @@ const buildMissionRow = (
     id: 'M1',
     status: 'draft',
     reason: null,
+    unitId: null,
+    authorId: null,
     createdAt: CREATED_AT,
     waypoints: [],
   };
@@ -38,6 +40,7 @@ const buildDroneRow = (fields?: Partial<PrismaDrone>): PrismaDrone => {
     altitude: 100,
     homeLng: 133,
     homeLat: -25,
+    unitId: null,
     updatedAt: UPDATED_AT,
     createdAt: CREATED_AT,
   };
