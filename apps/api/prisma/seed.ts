@@ -66,46 +66,111 @@ const zones = [
 async function main() {
   await prisma.telemetry.deleteMany();
   await prisma.waypoint.deleteMany();
+  await prisma.unitMember.deleteMany();
+  await prisma.geofence.deleteMany();
   await prisma.drone.deleteMany();
   await prisma.mission.deleteMany();
-  await prisma.geofence.deleteMany();
+  await prisma.unit.deleteMany();
+  await prisma.user.deleteMany();
+
+  const units = await prisma.unit.createManyAndReturn({
+    data: [
+      {
+        name: 'Training UAV Platoon',
+      },
+      {
+        name: 'Reserve UAV Platoon',
+      },
+    ],
+  });
+
+  const users = await prisma.user.createManyAndReturn({
+    data: [
+      {
+        email: 'demo@uav.test',
+        passwordHash: await bcrypt.hash('password123', 10),
+      },
+      {
+        email: 'operator@uav.test.com',
+        passwordHash: await bcrypt.hash('operator', 10),
+      },
+      {
+        email: 'reserve.commander@uav.test.com',
+        passwordHash: await bcrypt.hash('reserve.commander', 10),
+      },
+    ],
+  });
+
+  const [training, reserve] = units;
+  const [commander, operator, reserveCommander] = users;
+
+  await prisma.unitMember.createManyAndReturn({
+    data: [
+      {
+        unitId: training.id,
+        userId: commander.id,
+        unitRole: 'COMMANDER',
+        canAcceptDrones: true,
+      },
+      {
+        unitId: training.id,
+        userId: operator.id,
+        unitRole: 'OPERATOR',
+        canAcceptDrones: false,
+      },
+      {
+        unitId: reserve.id,
+        userId: reserveCommander.id,
+        unitRole: 'COMMANDER',
+        canAcceptDrones: true,
+      },
+    ],
+  });
 
   await prisma.mission.createMany({
     data: [
-      { status: 'draft', name: 'Recon sector 1' },
+      {
+        id: 'm0',
+        status: 'draft',
+        name: 'Recon sector 1',
+        unitId: training.id,
+        authorId: commander.id,
+      },
       {
         id: 'm1',
         status: 'draft',
         name: 'Destroy infantry sector 2',
+        unitId: training.id,
+        authorId: commander.id,
       },
       {
         id: 'm2',
         status: 'in-progress',
         name: 'Destroy infantry sector 3',
+        unitId: training.id,
+        authorId: commander.id,
       },
       {
         id: 'm3',
         status: 'completed',
         name: 'Recon sector 2',
+        unitId: training.id,
+        authorId: commander.id,
       },
       {
         id: 'm4',
         status: 'aborted',
         name: 'Destroy warehouse sector 2',
+        unitId: training.id,
+        authorId: commander.id,
       },
     ],
   });
 
-  await prisma.drone.createMany({ data: drones });
-  await prisma.geofence.createMany({ data: zones });
-
-  await prisma.user.deleteMany();
-  await prisma.user.create({
-    data: {
-      email: 'demo@uav.test',
-      passwordHash: await bcrypt.hash('password123', 10),
-    },
+  await prisma.drone.createMany({
+    data: drones.map((d) => ({ ...d, unitId: training.id })),
   });
+  await prisma.geofence.createMany({ data: zones });
 
   const createdDrones = await prisma.drone.findMany({
     orderBy: { name: 'asc' },
