@@ -34,6 +34,7 @@ export const config = {
     .split(',')
     .map((o) => o.trim()),
   port: parsePositiveIntEnv('PORT', 4000),
+  invitationTtlHours: parsePositiveIntEnv('INVITATION_TTL_HOURS', 24),
   host: '0.0.0.0',
   isProduction: process.env.NODE_ENV === 'production',
 };
