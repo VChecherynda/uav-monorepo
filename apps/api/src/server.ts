@@ -9,6 +9,7 @@ import { authRoutes } from './routes/auth.js';
 import { fleetRoutes } from './routes/fleet.js';
 import { missionRoutes } from './routes/missions.js';
 import { geofenceRoutes } from './routes/geofence.js';
+import { unitRoutes } from './routes/unit.js';
 import { wsRoutes, hasClients, broadcastDrones } from './routes/ws.js';
 import { prisma } from './lib/prisma.js';
 import { logger } from './lib/logger.js';
@@ -33,6 +34,7 @@ await app.register(droneRoutes);
 await app.register(fleetRoutes);
 await app.register(missionRoutes);
 await app.register(geofenceRoutes);
+await app.register(unitRoutes);
 
 app.get('/health', async (req) => ({ status: 'ok' }));
 
