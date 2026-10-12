@@ -9,5 +9,6 @@ export default defineConfig({
     },
     include: ['src/**/*.test.ts'],
     exclude: ['e2e/**', 'node_modules/**'],
+    env: { JWT_SECRET: 'test-secret' },
   },
 });
