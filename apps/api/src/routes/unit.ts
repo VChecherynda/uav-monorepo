@@ -4,7 +4,7 @@ import { prisma } from '../lib/prisma.js';
 import { UnitRole } from '@prisma/client';
 import { config } from '../lib/config.js';
 
-import type { FastifyInstance, FastifyRequest } from 'fastify';
+import type { FastifyInstance } from 'fastify';
 import { generateInvitationCode } from '../lib/generateInvitationCode.js';
 
 const InvitationSchema = z.object({
@@ -29,10 +29,15 @@ export async function unitRoutes(app: FastifyInstance) {
       const expiresAt = new Date(
         Date.now() + config.invitationTtlHours * 60 * 60 * 1000,
       );
-      const { userId, unitId } = req as FastifyRequest & {
-        userId: string;
-        unitId: string;
-      };
+      const { userId, unitId } = req;
+
+      if (!userId) {
+        throw new Error('authenticate must run first');
+      }
+
+      if (!unitId) {
+        throw new Error('Unit member not found');
+      }
 
       const { unitRole } = result.data;
 

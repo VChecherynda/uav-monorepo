@@ -17,7 +17,7 @@ export async function authenticate(req: FastifyRequest, reply: FastifyReply) {
 
   try {
     const payload = jwt.verify(token, secret) as { userId: string };
-    (req as FastifyRequest & { userId: string }).userId = payload.userId;
+    req.userId = payload.userId;
   } catch (e) {
     return reply.status(401).send({ error: 'Invalid or expired token' });
   }
@@ -27,7 +27,11 @@ export async function authorizeCommander(
   req: FastifyRequest,
   reply: FastifyReply,
 ) {
-  const { userId } = req as FastifyRequest & { userId: string };
+  const { userId } = req;
+
+  if (!userId) {
+    throw new Error('authenticate must run first');
+  }
 
   const unitMember = await prisma.unitMember.findUnique({
     where: { userId },
@@ -43,5 +47,5 @@ export async function authorizeCommander(
     return reply.status(403).send({ error: 'Commander role required' });
   }
 
-  (req as FastifyRequest & { unitId: string }).unitId = unitId;
+  req.unitId = unitId;
 }
