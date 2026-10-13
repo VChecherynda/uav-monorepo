@@ -23,7 +23,7 @@ export async function authenticate(req: FastifyRequest, reply: FastifyReply) {
   }
 }
 
-export async function authorizeCommander(
+export async function authenticateUnitMember(
   req: FastifyRequest,
   reply: FastifyReply,
 ) {
@@ -41,11 +41,21 @@ export async function authorizeCommander(
     return reply.status(401).send({ error: 'Unit member not found' });
   }
 
-  const { unitId, unitRole } = unitMember;
+  req.unitId = unitMember.unitId;
+  req.unitRole = unitMember.unitRole;
+}
+
+export async function authorizeCommander(
+  req: FastifyRequest,
+  reply: FastifyReply,
+) {
+  const { unitRole } = req;
+
+  if (!unitRole) {
+    throw new Error('authenticateUnitMember must run first');
+  }
 
   if (unitRole !== 'COMMANDER') {
     return reply.status(403).send({ error: 'Commander role required' });
   }
-
-  req.unitId = unitId;
 }

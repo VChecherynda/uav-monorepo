@@ -1,5 +1,9 @@
 import { z } from 'zod';
-import { authenticate, authorizeCommander } from '../lib/auth.js';
+import {
+  authenticate,
+  authenticateUnitMember,
+  authorizeCommander,
+} from '../lib/auth.js';
 import { prisma } from '../lib/prisma.js';
 import { UnitRole } from '@prisma/client';
 import { config } from '../lib/config.js';
@@ -14,7 +18,7 @@ const InvitationSchema = z.object({
 export async function unitRoutes(app: FastifyInstance) {
   app.post(
     '/unit/invitations',
-    { preHandler: [authenticate, authorizeCommander] },
+    { preHandler: [authenticate, authenticateUnitMember, authorizeCommander] },
     async (req, reply) => {
       const result = InvitationSchema.safeParse(req.body);
 
