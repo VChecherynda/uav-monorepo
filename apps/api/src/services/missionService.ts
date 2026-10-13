@@ -31,6 +31,7 @@ import {
 } from '../lib/mappers.js';
 import { prisma } from '../lib/prisma.js';
 import { sendCommandService } from './sendCommandService.js';
+import type { Actor } from '../domain/actor.js';
 
 class MissionRejectedError extends Error {
   constructor(public reason: MissionRejectionReason) {
@@ -206,6 +207,7 @@ export async function replaceWaypointsService(
 
 export async function startMissionService(
   missionId: string,
+  actor: Actor,
 ): Promise<StartMissionServiceResult> {
   try {
     const { updatedMission, droneRows } = await prisma.$transaction(
@@ -231,6 +233,7 @@ export async function startMissionService(
           mapMission(missionRow),
           mapDrones(droneRows),
           zones,
+          actor,
         );
 
         if (next.status === 'rejected') {

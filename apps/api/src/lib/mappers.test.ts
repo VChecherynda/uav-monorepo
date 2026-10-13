@@ -69,6 +69,8 @@ it('drops db-only fields from mission payload', () => {
     name: 'Prisma Mission',
     status: 'draft',
     waypoints: [],
+    unitId: 'u1',
+    authorId: 'D1',
     reason: null,
   });
 });

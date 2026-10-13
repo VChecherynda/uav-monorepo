@@ -42,6 +42,8 @@ export function mapMission(m: MissionWithWaypoints): Mission {
     name: m.name,
     waypoints: mapWaypoints(m.waypoints),
     status: MissionStatusSchema.parse(m.status),
+    unitId: m.unitId,
+    authorId: m.authorId,
     reason: m.reason,
   };
 }

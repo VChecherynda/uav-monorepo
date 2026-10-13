@@ -2,6 +2,7 @@ import type { FastifyRequest, FastifyReply } from 'fastify';
 import jwt from 'jsonwebtoken';
 import { config } from './config.js';
 import { prisma } from './prisma.js';
+import type { Actor } from '../domain/actor.js';
 
 export async function authenticate(req: FastifyRequest, reply: FastifyReply) {
   const authHeader = req.headers.authorization;
@@ -59,3 +60,13 @@ export async function authorizeCommander(
     return reply.status(403).send({ error: 'Commander role required' });
   }
 }
+
+export const requireActor = (req: FastifyRequest): Actor => {
+  const { userId, unitId, unitRole } = req;
+
+  if (!userId || !unitId || !unitRole) {
+    throw Error('authenticateUnitMember must be run first');
+  }
+
+  return { userId, unitId, unitRole };
+};

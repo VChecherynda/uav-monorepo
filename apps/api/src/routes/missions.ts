@@ -1,6 +1,10 @@
 import { z } from 'zod';
 import { prisma } from '../lib/prisma.js';
-import { authenticate } from '../lib/auth.js';
+import {
+  authenticate,
+  authenticateUnitMember,
+  requireActor,
+} from '../lib/auth.js';
 import type { FastifyInstance } from 'fastify';
 import {
   assignMission,
@@ -117,11 +121,12 @@ export async function missionRoutes(app: FastifyInstance) {
 
   app.post(
     '/missions/:id/start',
-    { preHandler: authenticate },
+    { preHandler: [authenticate, authenticateUnitMember] },
     async (req, reply) => {
       const { id } = req.params as { id: string };
 
-      const result = await startMissionService(id);
+      const actor = requireActor(req);
+      const result = await startMissionService(id, actor);
       if (result.status === 'rejected') {
         return reply.code(statusFor(result.reason)).send(result);
       }

@@ -4,8 +4,10 @@ import type {
   Drone,
   MissionConflictReason,
   ZoneViolation,
+  MissionNotFoundReason,
 } from '@uav/shared';
 import { isPointInPolygon, segmentIntersectsPolygon } from '@uav/shared';
+import type { Actor } from './actor.js';
 
 export const assignDrone = (
   mission: Pick<Mission, 'status'>,
@@ -142,8 +144,18 @@ export const startMission = (
   mission: Mission,
   drones: Drone[],
   zones: Geofence[],
+  actor: Actor,
 ):
-  StartMissionPatch | { status: 'rejected'; reason: MissionConflictReason } => {
+  | StartMissionPatch
+  | {
+      status: 'rejected';
+      reason: MissionConflictReason | MissionNotFoundReason;
+    } => {
+  const rejection = resolveUnitRejection(mission, actor);
+  if (rejection) {
+    return { status: 'rejected', reason: rejection };
+  }
+
   if (mission.status !== 'draft') {
     return {
       status: 'rejected',
@@ -331,4 +343,18 @@ export const terminateMission = (
       status: 'terminated',
     },
   };
+};
+
+export const resolveUnitRejection = (
+  mission: Mission,
+  actor: Actor,
+): MissionNotFoundReason | undefined => {
+  if (mission.unitId !== actor.unitId) {
+    return {
+      code: 'MISSION_NOT_FOUND',
+      message: 'Mission not found',
+    };
+  }
+
+  return undefined;
 };

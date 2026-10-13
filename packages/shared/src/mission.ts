@@ -15,6 +15,8 @@ export const MissionSchema = z.object({
   id: z.string(),
   name: z.string(),
   waypoints: z.array(CoordinateSchema),
+  unitId: z.string(),
+  authorId: z.string(),
   status: MissionStatusSchema,
   reason: z.string().nullable(),
 });

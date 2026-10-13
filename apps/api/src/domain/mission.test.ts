@@ -10,6 +10,7 @@ import {
   terminateMission,
 } from '../domain/mission.js';
 import type { Drone, Mission } from '@uav/shared';
+import type { Actor } from './actor.js';
 
 const defaultWaypoints = [
   { lng: 8, lat: 12 },
@@ -40,12 +41,20 @@ const noFlyZone2 = {
   ],
 };
 
+const actor: Actor = {
+  userId: 'user-1',
+  unitId: 'unit-1',
+  unitRole: 'COMMANDER',
+};
+
 const buildMission = (fields?: Partial<Mission>): Mission => {
   const defaultMission: Mission = {
     id: 'm1',
     name: 'test_name',
     waypoints: defaultWaypoints,
     status: 'draft' as const,
+    unitId: 'unit-1',
+    authorId: 'user-1',
     reason: null,
   };
 
@@ -184,7 +193,12 @@ describe('canReplaceWaypoints', () => {
 describe('startMission', () => {
   it('mission is started successfully', () => {
     expect(
-      startMission(buildMission(), [buildDrone()], [noFlyZone1, noFlyZone2]),
+      startMission(
+        buildMission(),
+        [buildDrone()],
+        [noFlyZone1, noFlyZone2],
+        actor,
+      ),
     ).toEqual({
       status: 'success',
       mission: { status: 'in-progress' },
@@ -287,7 +301,9 @@ describe('startMission', () => {
       },
     ],
   ])('rejects with reason: %s', (mission, drones, reason) => {
-    expect(startMission(mission, drones, [noFlyZone1, noFlyZone2])).toEqual({
+    expect(
+      startMission(mission, drones, [noFlyZone1, noFlyZone2], actor),
+    ).toEqual({
       status: 'rejected',
       reason,
     });
