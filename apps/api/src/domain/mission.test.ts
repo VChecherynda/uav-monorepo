@@ -8,6 +8,7 @@ import {
   restoreMission,
   unassignDrone,
   terminateMission,
+  resolveUnitRejection,
 } from '../domain/mission.js';
 import type { Drone, Mission } from '@uav/shared';
 import type { Actor } from './actor.js';
@@ -406,6 +407,26 @@ describe('restoreMission', () => {
         code: 'MISSION_CANNOT_BE_RESTORED',
         message: 'Only aborted missions can be restored',
       },
+    });
+  });
+});
+
+describe('resolveUnitRejection', () => {
+  it('passes own unit', () => {
+    expect(resolveUnitRejection(buildMission(), actor)).toBeUndefined();
+  });
+
+  it('rejects another unit with MISSION_NOT_FOUND', () => {
+    expect(
+      resolveUnitRejection(
+        buildMission({
+          unitId: 'unit-2',
+        }),
+        actor,
+      ),
+    ).toEqual({
+      code: 'MISSION_NOT_FOUND',
+      message: 'Mission not found',
     });
   });
 });
