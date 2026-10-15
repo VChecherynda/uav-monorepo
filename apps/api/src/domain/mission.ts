@@ -346,7 +346,7 @@ export const terminateMission = (
 };
 
 export const resolveUnitRejection = (
-  mission: Mission,
+  mission: Pick<Mission, 'unitId'>,
   actor: Actor,
 ): MissionNotFoundReason | undefined => {
   if (mission.unitId !== actor.unitId) {
