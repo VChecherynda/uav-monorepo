@@ -65,7 +65,7 @@ export const requireActor = (req: FastifyRequest): Actor => {
   const { userId, unitId, unitRole } = req;
 
   if (!userId || !unitId || !unitRole) {
-    throw Error('authenticateUnitMember must be run first');
+    throw new Error('authenticateUnitMember must run first');
   }
 
   return { userId, unitId, unitRole };
