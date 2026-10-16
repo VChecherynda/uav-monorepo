@@ -362,6 +362,7 @@ export async function restoreMissionService(
 
 export async function completeMissionService(
   missionId: string,
+  actor: Actor,
 ): Promise<CompleteMissionServiceResult> {
   const missionRow = await prisma.mission.findUnique({
     where: { id: missionId },
@@ -378,7 +379,7 @@ export async function completeMissionService(
     };
   }
 
-  const next = completeMission(mapMission(missionRow));
+  const next = completeMission(mapMission(missionRow), actor);
   if (next.status === 'rejected') {
     return next;
   }

@@ -168,11 +168,12 @@ export async function missionRoutes(app: FastifyInstance) {
 
   app.post(
     '/missions/:id/complete',
-    { preHandler: authenticate },
+    { preHandler: [authenticate, authenticateUnitMember] },
     async (req, reply) => {
       const { id } = req.params as { id: string };
 
-      const result = await completeMissionService(id);
+      const actor = requireActor(req);
+      const result = await completeMissionService(id, actor);
       if (result.status === 'rejected') {
         return reply.code(statusFor(result.reason)).send(result);
       }

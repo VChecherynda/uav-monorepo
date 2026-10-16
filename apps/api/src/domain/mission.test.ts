@@ -383,7 +383,9 @@ describe('terminateMission', () => {
 
 describe('completeMission', () => {
   it('mission with in-progress status completed successfuly', () => {
-    expect(completeMission(buildMission({ status: 'in-progress' }))).toEqual({
+    expect(
+      completeMission(buildMission({ status: 'in-progress' }), actor),
+    ).toEqual({
       status: 'success',
       mission: { status: 'completed' },
     });
@@ -395,11 +397,29 @@ describe('completeMission', () => {
     [buildMission({ status: 'aborted' })],
     [buildMission({ status: 'terminated' })],
   ])('rejects with status %s', (mission) => {
-    expect(completeMission(mission)).toEqual({
+    expect(completeMission(mission, actor)).toEqual({
       status: 'rejected',
       reason: {
         code: 'MISSION_IS_NOT_IN_PROGRESS',
         message: 'Only in-progress missions can be completed',
+      },
+    });
+  });
+
+  it('rejects another unit with MISSION_NOT_FOUND', () => {
+    expect(
+      completeMission(
+        buildMission({
+          status: 'in-progress',
+          unitId: 'unit-2',
+        }),
+        actor,
+      ),
+    ).toEqual({
+      status: 'rejected',
+      reason: {
+        code: 'MISSION_NOT_FOUND',
+        message: 'Mission not found',
       },
     });
   });
