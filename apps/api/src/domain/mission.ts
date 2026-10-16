@@ -260,8 +260,18 @@ export const startMission = (
 
 export const abortMission = (
   mission: Mission,
+  actor: Actor,
 ):
-  AbortMissionPatch | { status: 'rejected'; reason: MissionConflictReason } => {
+  | AbortMissionPatch
+  | {
+      status: 'rejected';
+      reason: MissionConflictReason | MissionNotFoundReason;
+    } => {
+  const rejection = resolveUnitRejection(mission, actor);
+  if (rejection) {
+    return { status: 'rejected', reason: rejection };
+  }
+
   if (mission.status !== 'in-progress') {
     return {
       status: 'rejected',

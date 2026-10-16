@@ -279,6 +279,7 @@ export async function startMissionService(
 
 export async function abortMissionService(
   missionId: string,
+  actor: Actor,
 ): Promise<AbortMissionServiceResult> {
   const missionRow = await prisma.mission.findUnique({
     where: { id: missionId },
@@ -297,7 +298,7 @@ export async function abortMissionService(
 
   const droneRows = await prisma.drone.findMany({ where: { missionId } });
 
-  const next = abortMission(mapMission(missionRow));
+  const next = abortMission(mapMission(missionRow), actor);
   if (next.status === 'rejected') {
     return next;
   }
