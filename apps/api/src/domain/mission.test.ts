@@ -384,7 +384,7 @@ describe('terminateMission', () => {
 
   it('rejects another unit with MISSION_NOT_FOUND', () => {
     expect(
-      completeMission(
+      terminateMission(
         buildMission({
           status: 'aborted',
           unitId: 'unit-2',
@@ -472,7 +472,7 @@ describe('restoreMission', () => {
 
   it('rejects another unit with MISSION_NOT_FOUND', () => {
     expect(
-      completeMission(
+      restoreMission(
         buildMission({
           status: 'aborted',
           unitId: 'unit-2',
