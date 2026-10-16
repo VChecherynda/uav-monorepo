@@ -185,7 +185,7 @@ export async function missionRoutes(app: FastifyInstance) {
 
   app.post(
     '/missions/:id/terminate',
-    { preHandler: authenticate },
+    { preHandler: [authenticate, authenticateUnitMember] },
     async (req, reply) => {
       const { id } = req.params as { id: string };
 
