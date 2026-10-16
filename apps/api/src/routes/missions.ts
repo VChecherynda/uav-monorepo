@@ -189,7 +189,8 @@ export async function missionRoutes(app: FastifyInstance) {
     async (req, reply) => {
       const { id } = req.params as { id: string };
 
-      const result = await terminateMissionService(id);
+      const actor = requireActor(req);
+      const result = await terminateMissionService(id, actor);
       if (result.status === 'rejected') {
         return reply.code(statusFor(result.reason)).send(result);
       }
