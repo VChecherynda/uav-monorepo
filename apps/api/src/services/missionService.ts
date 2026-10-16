@@ -328,6 +328,7 @@ export async function abortMissionService(
 
 export async function restoreMissionService(
   missionId: string,
+  actor: Actor,
 ): Promise<RestoreMissionServiceResult> {
   const missionRow = await prisma.mission.findUnique({
     where: { id: missionId },
@@ -343,7 +344,7 @@ export async function restoreMissionService(
     };
   }
 
-  const next = restoreMission(mapMission(missionRow));
+  const next = restoreMission(mapMission(missionRow), actor);
   if (next.status === 'rejected') {
     return next;
   }

@@ -320,9 +320,18 @@ export const completeMission = (
 
 export const restoreMission = (
   mission: Mission,
+  actor: Actor,
 ):
   | RestoreMissionPatch
-  | { status: 'rejected'; reason: MissionConflictReason } => {
+  | {
+      status: 'rejected';
+      reason: MissionConflictReason | MissionNotFoundReason;
+    } => {
+  const rejection = resolveUnitRejection(mission, actor);
+  if (rejection) {
+    return { status: 'rejected', reason: rejection };
+  }
+
   if (mission.status !== 'aborted') {
     return {
       status: 'rejected',

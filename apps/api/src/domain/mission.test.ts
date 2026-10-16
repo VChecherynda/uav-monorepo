@@ -427,7 +427,7 @@ describe('completeMission', () => {
 
 describe('restoreMission', () => {
   it('mission with aborted status reassigned successfuly', () => {
-    expect(restoreMission(buildMission({ status: 'aborted' }))).toEqual({
+    expect(restoreMission(buildMission({ status: 'aborted' }), actor)).toEqual({
       status: 'success',
       mission: {
         status: 'draft',
@@ -441,11 +441,29 @@ describe('restoreMission', () => {
     [buildMission({ status: 'completed' })],
     [buildMission({ status: 'terminated' })],
   ])('rejects to restore mission with status %s', (mission) => {
-    expect(restoreMission(mission)).toEqual({
+    expect(restoreMission(mission, actor)).toEqual({
       status: 'rejected',
       reason: {
         code: 'MISSION_CANNOT_BE_RESTORED',
         message: 'Only aborted missions can be restored',
+      },
+    });
+  });
+
+  it('rejects another unit with MISSION_NOT_FOUND', () => {
+    expect(
+      completeMission(
+        buildMission({
+          status: 'aborted',
+          unitId: 'unit-2',
+        }),
+        actor,
+      ),
+    ).toEqual({
+      status: 'rejected',
+      reason: {
+        code: 'MISSION_NOT_FOUND',
+        message: 'Mission not found',
       },
     });
   });
