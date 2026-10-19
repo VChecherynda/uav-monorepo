@@ -107,6 +107,7 @@ export async function assignMission(
 export async function unassignMission(
   missionId: string,
   droneId: string,
+  actor: Actor,
 ): Promise<UnassignResult> {
   try {
     const updatedDrone = await prisma.$transaction(async (tx) => {
@@ -134,9 +135,11 @@ export async function unassignMission(
       const nextDrone = unassignDrone(
         {
           id: missionRow.id,
+          unitId: missionRow.unitId,
           status: MissionStatusSchema.parse(missionRow.status),
         },
         mapDrone(droneRow),
+        actor,
       );
       if (nextDrone.status === 'rejected') {
         throw new MissionRejectedError(nextDrone.reason);

@@ -151,8 +151,9 @@ describe('unassignDrone', () => {
   it('unassigns mission succesfully', () => {
     expect(
       unassignDrone(
-        { id: 'm1', status: 'draft' },
+        { id: 'm1', unitId: 'unit-1', status: 'draft' },
         buildDrone({ missionId: 'm1' }),
+        actor,
       ),
     ).toEqual({
       status: 'success',
@@ -161,7 +162,7 @@ describe('unassignDrone', () => {
 
   it.each([
     [
-      { id: 'm1', status: 'draft' } as const,
+      { id: 'm1', unitId: 'unit-1', status: 'draft' } as const,
       buildDrone({ missionId: 'm1', disposition: 'EXPENDED' }),
       {
         code: 'DRONE_IS_NOT_READY',
@@ -169,7 +170,7 @@ describe('unassignDrone', () => {
       },
     ],
     [
-      { id: 'm1', status: 'in-progress' } as const,
+      { id: 'm1', unitId: 'unit-1', status: 'in-progress' } as const,
       buildDrone({ missionId: 'm1' }),
       {
         code: 'MISSION_IS_NOT_DRAFT',
@@ -177,7 +178,7 @@ describe('unassignDrone', () => {
       },
     ],
     [
-      { id: 'm1', status: 'draft' } as const,
+      { id: 'm1', unitId: 'unit-1', status: 'draft' } as const,
       buildDrone({ missionId: 'm2' }),
       {
         code: 'DRONE_IS_NOT_ON_MISSION',
@@ -185,9 +186,29 @@ describe('unassignDrone', () => {
       },
     ],
   ])('rejects with reason: %s', (mission, drone, reason) => {
-    expect(unassignDrone(mission, drone)).toEqual({
+    expect(unassignDrone(mission, drone, actor)).toEqual({
       status: 'rejected',
       reason,
+    });
+  });
+
+  it('rejects another unit with MISSION_NOT_FOUND', () => {
+    expect(
+      unassignDrone(
+        buildMission({
+          id: 'm1',
+          status: 'draft',
+          unitId: 'unit-2',
+        }),
+        buildDrone({ missionId: 'm1' }),
+        actor,
+      ),
+    ).toEqual({
+      status: 'rejected',
+      reason: {
+        code: 'MISSION_NOT_FOUND',
+        message: 'Mission not found',
+      },
     });
   });
 });

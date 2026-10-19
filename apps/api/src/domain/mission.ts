@@ -62,13 +62,22 @@ export const assignDrone = (
 };
 
 export const unassignDrone = (
-  mission: Pick<Mission, 'status' | 'id'>,
+  mission: Pick<Mission, 'status' | 'unitId' | 'id'>,
   drone: Drone,
+  actor: Actor,
 ):
   | {
       status: 'success';
     }
-  | { status: 'rejected'; reason: MissionConflictReason } => {
+  | {
+      status: 'rejected';
+      reason: MissionConflictReason | MissionNotFoundReason;
+    } => {
+  const rejection = resolveUnitRejection(mission, actor);
+  if (rejection) {
+    return { status: 'rejected', reason: rejection };
+  }
+
   if (drone.disposition === 'EXPENDED') {
     return {
       status: 'rejected',
