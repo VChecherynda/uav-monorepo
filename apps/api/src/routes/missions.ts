@@ -59,7 +59,7 @@ export async function missionRoutes(app: FastifyInstance) {
 
   app.post(
     '/missions/:id/assign',
-    { preHandler: authenticate },
+    { preHandler: [authenticate, authenticateUnitMember] },
     async (req, reply) => {
       const { id } = req.params as { id: string };
 
@@ -69,7 +69,8 @@ export async function missionRoutes(app: FastifyInstance) {
       }
 
       const { droneId } = parsed.data;
-      const result = await assignMission(id, droneId);
+      const actor = requireActor(req);
+      const result = await assignMission(id, droneId, actor);
       if (result.status === 'rejected') {
         return reply.code(statusFor(result.reason)).send(result);
       }

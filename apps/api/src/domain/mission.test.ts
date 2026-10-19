@@ -88,14 +88,16 @@ const buildDrone = (fields?: Partial<Drone>): Drone => {
 
 describe('assignDrone', () => {
   it('assigns an idle to the a draft mission', () => {
-    expect(assignDrone({ status: 'draft' }, buildDrone())).toEqual({
+    expect(
+      assignDrone({ status: 'draft', unitId: 'unit-1' }, buildDrone(), actor),
+    ).toEqual({
       status: 'success',
     });
   });
 
   it.each([
     [
-      { status: 'draft' } as const,
+      { status: 'draft', unitId: 'unit-1' } as const,
       buildDrone({
         flightPhase: 'IN_AIR',
         flightMode: 'AUTO',
@@ -104,14 +106,14 @@ describe('assignDrone', () => {
       { code: 'DRONE_IS_NOT_READY', message: 'Drone is on another mission' },
     ],
     [
-      { status: 'draft' } as const,
+      { status: 'draft', unitId: 'unit-1' } as const,
       buildDrone({
         disposition: 'EXPENDED',
       }),
       { code: 'DRONE_IS_NOT_READY', message: 'Drone is expended' },
     ],
     [
-      { status: 'in-progress' } as const,
+      { status: 'in-progress', unitId: 'unit-1' } as const,
       buildDrone(),
       {
         code: 'MISSION_IS_NOT_DRAFT',
@@ -119,7 +121,29 @@ describe('assignDrone', () => {
       },
     ],
   ])('rejects with reason: %s', (mission, drone, reason) => {
-    expect(assignDrone(mission, drone)).toEqual({ status: 'rejected', reason });
+    expect(assignDrone(mission, drone, actor)).toEqual({
+      status: 'rejected',
+      reason,
+    });
+  });
+
+  it('rejects another unit with MISSION_NOT_FOUND', () => {
+    expect(
+      assignDrone(
+        buildMission({
+          status: 'draft',
+          unitId: 'unit-2',
+        }),
+        buildDrone(),
+        actor,
+      ),
+    ).toEqual({
+      status: 'rejected',
+      reason: {
+        code: 'MISSION_NOT_FOUND',
+        message: 'Mission not found',
+      },
+    });
   });
 });
 

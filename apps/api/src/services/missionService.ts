@@ -42,6 +42,7 @@ class MissionRejectedError extends Error {
 export async function assignMission(
   missionId: string,
   droneId: string,
+  actor: Actor,
 ): Promise<AssignResult> {
   try {
     const updatedDrone = await prisma.$transaction(async (tx) => {
@@ -67,8 +68,12 @@ export async function assignMission(
       }
 
       const nextDrone = assignDrone(
-        { status: MissionStatusSchema.parse(missionRow.status) },
+        {
+          status: MissionStatusSchema.parse(missionRow.status),
+          unitId: missionRow.unitId,
+        },
         mapDrone(droneRow),
+        actor,
       );
       if (nextDrone.status === 'rejected') {
         throw new MissionRejectedError(nextDrone.reason);

@@ -10,13 +10,22 @@ import { isPointInPolygon, segmentIntersectsPolygon } from '@uav/shared';
 import type { Actor } from './actor.js';
 
 export const assignDrone = (
-  mission: Pick<Mission, 'status'>,
+  mission: Pick<Mission, 'status' | 'unitId'>,
   drone: Drone,
+  actor: Actor,
 ):
   | {
       status: 'success';
     }
-  | { status: 'rejected'; reason: MissionConflictReason } => {
+  | {
+      status: 'rejected';
+      reason: MissionConflictReason | MissionNotFoundReason;
+    } => {
+  const rejection = resolveUnitRejection(mission, actor);
+  if (rejection) {
+    return { status: 'rejected', reason: rejection };
+  }
+
   if (mission.status !== 'draft') {
     return {
       status: 'rejected',
