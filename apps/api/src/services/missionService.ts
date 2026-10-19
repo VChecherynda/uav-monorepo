@@ -171,6 +171,7 @@ export async function unassignMission(
 export async function replaceWaypointsService(
   missionId: string,
   waypoints: Coordinate[],
+  actor: Actor,
 ): Promise<ReplaceWaypointsResult> {
   try {
     const { mission, savedWaypoints } = await prisma.$transaction(
@@ -186,7 +187,7 @@ export async function replaceWaypointsService(
           });
         }
 
-        const next = canReplaceWaypoints(mapMission(missionRow));
+        const next = canReplaceWaypoints(mapMission(missionRow), actor);
         if (next.status === 'rejected') {
           throw new MissionRejectedError(next.reason);
         }

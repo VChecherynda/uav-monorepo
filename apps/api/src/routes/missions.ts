@@ -103,7 +103,7 @@ export async function missionRoutes(app: FastifyInstance) {
 
   app.put(
     '/missions/:id/waypoints',
-    { preHandler: authenticate },
+    { preHandler: [authenticate, authenticateUnitMember] },
     async (req, reply) => {
       const { id } = req.params as { id: string };
 
@@ -112,7 +112,8 @@ export async function missionRoutes(app: FastifyInstance) {
         return reply.code(400).send(z.flattenError(parsed.error));
       }
 
-      const result = await replaceWaypointsService(id, parsed.data);
+      const actor = requireActor(req);
+      const result = await replaceWaypointsService(id, parsed.data, actor);
       if (result.status === 'rejected') {
         return reply.code(statusFor(result.reason)).send(result);
       }

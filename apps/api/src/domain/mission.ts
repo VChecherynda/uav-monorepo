@@ -140,9 +140,18 @@ export type CompleteMissionPatch = {
 
 export const canReplaceWaypoints = (
   mission: Mission,
+  actor: Actor,
 ):
   | { status: 'success' }
-  | { status: 'rejected'; reason: MissionConflictReason } => {
+  | {
+      status: 'rejected';
+      reason: MissionConflictReason | MissionNotFoundReason;
+    } => {
+  const rejection = resolveUnitRejection(mission, actor);
+  if (rejection) {
+    return { status: 'rejected', reason: rejection };
+  }
+
   if (mission.status !== 'draft') {
     return {
       status: 'rejected',

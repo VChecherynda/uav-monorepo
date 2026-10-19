@@ -215,7 +215,7 @@ describe('unassignDrone', () => {
 
 describe('canReplaceWaypoints', () => {
   it('can replace mission waypoints', () => {
-    expect(canReplaceWaypoints(buildMission())).toEqual({
+    expect(canReplaceWaypoints(buildMission(), actor)).toEqual({
       status: 'success',
     });
   });
@@ -226,11 +226,28 @@ describe('canReplaceWaypoints', () => {
     [buildMission({ status: 'aborted' })],
     [buildMission({ status: 'terminated' })],
   ])('rejects waypoint replacement for locked mission %s', (mission) => {
-    expect(canReplaceWaypoints(mission)).toEqual({
+    expect(canReplaceWaypoints(mission, actor)).toEqual({
       status: 'rejected',
       reason: {
         code: 'WAYPOINTS_CANNOT_BE_REPLACED',
         message: 'Waypoints can only be replaced while mission is draft',
+      },
+    });
+  });
+
+  it('rejects another unit with MISSION_NOT_FOUND', () => {
+    expect(
+      canReplaceWaypoints(
+        buildMission({
+          unitId: 'unit-2',
+        }),
+        actor,
+      ),
+    ).toEqual({
+      status: 'rejected',
+      reason: {
+        code: 'MISSION_NOT_FOUND',
+        message: 'Mission not found',
       },
     });
   });
