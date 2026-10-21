@@ -36,10 +36,12 @@ export async function wsRoutes(app: FastifyInstance) {
 export function broadcastDrones(drones: Drone[]) {
   if (clientUnits.size === 0) return;
 
-  for (const client of clientUnits.keys()) {
+  for (const [client, unitId] of clientUnits) {
+    const unitDrones = drones.filter((d) => d.unitId === unitId);
+
     const payload: WSMessage = {
       type: 'drones:snapshot',
-      data: drones,
+      data: unitDrones,
     };
     const serialized = JSON.stringify(payload);
 

@@ -31,6 +31,7 @@ export function mapDrone(d: PrismaDrone): Drone {
         : 'ONLINE',
     battery: d.battery,
     altitude: d.altitude,
+    unitId: d.unitId,
     lng: d.lng,
     lat: d.lat,
   };

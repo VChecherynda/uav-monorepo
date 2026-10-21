@@ -40,7 +40,7 @@ const buildDroneRow = (fields?: Partial<PrismaDrone>): PrismaDrone => {
     altitude: 100,
     homeLng: 133,
     homeLat: -25,
-    unitId: null,
+    unitId: 'u1',
     updatedAt: UPDATED_AT,
     createdAt: CREATED_AT,
   };
@@ -96,6 +96,7 @@ it('drops db-only fields from drone payload', () => {
     link: 'ONLINE',
     battery: 80,
     altitude: 100,
+    unitId: 'u1',
     lng: 133,
     lat: -20,
   });

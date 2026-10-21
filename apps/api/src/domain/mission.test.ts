@@ -75,6 +75,7 @@ const buildDrone = (fields?: Partial<Drone>): Drone => {
     disposition: 'ACTIVE',
     link: 'ONLINE',
     altitude: 0,
+    unitId: 'u1',
     lng: 8,
     lat: 12,
     battery: 80,

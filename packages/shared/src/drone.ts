@@ -40,6 +40,7 @@ export const DroneSchema = z.object({
   link: LinkStateSchema,
   battery: z.number(),
   altitude: z.number(),
+  unitId: z.string().nullable(),
   lng: z.number(),
   lat: z.number(),
 });
