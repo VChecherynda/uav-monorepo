@@ -1,56 +1,48 @@
-import jwt from 'jsonwebtoken';
-
 import type { FastifyInstance } from 'fastify';
 import type { WSMessage, Drone, DomainEvent } from '@uav/shared';
-import { config } from '../lib/config.js';
+import {
+  authenticateWs,
+  authenticateUnitMember,
+  requireActor,
+} from '../lib/auth.js';
 
-const clients = new Set<WebSocket>();
+const clientUnits = new Map<WebSocket, string>();
 
 export const hasClients = () => {
-  return clients.size > 0;
+  return clientUnits.size > 0;
 };
 
 export async function wsRoutes(app: FastifyInstance) {
-  app.get('/ws/drones', { websocket: true }, (socket, req) => {
-    const url = new URL(req.url, `http://${req.headers.host}`);
-    const token = url.searchParams.get('token');
+  app.get(
+    '/ws/drones',
+    { preHandler: [authenticateWs, authenticateUnitMember], websocket: true },
+    (socket, req) => {
+      const actor = requireActor(req);
+      clientUnits.set(socket, actor.unitId);
 
-    if (!token) {
-      socket.close(4001, 'Unauthorized: no token');
-      return;
-    }
+      socket.on('close', () => {
+        app.log.info('WS client disconnected');
+        clientUnits.delete(socket);
+      });
 
-    try {
-      jwt.verify(token, config.jwtSecret);
-    } catch {
-      socket.close(4001, 'Unauthorized: invalid token');
-      return;
-    }
-
-    clients.add(socket);
-
-    socket.on('close', () => {
-      app.log.info('WS client disconnected');
-      clients.delete(socket);
-    });
-
-    socket.on('error', (err: Error) => {
-      app.log.error({ err }, 'WS error');
-      clients.delete(socket);
-    });
-  });
+      socket.on('error', (err: Error) => {
+        app.log.error({ err }, 'WS error');
+        clientUnits.delete(socket);
+      });
+    },
+  );
 }
 
 export function broadcastDrones(drones: Drone[]) {
-  if (clients.size === 0) return;
+  if (clientUnits.size === 0) return;
 
-  const payload: WSMessage = {
-    type: 'drones:snapshot',
-    data: drones,
-  };
-  const serialized = JSON.stringify(payload);
+  for (const client of clientUnits.keys()) {
+    const payload: WSMessage = {
+      type: 'drones:snapshot',
+      data: drones,
+    };
+    const serialized = JSON.stringify(payload);
 
-  for (const client of clients) {
     if (client.readyState === 1) {
       client.send(serialized);
     }
@@ -58,12 +50,12 @@ export function broadcastDrones(drones: Drone[]) {
 }
 
 export function broadcastEvent(event: DomainEvent) {
-  if (clients.size === 0) return;
+  if (clientUnits.size === 0) return;
 
   const payload: WSMessage = event;
   const serialized = JSON.stringify(payload);
 
-  for (const client of clients) {
+  for (const client of clientUnits.keys()) {
     if (client.readyState === 1) {
       client.send(serialized);
     }

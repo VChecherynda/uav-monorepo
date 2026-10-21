@@ -24,6 +24,26 @@ export async function authenticate(req: FastifyRequest, reply: FastifyReply) {
   }
 }
 
+export async function authenticateWs(req: FastifyRequest, reply: FastifyReply) {
+  const url = new URL(req.url, `http://${req.headers.host}`);
+
+  const secret = config.jwtSecret;
+  const token = url.searchParams.get('token');
+
+  if (!token) {
+    return reply.status(401).send({
+      error: 'Missing or invalid token',
+    });
+  }
+
+  try {
+    const payload = jwt.verify(token, secret) as { userId: string };
+    req.userId = payload.userId;
+  } catch (e) {
+    return reply.status(401).send({ error: 'Invalid or expired token' });
+  }
+}
+
 export async function authenticateUnitMember(
   req: FastifyRequest,
   reply: FastifyReply,
