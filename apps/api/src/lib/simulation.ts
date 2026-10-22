@@ -50,11 +50,14 @@ const tick = async (
           return updatedDrone;
         });
 
-        broadcastEvent({
-          type: 'DroneRecovered',
-          droneId: d.id,
-          at: new Date().toISOString(),
-        });
+        broadcastEvent(
+          {
+            type: 'DroneRecovered',
+            droneId: d.id,
+            at: new Date().toISOString(),
+          },
+          d,
+        );
 
         return updated;
       } else {
@@ -93,12 +96,15 @@ const tick = async (
           newBattery < BATTERY_CRITICAL_THRESHOLD;
 
         if (crossedCriticalThreshold) {
-          broadcastEvent({
-            type: 'BatteryCritical',
-            droneId: d.id,
-            battery: newBattery,
-            at: new Date().toISOString(),
-          });
+          broadcastEvent(
+            {
+              type: 'BatteryCritical',
+              droneId: d.id,
+              battery: newBattery,
+              at: new Date().toISOString(),
+            },
+            d,
+          );
         }
 
         return updated;

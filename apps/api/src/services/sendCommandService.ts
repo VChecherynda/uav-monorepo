@@ -24,7 +24,7 @@ export async function sendCommandService(
       reason: next.reason,
       at: new Date().toISOString(),
     };
-    broadcastEvent(event);
+    broadcastEvent(event, drone);
     return next;
   }
 

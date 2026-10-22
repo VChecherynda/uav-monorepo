@@ -51,13 +51,17 @@ export function broadcastDrones(drones: Drone[]) {
   }
 }
 
-export function broadcastEvent(event: DomainEvent) {
-  if (clientUnits.size === 0) return;
+export function broadcastEvent(
+  event: DomainEvent,
+  drone: Pick<Drone, 'unitId'>,
+) {
+  if (drone.unitId === null || clientUnits.size === 0) return;
 
   const payload: WSMessage = event;
   const serialized = JSON.stringify(payload);
 
-  for (const client of clientUnits.keys()) {
+  for (const [client, unitId] of clientUnits) {
+    if (unitId !== drone.unitId) continue;
     if (client.readyState === 1) {
       client.send(serialized);
     }
