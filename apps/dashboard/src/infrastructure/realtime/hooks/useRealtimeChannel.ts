@@ -74,11 +74,6 @@ export function useRealtimeChannel() {
           heartbeatTimerRef.current = null;
         }
 
-        if (event.code === 4001) {
-          useAuthStore.getState().logout();
-          return;
-        }
-
         setStatus('reconnecting');
 
         if (disconnectedAtRef.current === null) {
