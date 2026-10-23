@@ -1,6 +1,10 @@
 import { z } from 'zod';
 import { prisma } from '../lib/prisma.js';
-import { authenticate } from '../lib/auth.js';
+import {
+  authenticate,
+  authenticateUnitMember,
+  requireActor,
+} from '../lib/auth.js';
 import type { FastifyInstance } from 'fastify';
 import { mapDrone } from '../lib/mappers.js';
 import { sendCommandService } from '../services/sendCommandService.js';
@@ -10,15 +14,29 @@ const CommandSchema = z.object({
 });
 
 export async function droneRoutes(app: FastifyInstance) {
-  app.get('/drones/:id/telemetry', async (req, reply) => {
-    const { id } = req.params as { id: string };
-    const telemetry = await prisma.telemetry.findMany({
-      where: { droneId: id },
-      orderBy: { recordedAt: 'desc' },
-      take: 50,
-    });
-    return telemetry;
-  });
+  app.get(
+    '/drones/:id/telemetry',
+    { preHandler: [authenticate, authenticateUnitMember] },
+    async (req, reply) => {
+      const { id } = req.params as { id: string };
+      const droneRow = await prisma.drone.findUnique({ where: { id } });
+      const actor = requireActor(req);
+
+      if (!droneRow || droneRow.unitId !== actor.unitId) {
+        return reply.code(404).send({
+          status: 'rejected',
+          reason: { code: 'DRONE_NOT_FOUND', message: 'Drone not found' },
+        });
+      }
+
+      const telemetry = await prisma.telemetry.findMany({
+        where: { droneId: id },
+        orderBy: { recordedAt: 'desc' },
+        take: 50,
+      });
+      return telemetry;
+    },
+  );
 
   app.post(
     '/drones/:id/command',
