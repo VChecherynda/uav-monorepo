@@ -44,7 +44,7 @@ describe('drone telemetry route', () => {
 
   it('returns 404 for unknown drone id', async () => {
     const app = await buildApp();
-    const token = jwt.sign({ userId: 'ghost' }, config.jwtSecret);
+    const token = jwt.sign({ userId: 'user1' }, config.jwtSecret);
 
     vi.mocked(prisma.drone.findUnique).mockResolvedValueOnce(null);
     vi.mocked(prisma.unitMember.findUnique).mockResolvedValueOnce({
