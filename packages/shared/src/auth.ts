@@ -6,3 +6,12 @@ export const UserSchema = z.object({
 });
 
 export type User = z.infer<typeof UserSchema>;
+
+export const UnitRoleSchema = z.enum(['COMMANDER', 'OPERATOR']);
+
+export const MeSchema = z.object({
+  unitId: z.string(),
+  unitRole: UnitRoleSchema,
+});
+
+export type Me = z.infer<typeof MeSchema>;
