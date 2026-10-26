@@ -6,6 +6,11 @@ import jwt from 'jsonwebtoken';
 import { Prisma } from '@prisma/client';
 import rateLimit from '@fastify/rate-limit';
 import { config } from '../lib/config.js';
+import {
+  authenticate,
+  authenticateUnitMember,
+  requireActor,
+} from '../lib/auth.js';
 
 const EmailSchema = z.string().trim().toLowerCase().pipe(z.email());
 
@@ -119,6 +124,15 @@ export async function authRoutes(fastify: FastifyInstance) {
         user: { id: user.id, email: user.email },
         token,
       });
+    },
+  );
+
+  fastify.get(
+    '/auth/me',
+    { preHandler: [authenticate, authenticateUnitMember] },
+    (req) => {
+      const { unitId, unitRole } = requireActor(req);
+      return { unitId, unitRole };
     },
   );
 }
