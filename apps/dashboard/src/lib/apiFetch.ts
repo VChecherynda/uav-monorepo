@@ -71,7 +71,10 @@ export async function apiFetch<T>(
       .json()
       .catch(() => ({ error: 'Request failed' }));
     throw new ResponseError(
-      error.message ?? error.error ?? `HTTP status: ${response.status}`,
+      error.message ??
+        error.reason?.message ??
+        error.error ??
+        `HTTP status: ${response.status}`,
       error,
     );
   }
