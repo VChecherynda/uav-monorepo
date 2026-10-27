@@ -74,6 +74,11 @@ function DroneCard({
   onCardClick: (id: string) => void;
 }) {
   const sendCmd = useSendCommand();
+  const commandFailureMessage =
+    sendCmd.data?.status === 'rejected'
+      ? sendCmd.data.reason.message
+      : sendCmd.error?.message;
+
   const isSelected = useDronesStore((s) => s.droneId === drone.id);
   const canReturnHome = resolveRejection(drone, 'return-home') === undefined;
 
@@ -133,9 +138,9 @@ function DroneCard({
           {sendCmd.isPending ? 'SENDING...' : 'RTH'}
         </button>
 
-        {sendCmd.data?.status === 'rejected' && (
+        {commandFailureMessage && (
           <span className="font-mono text-xs text-critical">
-            {sendCmd.data.reason.message}
+            {commandFailureMessage}
           </span>
         )}
 
