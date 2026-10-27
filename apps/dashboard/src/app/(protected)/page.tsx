@@ -6,7 +6,7 @@ import {
 } from '@/contexts/drones';
 import { useRealtimeChannel } from '@/infrastructure/realtime';
 import { BatteryChart } from '@/contexts/telemetry';
-import { LogoutButton } from '@/contexts/auth';
+import { LogoutButton, useMe } from '@/contexts/auth';
 import { MissionPanel, MissionRouteLayer } from '@/contexts/missions';
 import { CrosshairIcon, SignalLostIcon } from '@/components';
 import { useState } from 'react';
@@ -14,11 +14,15 @@ import { MapCanvas } from '@/infrastructure/map';
 import { PlanningModeBadge, RouteDraftLayer } from '@/contexts/routes';
 import { GeofenceLayer } from '@/contexts/geofences';
 import { MissionViolationLayer } from '@/contexts/missions';
+import Link from 'next/link';
 
 type Tab = 'drones' | 'missions';
 
 export default function Home() {
   const { status, reconnect } = useRealtimeChannel();
+  const { data } = useMe();
+  const isCommander = data?.unitRole === 'COMMANDER';
+
   const [activeTab, setActiveTab] = useState<Tab>('drones');
 
   return (
@@ -44,7 +48,11 @@ export default function Home() {
         <ConnectionBadge status={status} />
 
         {/* Right block */}
-        <LogoutButton />
+
+        <div className="flex items-center gap-3">
+          {isCommander ? <Link href="/unit">UNIT</Link> : null}
+          <LogoutButton />
+        </div>
       </header>
 
       {status === 'lost' ? (
