@@ -64,3 +64,58 @@ describe('drone telemetry route', () => {
     await app.close();
   });
 });
+
+describe('drone command route', () => {
+  it('returns 404 when drone belongs to another unit', async () => {
+    const app = await buildApp();
+    const token = jwt.sign({ userId: 'user1' }, config.jwtSecret);
+
+    vi.mocked(prisma.drone.findUnique).mockResolvedValueOnce({
+      unitId: 'u1',
+    } as Drone);
+
+    vi.mocked(prisma.unitMember.findUnique).mockResolvedValueOnce({
+      unitId: 'u2',
+      unitRole: 'OPERATOR',
+    } as UnitMember);
+
+    const res = await app.inject({
+      method: 'POST',
+      url: '/drones/d1/command',
+      headers: { authorization: `Bearer ${token}` },
+      payload: {
+        action: 'return-home',
+      },
+    });
+
+    expect(res.statusCode).toBe(404);
+    expect(res.json().reason.code).toBe('DRONE_NOT_FOUND');
+
+    await app.close();
+  });
+
+  it('returns 404 for unknown drone id', async () => {
+    const app = await buildApp();
+    const token = jwt.sign({ userId: 'user1' }, config.jwtSecret);
+
+    vi.mocked(prisma.drone.findUnique).mockResolvedValueOnce(null);
+    vi.mocked(prisma.unitMember.findUnique).mockResolvedValueOnce({
+      unitId: 'u2',
+      unitRole: 'OPERATOR',
+    } as UnitMember);
+
+    const res = await app.inject({
+      method: 'POST',
+      url: '/drones/d1/command',
+      headers: { authorization: `Bearer ${token}` },
+      payload: {
+        action: 'return-home',
+      },
+    });
+
+    expect(res.statusCode).toBe(404);
+    expect(res.json().reason.code).toBe('DRONE_NOT_FOUND');
+
+    await app.close();
+  });
+});
