@@ -40,7 +40,7 @@ export async function droneRoutes(app: FastifyInstance) {
 
   app.post(
     '/drones/:id/command',
-    { preHandler: authenticate },
+    { preHandler: [authenticate, authenticateUnitMember] },
     async (req, reply) => {
       const parsed = CommandSchema.safeParse(req.body);
       if (!parsed.success) {
@@ -49,12 +49,16 @@ export async function droneRoutes(app: FastifyInstance) {
 
       const { action } = parsed.data;
       const { id } = req.params as { id: string };
+
       const droneRow = await prisma.drone.findUnique({ where: { id } });
-      if (!droneRow)
-        return reply.send({
+      const actor = requireActor(req);
+
+      if (!droneRow || droneRow.unitId !== actor.unitId) {
+        return reply.code(404).send({
           status: 'rejected',
           reason: { code: 'DRONE_NOT_FOUND', message: 'Drone not found' },
         });
+      }
 
       const result = await sendCommandService(mapDrone(droneRow), action);
       return reply.send(result);
