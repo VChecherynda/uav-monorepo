@@ -6,7 +6,7 @@ import {
 } from '@/contexts/drones';
 import { useRealtimeChannel } from '@/infrastructure/realtime';
 import { BatteryChart } from '@/contexts/telemetry';
-import { LogoutButton, useMe } from '@/contexts/auth';
+import { LogoutButton, useRole } from '@/contexts/auth';
 import { MissionPanel, MissionRouteLayer } from '@/contexts/missions';
 import { CrosshairIcon, SignalLostIcon } from '@/components';
 import { useState } from 'react';
@@ -20,8 +20,7 @@ type Tab = 'drones' | 'missions';
 
 export default function Home() {
   const { status, reconnect } = useRealtimeChannel();
-  const { data } = useMe();
-  const isCommander = data?.unitRole === 'COMMANDER';
+  const { isCommander } = useRole();
 
   const [activeTab, setActiveTab] = useState<Tab>('drones');
 

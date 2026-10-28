@@ -1,13 +1,10 @@
 import { useEffect } from 'react';
-import { useMe } from '../hooks/useMe';
+import { useRole } from '../hooks/useRole';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 
 export function RequireCommander({ children }: { children: React.ReactNode }) {
-  const { isLoading, data } = useMe();
+  const { isLoading, isCommander } = useRole();
   const router = useRouter();
-
-  const isCommander = data?.unitRole === 'COMMANDER';
 
   useEffect(() => {
     if (!isLoading && !isCommander) {
