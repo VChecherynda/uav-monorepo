@@ -1,6 +1,7 @@
 'use client';
 
 import { useDronesStore } from '@/contexts/drones';
+import { ConfirmButton } from '@/components';
 import { PlanRouteButton, useRouteDraftStore } from '@/contexts/routes';
 import { useAssignMission } from '../hooks/useAssignMission';
 import { useState } from 'react';
@@ -33,6 +34,8 @@ const STATUS_ACTIONS = {
   completed: [],
   aborted: ['restore'],
 } as const satisfies Record<MissionStatus, readonly MissionAction[]>;
+
+const CRITICAL_ACTIONS: readonly ButtonAction[] = ['abort'];
 
 const ACTION_LABEL: Record<MissionAction, string> = {
   assign: 'ASSIGN',
@@ -214,6 +217,21 @@ export const MissionCard = ({ mission }: { mission: Mission }) => {
         )}
         {STATUS_ACTIONS[mission.status].map((action) => {
           const { label, mutation } = ACTION_ENTRY[action];
+
+          if (CRITICAL_ACTIONS.includes(action)) {
+            return (
+              <div key={action} className="flex flex-col gap-1 min-w-0">
+                <ConfirmButton
+                  label={label}
+                  disabled={mutation.isPending}
+                  onConfirm={() => {
+                    mutation.mutate(mission.id);
+                  }}
+                  className="btn-rth px-3 py-1 text-xs rounded border self-start"
+                />
+              </div>
+            );
+          }
 
           return (
             <div key={action} className="flex flex-col gap-1 min-w-0">
