@@ -66,6 +66,7 @@ const zones = [
 async function main() {
   await prisma.telemetry.deleteMany();
   await prisma.waypoint.deleteMany();
+  await prisma.invitation.deleteMany();
   await prisma.unitMember.deleteMany();
   await prisma.geofence.deleteMany();
   await prisma.drone.deleteMany();
