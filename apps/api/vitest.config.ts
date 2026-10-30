@@ -8,7 +8,7 @@ export default defineConfig({
       provider: 'v8',
     },
     include: ['src/**/*.test.ts'],
-    exclude: ['e2e/**', 'node_modules/**'],
+    exclude: ['e2e/**', '**/*.integration.test.ts', 'node_modules/**'],
     env: { JWT_SECRET: 'test-secret' },
   },
 });

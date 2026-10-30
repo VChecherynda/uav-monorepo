@@ -53,6 +53,9 @@ jobs:
           npx prisma db seed
         working-directory: apps/api
 
+      - name: Run integration tests
+        run: npm run test:integration --workspace=apps/api
+
       - name: Start API
         run: npm run dev:ci --workspace=apps/api &
         env:

@@ -10,6 +10,7 @@
     "start": "node dist/server.js",
     "test": "vitest",
     "test:run": "vitest run",
+    "test:integration": "vitest run --config vitest.integration.config.ts",
     "release": "prisma migrate deploy",
     "postinstall": "prisma generate"
   },
