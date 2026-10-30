@@ -59,7 +59,7 @@ export function ConfirmButton({
       }
       className={`btn-confirm ${className}`}
     >
-      {label}
+      HOLD TO {label} ›››
     </button>
   );
 }
