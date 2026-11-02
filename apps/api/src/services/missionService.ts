@@ -46,6 +46,8 @@ export async function assignMission(
 ): Promise<AssignResult> {
   try {
     const updatedDrone = await prisma.$transaction(async (tx) => {
+      await tx.$queryRaw`SELECT id FROM "Mission" WHERE id = ${missionId} FOR UPDATE`;
+
       const missionRow = await tx.mission.findUnique({
         where: { id: missionId },
       });
@@ -111,6 +113,8 @@ export async function unassignMission(
 ): Promise<UnassignResult> {
   try {
     const updatedDrone = await prisma.$transaction(async (tx) => {
+      await tx.$queryRaw`SELECT id FROM "Mission" WHERE id = ${missionId} FOR UPDATE`;
+
       const missionRow = await tx.mission.findUnique({
         where: { id: missionId },
       });
