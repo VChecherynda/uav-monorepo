@@ -221,6 +221,8 @@ export async function startMissionService(
   try {
     const { updatedMission, droneRows } = await prisma.$transaction(
       async (tx) => {
+        await tx.$queryRaw`SELECT id FROM "Mission" WHERE id = ${missionId} FOR UPDATE`;
+
         const missionRow = await tx.mission.findUnique({
           where: { id: missionId },
           include: { waypoints: { orderBy: { order: 'asc' } } },
