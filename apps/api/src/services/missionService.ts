@@ -12,6 +12,7 @@ import {
   MissionStatusSchema,
   type RejectedDrone,
   type TerminateMissionServiceResult,
+  type Mission,
 } from '@uav/shared';
 import {
   assignDrone,
@@ -32,11 +33,19 @@ import {
 import { prisma } from '../lib/prisma.js';
 import { sendCommandService } from './sendCommandService.js';
 import type { Actor } from '../domain/actor.js';
+import type { Prisma } from '@prisma/client';
 
 class MissionRejectedError extends Error {
   constructor(public reason: MissionRejectionReason) {
     super(reason.message);
   }
+}
+
+async function lockMissionRow(
+  tx: Prisma.TransactionClient,
+  missionId: string,
+): Promise<void> {
+  await tx.$queryRaw`SELECT id FROM "Mission" WHERE id = ${missionId} FOR UPDATE`;
 }
 
 export async function assignMission(
@@ -46,12 +55,11 @@ export async function assignMission(
 ): Promise<AssignResult> {
   try {
     const updatedDrone = await prisma.$transaction(async (tx) => {
-      await tx.$queryRaw`SELECT id FROM "Mission" WHERE id = ${missionId} FOR UPDATE`;
+      await lockMissionRow(tx, missionId);
 
       const missionRow = await tx.mission.findUnique({
         where: { id: missionId },
       });
-
       if (!missionRow) {
         throw new MissionRejectedError({
           code: 'MISSION_NOT_FOUND',
@@ -113,12 +121,11 @@ export async function unassignMission(
 ): Promise<UnassignResult> {
   try {
     const updatedDrone = await prisma.$transaction(async (tx) => {
-      await tx.$queryRaw`SELECT id FROM "Mission" WHERE id = ${missionId} FOR UPDATE`;
+      await lockMissionRow(tx, missionId);
 
       const missionRow = await tx.mission.findUnique({
         where: { id: missionId },
       });
-
       if (!missionRow) {
         throw new MissionRejectedError({
           code: 'MISSION_NOT_FOUND',
@@ -225,7 +232,7 @@ export async function startMissionService(
   try {
     const { updatedMission, droneRows } = await prisma.$transaction(
       async (tx) => {
-        await tx.$queryRaw`SELECT id FROM "Mission" WHERE id = ${missionId} FOR UPDATE`;
+        await lockMissionRow(tx, missionId);
 
         const missionRow = await tx.mission.findUnique({
           where: { id: missionId },
