@@ -5,6 +5,7 @@ const prisma = new PrismaClient();
 
 const drones = [
   {
+    id: 'falcon-1',
     name: 'Falcon-1',
     missionId: 'm2',
     flightMode: 'AUTO' as FlightMode,
@@ -17,6 +18,7 @@ const drones = [
     lng: 133.88,
   },
   {
+    id: 'hawk-2',
     name: 'Hawk-2',
     missionId: 'm2',
     flightMode: 'AUTO' as FlightMode,
@@ -29,6 +31,7 @@ const drones = [
     lng: 133.915,
   },
   {
+    id: 'owl-3',
     name: 'Owl-3',
     missionId: null,
     flightMode: 'AUTO' as FlightMode,
