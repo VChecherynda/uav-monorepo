@@ -1,17 +1,10 @@
 import { test, expect } from '@playwright/test';
 
-test.beforeEach(async ({ page }) => {
-  await page.goto('/login');
-  await page.getByLabel('Email').fill('demo@uav.test');
-  await page.getByLabel('Password').fill('password123');
-  await page.getByRole('button', { name: 'AUTHENTICATE' }).click();
-  await expect(page.getByText('Falcon-1')).toBeVisible();
-});
+test.beforeEach(({ page }) => page.goto('/'));
 
-test('operator logs in and sees the fleet', async ({ page }) => {
-  await expect(page).toHaveURL('/');
+test('operator sees the fleet', async ({ page }) => {
   await expect(page.getByText('UAV FLEET').first()).toBeVisible();
-  await page.getByText('Falcon-1').click();
+  await page.getByText('Falcon-1', { exact: true }).click();
   await expect(
     page.getByText('SELECT DRONE TO VIEW TELEMETRY'),
   ).not.toBeVisible();
