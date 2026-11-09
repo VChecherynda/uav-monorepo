@@ -13,8 +13,17 @@ test.beforeEach(async ({ page }) => {
     extraHTTPHeaders: { Authorization: `Bearer ${authStore.state.token}` },
   });
 
-  await api.post('/missions/m0/assign', { data: { droneId: 'owl-3' } });
-  await api.put('/missions/m0/waypoints', { data: [{ lng: 10, lat: 10 }] });
+  await expect(
+    await api.post('/missions/m0/assign', {
+      data: { droneId: 'owl-3' },
+    }),
+  ).toBeOK();
+
+  await expect(
+    await api.put('/missions/m0/waypoints', {
+      data: [{ lng: 10, lat: 10 }],
+    }),
+  ).toBeOK();
 
   await api.dispose();
 
