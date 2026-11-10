@@ -48,14 +48,21 @@ function statusFor(reason: MissionRejectionReason): number {
 }
 
 export async function missionRoutes(app: FastifyInstance) {
-  app.get('/missions', async () => {
-    const missions = await prisma.mission.findMany({
-      orderBy: { createdAt: 'desc' },
-      include: { waypoints: { orderBy: { order: 'asc' } } },
-    });
+  app.get(
+    '/missions',
+    { preHandler: [authenticate, authenticateUnitMember] },
+    async (req) => {
+      const actor = requireActor(req);
 
-    return mapMissions(missions);
-  });
+      const missions = await prisma.mission.findMany({
+        where: { unitId: actor.unitId },
+        orderBy: { createdAt: 'desc' },
+        include: { waypoints: { orderBy: { order: 'asc' } } },
+      });
+
+      return mapMissions(missions);
+    },
+  );
 
   app.post(
     '/missions/:id/assign',
