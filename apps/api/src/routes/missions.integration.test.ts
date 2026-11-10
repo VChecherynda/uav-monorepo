@@ -21,7 +21,8 @@ it("excludes another unit's missions", async () => {
   });
 
   expect(res.statusCode).toBe(200);
-  expect(res.json()).toEqual([]);
+  const ids = res.json<Mission[]>().map((m) => m.id);
+  expect(ids).toEqual(['m5']);
 
   await app.close();
 });

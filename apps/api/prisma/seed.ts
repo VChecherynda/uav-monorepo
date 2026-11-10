@@ -168,6 +168,13 @@ async function main() {
         unitId: training.id,
         authorId: commander.id,
       },
+      {
+        id: 'm5',
+        status: 'draft',
+        name: 'Destroy warehouse sector 3',
+        unitId: reserve.id,
+        authorId: reserveCommander.id,
+      },
     ],
   });
 
