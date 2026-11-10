@@ -19,3 +19,15 @@ setup('login as operator', async ({ page }) => {
 
   await page.context().storageState({ path: 'e2e/.auth/operator.json' });
 });
+
+setup('login as reserve commander', async ({ page }) => {
+  await page.goto('/login');
+  await page.getByLabel('Email').fill('reserve.commander@uav.test.com');
+  await page.getByLabel('Password').fill('reserve.commander');
+  await page.getByRole('button', { name: 'AUTHENTICATE' }).click();
+  await expect(page.getByRole('button', { name: 'LOGOUT' })).toBeVisible();
+
+  await page
+    .context()
+    .storageState({ path: 'e2e/.auth/reserve-commander.json' });
+});

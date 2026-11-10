@@ -2,7 +2,7 @@ import { expect, request, test } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 
 test.describe('assign', () => {
-  test.afterEach(async ({ page }) => {
+  test.afterEach(async () => {
     const storageState = JSON.parse(
       readFileSync('e2e/.auth/commander.json', 'utf-8'),
     );
@@ -41,6 +41,28 @@ test.describe('assign', () => {
     await assignButton.click();
 
     await expect(missionCard.getByText('Owl-3')).toBeVisible();
+  });
+});
+
+test.describe('unit boundary', () => {
+  test.use({ storageState: 'e2e/.auth/reserve-commander.json' });
+
+  test("reserve commander sees only own unit's missions", async ({ page }) => {
+    await page.goto('/');
+
+    const missionsButton = page.getByRole('button', { name: 'Missions' });
+    await missionsButton.click();
+
+    const reserveMissionCard = page
+      .locator('.card')
+      .filter({ hasText: 'Destroy warehouse sector 3' });
+
+    const trainingMissionCard = page
+      .locator('.card')
+      .filter({ hasText: 'Recon sector 1' });
+
+    await expect(reserveMissionCard).toBeVisible();
+    await expect(trainingMissionCard).toHaveCount(0);
   });
 });
 
