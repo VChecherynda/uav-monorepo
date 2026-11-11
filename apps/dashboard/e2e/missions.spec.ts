@@ -1,18 +1,9 @@
-import { expect, request, test } from '@playwright/test';
-import { readFileSync } from 'node:fs';
+import { expect, test } from '@playwright/test';
+import { buildAuthenticatedApi } from './api';
 
 test.describe('assign', () => {
   test.afterEach(async () => {
-    const storageState = JSON.parse(
-      readFileSync('e2e/.auth/commander.json', 'utf-8'),
-    );
-    const rawAuth = storageState.origins[0].localStorage[0].value;
-    const authStore = JSON.parse(rawAuth);
-
-    const api = await request.newContext({
-      baseURL: 'http://localhost:4000',
-      extraHTTPHeaders: { Authorization: `Bearer ${authStore.state.token}` },
-    });
+    const api = await buildAuthenticatedApi('e2e/.auth/commander.json');
 
     await expect(
       await api.post('/missions/m0/unassign', { data: { droneId: 'owl-3' } }),
@@ -67,16 +58,7 @@ test.describe('unit boundary', () => {
 });
 
 test('user starts mission and sees it in progress', async ({ page }) => {
-  const storageState = JSON.parse(
-    readFileSync('e2e/.auth/commander.json', 'utf-8'),
-  );
-  const rawAuth = storageState.origins[0].localStorage[0].value;
-  const authStore = JSON.parse(rawAuth);
-
-  const api = await request.newContext({
-    baseURL: 'http://localhost:4000',
-    extraHTTPHeaders: { Authorization: `Bearer ${authStore.state.token}` },
-  });
+  const api = await buildAuthenticatedApi('e2e/.auth/commander.json');
 
   await expect(
     await api.post('/missions/m0/assign', {
