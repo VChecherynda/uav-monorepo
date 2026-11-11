@@ -1,5 +1,5 @@
-import { describe, expect, it, vi } from 'vitest';
-import { buildApp } from '../app.js';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { buildApp, type AppInstance } from '../app.js';
 import jwt from 'jsonwebtoken';
 import { config } from '../lib/config.js';
 import { prisma } from '../lib/prisma.js';
@@ -16,9 +16,18 @@ vi.mock('../lib/prisma.js', () => ({
   },
 }));
 
+let app: AppInstance;
+
+beforeEach(async () => {
+  app = await buildApp();
+});
+
+afterEach(async () => {
+  await app.close();
+});
+
 describe('drone telemetry route', () => {
   it('returns 404 when drone belongs to another unit', async () => {
-    const app = await buildApp();
     const token = jwt.sign({ userId: 'user1' }, config.jwtSecret);
 
     vi.mocked(prisma.drone.findUnique).mockResolvedValueOnce({
@@ -38,12 +47,9 @@ describe('drone telemetry route', () => {
 
     expect(res.statusCode).toBe(404);
     expect(res.json().reason.code).toBe('DRONE_NOT_FOUND');
-
-    await app.close();
   });
 
   it('returns 404 for unknown drone id', async () => {
-    const app = await buildApp();
     const token = jwt.sign({ userId: 'user1' }, config.jwtSecret);
 
     vi.mocked(prisma.drone.findUnique).mockResolvedValueOnce(null);
@@ -60,14 +66,11 @@ describe('drone telemetry route', () => {
 
     expect(res.statusCode).toBe(404);
     expect(res.json().reason.code).toBe('DRONE_NOT_FOUND');
-
-    await app.close();
   });
 });
 
 describe('drone command route', () => {
   it('returns 404 when drone belongs to another unit', async () => {
-    const app = await buildApp();
     const token = jwt.sign({ userId: 'user1' }, config.jwtSecret);
 
     vi.mocked(prisma.drone.findUnique).mockResolvedValueOnce({
@@ -90,12 +93,9 @@ describe('drone command route', () => {
 
     expect(res.statusCode).toBe(404);
     expect(res.json().reason.code).toBe('DRONE_NOT_FOUND');
-
-    await app.close();
   });
 
   it('returns 404 for unknown drone id', async () => {
-    const app = await buildApp();
     const token = jwt.sign({ userId: 'user1' }, config.jwtSecret);
 
     vi.mocked(prisma.drone.findUnique).mockResolvedValueOnce(null);
@@ -115,7 +115,5 @@ describe('drone command route', () => {
 
     expect(res.statusCode).toBe(404);
     expect(res.json().reason.code).toBe('DRONE_NOT_FOUND');
-
-    await app.close();
   });
 });

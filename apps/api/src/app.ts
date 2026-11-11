@@ -12,6 +12,8 @@ import { wsRoutes } from './routes/ws.js';
 import { logger } from './lib/logger.js';
 import { config } from './lib/config.js';
 
+export type AppInstance = Awaited<ReturnType<typeof buildApp>>;
+
 export async function buildApp() {
   const app = Fastify({
     loggerInstance: logger,

@@ -1,13 +1,21 @@
-import { afterAll, it, expect } from 'vitest';
-import { buildApp } from '../app.js';
+import { afterAll, it, expect, beforeEach, afterEach } from 'vitest';
+import { buildApp, type AppInstance } from '../app.js';
 import jwt from 'jsonwebtoken';
 import { config } from '../lib/config.js';
 import { prisma } from '../lib/prisma.js';
 import type { Mission } from '@uav/shared';
 
-it("excludes another unit's missions", async () => {
-  const app = await buildApp();
+let app: AppInstance;
 
+beforeEach(async () => {
+  app = await buildApp();
+});
+
+afterEach(async () => {
+  await app.close();
+});
+
+it("excludes another unit's missions", async () => {
   const user = await prisma.user.findUniqueOrThrow({
     where: { email: 'reserve.commander@uav.test.com' },
   });
@@ -23,13 +31,9 @@ it("excludes another unit's missions", async () => {
   expect(res.statusCode).toBe(200);
   const ids = res.json<Mission[]>().map((m) => m.id);
   expect(ids).toEqual(['m5']);
-
-  await app.close();
 });
 
 it("returns own unit's missions", async () => {
-  const app = await buildApp();
-
   const user = await prisma.user.findUniqueOrThrow({
     where: { email: 'demo@uav.test' },
   });
@@ -46,8 +50,6 @@ it("returns own unit's missions", async () => {
 
   const ids = res.json<Mission[]>().map((m) => m.id);
   expect(ids).toContain('m0');
-
-  await app.close();
 });
 
 afterAll(() => prisma.$disconnect());
