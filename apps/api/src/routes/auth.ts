@@ -11,12 +11,21 @@ import {
   authenticateUnitMember,
   requireActor,
 } from '../lib/auth.js';
+import { CODE_LENGTH } from '../lib/generateInvitationCode.js';
+import { canUseInvitation } from '../domain/invitation.js';
+import type { InvitationRejectReason } from '@uav/shared';
 
 const EmailSchema = z.string().trim().toLowerCase().pipe(z.email());
+const CodeSchema = z
+  .string()
+  .trim()
+  .toUpperCase()
+  .pipe(z.string().length(CODE_LENGTH));
 
 const RegisterSchema = z.object({
   email: EmailSchema,
   password: z.string().min(8),
+  code: CodeSchema,
 });
 
 const LoginSchema = z.object({
@@ -26,6 +35,14 @@ const LoginSchema = z.object({
 
 const MAX_REGISTER_ATTEMPTS = 36;
 const MAX_LOGIN_ATTEMPTS = 24;
+
+function statusFor(reason: InvitationRejectReason): number {
+  if (reason.code === 'INVITATION_NOT_FOUND') {
+    return 404;
+  }
+
+  return 409;
+}
 
 export async function authRoutes(fastify: FastifyInstance) {
   await fastify.register(rateLimit, { global: false });
@@ -47,7 +64,18 @@ export async function authRoutes(fastify: FastifyInstance) {
         });
       }
 
-      const { email, password } = result.data;
+      const { email, password, code } = result.data;
+
+      const invitation = await prisma.invitation.findUnique({
+        where: { code },
+      });
+
+      const next = canUseInvitation(invitation, new Date());
+      if (next.status === 'rejected') {
+        return reply
+          .status(statusFor(next.reason))
+          .send({ error: next.reason.message });
+      }
 
       const existing = await prisma.user.findUnique({
         where: { email },

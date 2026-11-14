@@ -3,11 +3,17 @@ import { buildApp, type AppInstance } from '../app.js';
 import jwt from 'jsonwebtoken';
 import { config } from '../lib/config.js';
 import { prisma } from '../lib/prisma.js';
-import type { UnitMember } from '@prisma/client';
+import type { Invitation, UnitMember } from '@prisma/client';
 
 vi.mock('../lib/prisma.js', () => ({
   prisma: {
+    user: {
+      findUnique: vi.fn(),
+    },
     unitMember: {
+      findUnique: vi.fn(),
+    },
+    invitation: {
       findUnique: vi.fn(),
     },
   },
@@ -71,5 +77,56 @@ describe('auth me route', () => {
       unitId: 'u1',
       unitRole: 'OPERATOR',
     });
+  });
+});
+
+describe('register route', () => {
+  const presentMS = Date.now();
+  const present = new Date(presentMS);
+  const past = new Date(presentMS - 10000);
+  const future = new Date(presentMS + 10000);
+
+  it("returns 404 when invitation doesn't exist", async () => {
+    vi.mocked(prisma.invitation.findUnique).mockResolvedValueOnce(null);
+
+    const res = await app.inject({
+      method: 'POST',
+      url: '/auth/register',
+      body: {
+        email: 'new-operator@uav.test.com',
+        password: 'new-operator',
+        code: 'testCode',
+      },
+    });
+
+    expect(res.statusCode).toBe(404);
+    expect(res.json().error).toBe('Invitation not found');
+    expect(prisma.user.findUnique).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    [{ expiresAt: past, usedAt: null }, 'Invitation is expired'],
+    [
+      { expiresAt: future, usedAt: present },
+      'Invitation has already been used',
+    ],
+  ])('returns 409 with reason $1', async (invitation, error) => {
+    vi.mocked(prisma.invitation.findUnique).mockResolvedValueOnce(
+      invitation as Invitation,
+    );
+
+    const res = await app.inject({
+      method: 'POST',
+      url: '/auth/register',
+      body: {
+        email: 'new-operator@uav.test.com',
+        password: 'new-operator',
+        code: 'testCode',
+      },
+    });
+
+    expect(res.statusCode).toBe(409);
+    expect(res.json().error).toBe(error);
+    expect(prisma.user.findUnique).not.toHaveBeenCalled();
   });
 });
