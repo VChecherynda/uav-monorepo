@@ -6,6 +6,7 @@ export * from './auth.js';
 export * from './geofence.js';
 export * from './reasons.js';
 export * from './commands.js';
+export * from './invitation.js';
 export * from './mission-results.js';
 export * from './events.js';
 
