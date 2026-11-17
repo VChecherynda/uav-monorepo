@@ -1,4 +1,5 @@
 import type { FastifyInstance } from 'fastify';
+import type { WebSocket } from 'ws';
 import type { WSMessage, Drone, DomainEvent } from '@uav/shared';
 import {
   authenticateWs,
@@ -6,10 +7,27 @@ import {
   requireActor,
 } from '../lib/auth.js';
 
-const clientUnits = new Map<WebSocket, string>();
+const HEARTBEAT_INTERVAL_MS = 10_000;
+
+type ClientState = { unitId: string; isAlive: boolean };
+
+const clientUnits = new Map<WebSocket, ClientState>();
 
 export const hasClients = () => {
   return clientUnits.size > 0;
+};
+
+export const startHeartbeat = () => {
+  return setInterval(() => {
+    for (const [client, state] of clientUnits) {
+      if (state.isAlive === false) {
+        client.terminate();
+      } else {
+        state.isAlive = false;
+        client.ping();
+      }
+    }
+  }, HEARTBEAT_INTERVAL_MS);
 };
 
 export async function wsRoutes(app: FastifyInstance) {
@@ -18,7 +36,7 @@ export async function wsRoutes(app: FastifyInstance) {
     { preHandler: [authenticateWs, authenticateUnitMember], websocket: true },
     (socket, req) => {
       const actor = requireActor(req);
-      clientUnits.set(socket, actor.unitId);
+      clientUnits.set(socket, { unitId: actor.unitId, isAlive: true });
 
       socket.on('close', () => {
         app.log.info('WS client disconnected');
@@ -29,6 +47,13 @@ export async function wsRoutes(app: FastifyInstance) {
         app.log.error({ err }, 'WS error');
         clientUnits.delete(socket);
       });
+
+      socket.on('pong', () => {
+        const state = clientUnits.get(socket);
+        if (state) {
+          state.isAlive = true;
+        }
+      });
     },
   );
 }
@@ -36,8 +61,8 @@ export async function wsRoutes(app: FastifyInstance) {
 export function broadcastDrones(drones: Drone[]) {
   if (clientUnits.size === 0) return;
 
-  for (const [client, unitId] of clientUnits) {
-    const unitDrones = drones.filter((d) => d.unitId === unitId);
+  for (const [client, state] of clientUnits) {
+    const unitDrones = drones.filter((d) => d.unitId === state.unitId);
 
     const payload: WSMessage = {
       type: 'drones:snapshot',
@@ -60,8 +85,8 @@ export function broadcastEvent(
   const payload: WSMessage = event;
   const serialized = JSON.stringify(payload);
 
-  for (const [client, unitId] of clientUnits) {
-    if (unitId !== drone.unitId) continue;
+  for (const [client, state] of clientUnits) {
+    if (state.unitId !== drone.unitId) continue;
     if (client.readyState === 1) {
       client.send(serialized);
     }

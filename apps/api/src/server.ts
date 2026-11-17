@@ -1,6 +1,6 @@
 import { startSimulation } from './lib/simulation.js';
 import { startHousekeeping } from './lib/housekeeping.js';
-import { hasClients, broadcastDrones } from './routes/ws.js';
+import { hasClients, broadcastDrones, startHeartbeat } from './routes/ws.js';
 import { prisma } from './lib/prisma.js';
 import { config } from './lib/config.js';
 import { buildApp } from './app.js';
@@ -11,13 +11,18 @@ app.log.info(`API on ${address}`);
 
 const simulationTimer = startSimulation(broadcastDrones, hasClients);
 const housekeepingTimer = startHousekeeping();
-app.log.info('Background processes started: simulation, housekeeping');
+const heartbeatTimer = startHeartbeat();
+
+app.log.info(
+  'Background processes started: simulation, housekeeping, heartbeat',
+);
 
 const shutdown = async (signal: string) => {
   app.log.info(`Received ${signal}, starting graceful shutdown...`);
 
   clearInterval(simulationTimer);
   clearInterval(housekeepingTimer);
+  clearInterval(heartbeatTimer);
   app.log.info('Background timers stopped');
 
   await app.close();
