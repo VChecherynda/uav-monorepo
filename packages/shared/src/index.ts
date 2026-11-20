@@ -9,6 +9,7 @@ export * from './commands.js';
 export * from './invitation.js';
 export * from './mission-results.js';
 export * from './events.js';
+export * from './refreshToken.js';
 
 export type WSConnectionStatus =
   'connecting' | 'open' | 'reconnecting' | 'lost';
