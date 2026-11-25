@@ -16,3 +16,10 @@ export const RefreshTokenRejectReasonSchema = z.discriminatedUnion('code', [
 export type RefreshTokenRejectReason = z.infer<
   typeof RefreshTokenRejectReasonSchema
 >;
+
+export type RefreshTokensServiceResult =
+  | { status: 'success'; accessToken: string; refreshToken: string }
+  | {
+      status: 'rejected';
+      code: RefreshTokenRejectReason['code'];
+    };
