@@ -31,13 +31,6 @@ describe('canUseRefreshToken', () => {
       },
     ],
     [
-      null,
-      {
-        code: 'REFRESH_TOKEN_NOT_FOUND',
-        message: 'Refresh token not found',
-      },
-    ],
-    [
       { expiresAt: past, usedAt: present },
       {
         code: 'REFRESH_TOKEN_ALREADY_USED',

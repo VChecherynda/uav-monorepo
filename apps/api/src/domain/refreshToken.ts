@@ -2,7 +2,7 @@ import type { RefreshToken } from '@prisma/client';
 import type { RefreshTokenRejectReason } from '@uav/shared';
 
 export const canUseRefreshToken = (
-  refreshToken: Pick<RefreshToken, 'expiresAt' | 'usedAt'> | null,
+  refreshToken: Pick<RefreshToken, 'expiresAt' | 'usedAt'>,
   now: Date,
 ):
   | {
@@ -12,16 +12,6 @@ export const canUseRefreshToken = (
       status: 'rejected';
       reason: RefreshTokenRejectReason;
     } => {
-  if (refreshToken === null) {
-    return {
-      status: 'rejected',
-      reason: {
-        code: 'REFRESH_TOKEN_NOT_FOUND',
-        message: 'Refresh token not found',
-      },
-    };
-  }
-
   const { expiresAt, usedAt } = refreshToken;
 
   if (usedAt !== null) {
