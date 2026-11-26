@@ -4,13 +4,11 @@ import type {
 } from '@uav/shared';
 import type { Prisma } from '@prisma/client';
 
-import jwt from 'jsonwebtoken';
-
-import { hashToken } from '../lib/hashToken.js';
 import { prisma } from '../lib/prisma.js';
+import { hashToken } from '../lib/hashToken.js';
 import { canUseRefreshToken } from '../domain/refreshToken.js';
 import { generateRefreshToken } from '../lib/generateRefreshToken.js';
-import { config } from '../lib/config.js';
+import { buildAccessToken } from '../lib/buildAccessToken.js';
 
 class RefreshTokenRejectedError extends Error {
   constructor(public reason: Pick<RefreshTokenRejectReason, 'code'>) {
@@ -70,13 +68,7 @@ export async function refreshTokensService(
 
         const newRefreshToken = generateRefreshToken();
         const newRefreshTokenHash = hashToken(newRefreshToken);
-        const newAccessToken = jwt.sign(
-          { userId: refreshTokenRow.userId },
-          config.jwtSecret,
-          {
-            expiresIn: '5min',
-          },
-        );
+        const newAccessToken = buildAccessToken(refreshTokenRow.userId);
 
         await tx.refreshToken.update({
           where: {
