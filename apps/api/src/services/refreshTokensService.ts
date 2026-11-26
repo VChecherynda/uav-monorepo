@@ -34,66 +34,77 @@ export async function refreshTokensService(
   const refreshTokenHash = hashToken(refreshToken);
 
   try {
-    const result = await prisma.$transaction(async (tx) => {
-      await lockRefreshTokenRow(tx, refreshTokenHash);
+    const result = await prisma.$transaction(
+      async (tx): Promise<RefreshTokensServiceResult> => {
+        await lockRefreshTokenRow(tx, refreshTokenHash);
 
-      const refreshTokenRow = await tx.refreshToken.findUnique({
-        where: {
-          tokenHash: refreshTokenHash,
-        },
-      });
-
-      if (!refreshTokenRow) {
-        throw new RefreshTokenRejectedError({
-          code: 'REFRESH_TOKEN_NOT_FOUND',
+        const refreshTokenRow = await tx.refreshToken.findUnique({
+          where: {
+            tokenHash: refreshTokenHash,
+          },
         });
-      }
 
-      const next = canUseRefreshToken(refreshTokenRow, now);
-      if (next.status === 'rejected') {
-        throw new RefreshTokenRejectedError({
-          code: next.reason.code,
+        if (!refreshTokenRow) {
+          throw new RefreshTokenRejectedError({
+            code: 'REFRESH_TOKEN_NOT_FOUND',
+          });
+        }
+
+        const next = canUseRefreshToken(refreshTokenRow, now);
+        if (next.status === 'rejected') {
+          if (next.reason.code === 'REFRESH_TOKEN_ALREADY_USED') {
+            await tx.refreshToken.deleteMany({
+              where: { userId: refreshTokenRow.userId },
+            });
+
+            return {
+              status: 'rejected',
+              code: next.reason.code,
+            };
+          }
+
+          throw new RefreshTokenRejectedError({
+            code: next.reason.code,
+          });
+        }
+
+        const newRefreshToken = generateRefreshToken();
+        const newRefreshTokenHash = hashToken(newRefreshToken);
+        const newAccessToken = jwt.sign(
+          { userId: refreshTokenRow.userId },
+          config.jwtSecret,
+          {
+            expiresIn: '5min',
+          },
+        );
+
+        await tx.refreshToken.update({
+          where: {
+            tokenHash: refreshTokenHash,
+          },
+          data: {
+            usedAt: now,
+          },
         });
-      }
 
-      const newRefreshToken = generateRefreshToken();
-      const newRefreshTokenHash = hashToken(newRefreshToken);
-      const newAccessToken = jwt.sign(
-        { userId: refreshTokenRow.userId },
-        config.jwtSecret,
-        {
-          expiresIn: '5min',
-        },
-      );
+        await tx.refreshToken.create({
+          data: {
+            tokenHash: newRefreshTokenHash,
+            usedAt: null,
+            userId: refreshTokenRow.userId,
+            expiresAt: new Date(now.getTime() + REFRESH_TOKEN_TTL_MS),
+          },
+        });
 
-      await tx.refreshToken.update({
-        where: {
-          tokenHash: refreshTokenHash,
-        },
-        data: {
-          usedAt: now,
-        },
-      });
+        return {
+          status: 'success',
+          accessToken: newAccessToken,
+          refreshToken: newRefreshToken,
+        };
+      },
+    );
 
-      await tx.refreshToken.create({
-        data: {
-          tokenHash: newRefreshTokenHash,
-          usedAt: null,
-          userId: refreshTokenRow.userId,
-          expiresAt: new Date(now.getTime() + REFRESH_TOKEN_TTL_MS),
-        },
-      });
-
-      return {
-        accessToken: newAccessToken,
-        refreshToken: newRefreshToken,
-      };
-    });
-
-    return {
-      status: 'success',
-      ...result,
-    };
+    return result;
   } catch (e) {
     if (e instanceof RefreshTokenRejectedError) {
       return { status: 'rejected', code: e.reason.code };

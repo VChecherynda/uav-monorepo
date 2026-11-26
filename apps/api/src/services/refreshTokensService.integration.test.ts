@@ -17,6 +17,7 @@ let user: User;
 const presentMS = Date.now();
 const present = new Date(presentMS);
 const dayMS = 24 * 60 * 60 * 1000;
+const past = new Date(presentMS - dayMS);
 const future = new Date(presentMS + dayMS);
 
 beforeEach(async () => {
@@ -62,6 +63,53 @@ describe('refreshTokensService', () => {
 
     expect(newRefreshToken.usedAt).toEqual(null);
     expect(newRefreshToken.expiresAt).toEqual(future);
+  });
+
+  it('rejects unknown refresh token', async () => {
+    const result = await refreshTokensService('unknownRefreshToken', present);
+
+    assert(result.status === 'rejected');
+
+    expect(result.code).toEqual('REFRESH_TOKEN_NOT_FOUND');
+  });
+
+  it('rejects expired refresh token', async () => {
+    await prisma.refreshToken.create({
+      data: {
+        userId: user.id,
+        tokenHash: hashToken('expiredRefreshToken'),
+        expiresAt: past,
+        usedAt: null,
+      },
+    });
+
+    const result = await refreshTokensService('expiredRefreshToken', present);
+
+    assert(result.status === 'rejected');
+
+    expect(result.code).toEqual('REFRESH_TOKEN_IS_EXPIRED');
+  });
+
+  it('rejects used refresh token', async () => {
+    await prisma.refreshToken.create({
+      data: {
+        userId: user.id,
+        tokenHash: hashToken('usedRefreshToken'),
+        expiresAt: future,
+        usedAt: present,
+      },
+    });
+
+    const result = await refreshTokensService('usedRefreshToken', present);
+
+    assert(result.status === 'rejected');
+
+    const tokens = await prisma.refreshToken.findMany({
+      where: { userId: user.id },
+    });
+
+    expect(result.code).toEqual('REFRESH_TOKEN_ALREADY_USED');
+    expect(tokens.length).toBe(0);
   });
 });
 
